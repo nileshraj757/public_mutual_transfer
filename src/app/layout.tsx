@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
+import { HoverTranslate } from "@/components/hover-translate";
 
 export const metadata: Metadata = {
   title: "Mutual Transfer — find a posting swap",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <PwaRegister />
+        <HoverTranslate />
       </body>
     </html>
   );

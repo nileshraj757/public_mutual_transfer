@@ -32,6 +32,11 @@ PDF**.
   contact hidden until consent, "delete my account & all data", published privacy
   policy, persistent disclaimer.
 - **PWA** — installable manifest + offline-shell service worker.
+- **Hover-to-Hindi translation** — hover over any text/sentence/paragraph to see
+  its Hindi translation in a tooltip. Uses the free, key-less MyMemory API
+  (en→hi) with in-memory + `localStorage` caching to stay within the free quota;
+  a corner toggle turns it on/off. Optional `NEXT_PUBLIC_MYMEMORY_EMAIL` raises
+  the daily limit. No paid translation service.
 - **Tests** — Vitest unit tests for the matching engine & rules.
 
 ---

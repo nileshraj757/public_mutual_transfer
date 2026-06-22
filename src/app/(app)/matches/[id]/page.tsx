@@ -78,17 +78,21 @@ export default async function MatchDetailPage({ params }: { params: { id: string
 
       {/* Members */}
       <div className="grid gap-3 sm:grid-cols-2">
-        {match.members.map((m, i) => (
-          <MemberCard
-            key={m.id}
-            member={m}
-            index={i}
-            consented={match.consents[m.id]}
-            contact={contacts[m.id]}
-            coolingOffMonths={rules.coolingOffMonths}
-            showSeniority={rules.showSeniority}
-          />
-        ))}
+        {match.members.map((m, i) => {
+          const dest = match.members[(i + 1) % match.members.length];
+          return (
+            <MemberCard
+              key={m.id}
+              member={m}
+              index={i}
+              movingTo={[dest.current_district, dest.current_state].filter(Boolean).join(", ") || "Unknown"}
+              consented={match.consents[m.id]}
+              contact={contacts[m.id]}
+              coolingOffMonths={rules.coolingOffMonths}
+              showSeniority={rules.showSeniority}
+            />
+          );
+        })}
       </div>
 
       {/* Consent gate */}
@@ -123,6 +127,7 @@ export default async function MatchDetailPage({ params }: { params: { id: string
 function MemberCard({
   member,
   index,
+  movingTo,
   consented,
   contact,
   coolingOffMonths,
@@ -130,6 +135,7 @@ function MemberCard({
 }: {
   member: MatchMemberView;
   index: number;
+  movingTo: string;
   consented: boolean;
   contact?: RevealedContact;
   coolingOffMonths: number | null;
@@ -160,6 +166,12 @@ function MemberCard({
         <KV k="Designation" v={member.designation} />
         <KV k="Pay level" v={member.pay_level} />
       </dl>
+
+      <div className="mt-3 flex items-center gap-2 rounded-md bg-brand-50 px-3 py-2 text-sm">
+        <span className="text-brand-600" aria-hidden>➜</span>
+        <span className="text-slate-600">{member.isSelf ? "You move to" : "Moves to"}</span>
+        <span className="font-semibold text-slate-900">{movingTo}</span>
+      </div>
 
       {/* Soft factors */}
       <div className="mt-3 flex flex-wrap gap-1">

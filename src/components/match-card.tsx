@@ -17,7 +17,7 @@ export function MatchCard({ match }: { match: MatchView }) {
         <span className="text-xs text-slate-400">{new Date(match.created_at).toLocaleDateString("en-IN")}</span>
       </div>
 
-      <SwapRoute members={match.members} type={match.type} />
+      <SwapRoute members={match.members} type={match.type} compact />
 
       <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
         <span>
