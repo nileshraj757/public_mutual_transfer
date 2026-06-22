@@ -1,0 +1,86 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+
+export function GenerateAgreementButton({ matchId }: { matchId: string }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function download() {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/matches/${matchId}/agreement`);
+      if (!res.ok) {
+        setError((await res.json().catch(() => ({})))?.error ?? "Couldn't generate the document.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mutual-transfer-application-${matchId.slice(0, 8)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <button className="btn-primary" onClick={download} disabled={busy}>
+        {busy ? "Generating…" : "Download joint application (PDF)"}
+      </button>
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+export function ReportButton({ matchId, members }: { matchId: string; members: { id: string; label: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const [reportedId, setReportedId] = useState(members[0]?.id ?? "");
+  const [reason, setReason] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [done, setDone] = useState(false);
+
+  function submit() {
+    startTransition(async () => {
+      await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ match_id: matchId, reported_profile_id: reportedId, reason }),
+      });
+      setDone(true);
+      setOpen(false);
+    });
+  }
+
+  if (done) return <p className="text-xs text-green-600">Report submitted. Thank you.</p>;
+
+  return (
+    <div className="text-sm">
+      {!open ? (
+        <button className="text-xs text-slate-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+          Report this match / member
+        </button>
+      ) : (
+        <div className="card mt-2 space-y-2">
+          <select className="input" value={reportedId} onChange={(e) => setReportedId(e.target.value)}>
+            {members.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+          <textarea className="input" rows={3} placeholder="Describe the issue…" value={reason} onChange={(e) => setReason(e.target.value)} />
+          <div className="flex gap-2">
+            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason.trim()}>Submit report</button>
+            <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => setOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
