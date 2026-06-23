@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
  */
 
 const HOVER_DELAY_MS = 320;
+const TOUCH_DELAY_MS = 450;
 const MAX_CHARS = 1200; // don't translate giant blobs
 const CHUNK_SIZE = 460; // MyMemory free: ~500 bytes per query
 const CACHE_KEY = "hoverTranslate.cache.v1";
@@ -152,6 +153,7 @@ export function HoverTranslate() {
 
   const enabledRef = useRef(enabled);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const currentEl = useRef<HTMLElement | null>(null);
   const tokenRef = useRef(0);
@@ -173,6 +175,7 @@ export function HoverTranslate() {
 
   function hide() {
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
     abortRef.current?.abort();
     currentEl.current = null;
     setTip((t) => (t.visible ? { ...t, visible: false } : t));
@@ -188,48 +191,56 @@ export function HoverTranslate() {
       return Math.min(Math.max(12, y), h - 80);
     }
 
+    // Translate the given text and show the tooltip at (x, y). Shared by hover
+    // (desktop) and long-press (touch).
+    async function runTranslate(text: string, x: number, y: number) {
+      const token = ++tokenRef.current;
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+
+      const cached = memCache.get(text);
+      if (cached) {
+        setTip({ visible: true, loading: false, text: cached, error: false, x, y });
+        return;
+      }
+
+      setTip({ visible: true, loading: true, text: "", error: false, x, y });
+      try {
+        const translated = await translate(text, ac.signal);
+        if (token === tokenRef.current) {
+          setTip({ visible: true, loading: false, text: translated, error: false, x, y });
+        }
+      } catch (err) {
+        if ((err as Error)?.name === "AbortError") return;
+        if (token === tokenRef.current) {
+          setTip({ visible: true, loading: false, text: "अनुवाद उपलब्ध नहीं है", error: true, x, y });
+        }
+      }
+    }
+
+    // Resolve a usable text element + tooltip coords from an event target.
+    function resolve(target: EventTarget | null, clientX: number, clientY: number) {
+      const el = pickTextElement(target);
+      if (!el) return null;
+      const text = elementText(el);
+      if (!text || text.length > MAX_CHARS || !hasLetters(text)) return null;
+      return { el, text, x: clampX(clientX + 14), y: clampY(clientY + 18) };
+    }
+
     function onMouseOver(e: MouseEvent) {
       if (!enabledRef.current) return;
       const el = pickTextElement(e.target);
       if (!el || el === currentEl.current) return;
 
-      const text = elementText(el);
-      if (!text || text.length > MAX_CHARS || !hasLetters(text)) {
+      const info = resolve(e.target, e.clientX, e.clientY);
+      if (!info) {
         hide();
         return;
       }
-
-      currentEl.current = el;
+      currentEl.current = info.el;
       if (hoverTimer.current) clearTimeout(hoverTimer.current);
-
-      const x = clampX(e.clientX + 14);
-      const y = clampY(e.clientY + 18);
-
-      hoverTimer.current = setTimeout(async () => {
-        const token = ++tokenRef.current;
-        abortRef.current?.abort();
-        const ac = new AbortController();
-        abortRef.current = ac;
-
-        const cached = memCache.get(text);
-        if (cached) {
-          setTip({ visible: true, loading: false, text: cached, error: false, x, y });
-          return;
-        }
-
-        setTip({ visible: true, loading: true, text: "", error: false, x, y });
-        try {
-          const translated = await translate(text, ac.signal);
-          if (token === tokenRef.current) {
-            setTip({ visible: true, loading: false, text: translated, error: false, x, y });
-          }
-        } catch (err) {
-          if ((err as Error)?.name === "AbortError") return;
-          if (token === tokenRef.current) {
-            setTip({ visible: true, loading: false, text: "अनुवाद उपलब्ध नहीं है", error: true, x, y });
-          }
-        }
-      }, HOVER_DELAY_MS);
+      hoverTimer.current = setTimeout(() => runTranslate(info.text, info.x, info.y), HOVER_DELAY_MS);
     }
 
     function onMouseOut(e: MouseEvent) {
@@ -239,16 +250,43 @@ export function HoverTranslate() {
       hide();
     }
 
+    // Touch: long-press a paragraph/sentence to translate (hover doesn't exist).
+    function onTouchStart(e: TouchEvent) {
+      if (!enabledRef.current) return;
+      const t = e.touches[0];
+      if (!t) return;
+      const info = resolve(e.target, t.clientX, t.clientY);
+      if (!info) {
+        hide(); // tap elsewhere dismisses an open tooltip
+        return;
+      }
+      currentEl.current = info.el;
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      longPressTimer.current = setTimeout(() => runTranslate(info.text, info.x, info.y), TOUCH_DELAY_MS);
+    }
+
+    function cancelLongPress() {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    }
+
     function onScroll() {
       hide();
     }
 
     document.addEventListener("mouseover", onMouseOver);
     document.addEventListener("mouseout", onMouseOut);
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", cancelLongPress, { passive: true });
+    document.addEventListener("touchend", cancelLongPress);
+    document.addEventListener("touchcancel", cancelLongPress);
     window.addEventListener("scroll", onScroll, true);
     return () => {
       document.removeEventListener("mouseover", onMouseOver);
       document.removeEventListener("mouseout", onMouseOut);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", cancelLongPress);
+      document.removeEventListener("touchend", cancelLongPress);
+      document.removeEventListener("touchcancel", cancelLongPress);
       window.removeEventListener("scroll", onScroll, true);
     };
   }, []);

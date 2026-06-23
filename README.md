@@ -131,6 +131,66 @@ No paid plan is required at any step.
 
 ---
 
+## Mobile apps (Android / iOS)
+
+The app ships to phones two ways. **The web app stays $0; app-store accounts are
+not** (Google Play: **$25 one-time**, Apple: **$99/year**, required for iOS push).
+
+### Option A — PWA / TWA (cheapest, fastest)
+The app is already an installable PWA ([public/manifest.json](public/manifest.json),
+[public/sw.js](public/sw.js)).
+- **iOS:** open the site in Safari → Share → *Add to Home Screen* (free, no store).
+- **Android (Play Store):** run the deployed URL through
+  [PWABuilder](https://www.pwabuilder.com) or `bubblewrap` to produce a Trusted
+  Web Activity (TWA) `.aab`, then upload to the Play Console.
+
+### Option B — Capacitor (native shell for both stores)
+Capacitor wraps the **deployed (SSR) site** in a native WebView, so all server
+rendering, server actions, API routes and middleware keep working — no static
+export, no rewrite. Native bits (deep-link auth, status bar, back button, splash,
+PDF share, push) are wired in [src/components/native-bridge.tsx](src/components/native-bridge.tsx)
+and [src/lib/native.ts](src/lib/native.ts), and no-op on the web build.
+
+```bash
+# 1. Point the shell at your deployed app (or your dev machine's LAN IP for testing)
+export CAP_SERVER_URL="https://your-app.vercel.app"
+
+# 2. Generate the native projects (needs Xcode / Android Studio installed)
+npm run cap:add:android
+npm run cap:add:ios
+
+# 3. Sync config + plugins, then open the IDE to run on a device/emulator
+CAP_SERVER_URL="$CAP_SERVER_URL" npm run cap:sync
+npm run cap:open:android      # or: npm run cap:open:ios
+```
+
+**Required native config (do once in the generated projects):**
+- **Custom URL scheme** for magic-link deep links — must equal
+  `NEXT_PUBLIC_APP_SCHEME` (default `mutualtransfer`):
+  - iOS: add a URL Type with scheme `mutualtransfer` in `Info.plist`.
+  - Android: add an `intent-filter` for `mutualtransfer://auth` in
+    `AndroidManifest.xml`.
+- **Supabase → Auth → URL Configuration:** add `mutualtransfer://auth/callback`
+  to the allowed redirect URLs (alongside your web callback). On native, sign-in
+  uses this deep link; `NativeBridge` catches it and forwards the code to the
+  in-WebView `/auth/callback` to set the session.
+
+**Push notifications (optional, native only):**
+- Run [supabase/migrations/0002_device_tokens.sql](supabase/migrations/0002_device_tokens.sql)
+  (creates the `device_tokens` table + RLS).
+- On launch the app registers and POSTs its token to
+  [/api/account/push-token](src/app/api/account/push-token/route.ts).
+- The **server-side fan-out is the remaining piece you add**: send via **FCM**
+  (Android, free) and **APNs** (iOS, needs the Apple account) from wherever you
+  create notifications ([src/lib/notify.ts](src/lib/notify.ts)) by looking up
+  `device_tokens` for the recipient. In-app notifications + auth emails already
+  work without this.
+
+The **Hindi hover-translate** feature also supports touch: **long-press** any
+text on a phone to see its Hindi translation.
+
+---
+
 ## How matching works (algorithm)
 
 Implemented as pure, unit-tested functions in `src/lib/matching/` and bridged to

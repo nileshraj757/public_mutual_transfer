@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mutual Transfer</string>
+    <string name="title_activity_main">Mutual Transfer</string>
+    <string name="package_name">in.mutualtransfer.app</string>
+    <string name="custom_url_scheme">in.mutualtransfer.app</string>
+</resources>

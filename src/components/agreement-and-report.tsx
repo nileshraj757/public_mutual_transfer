@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
 
 export function GenerateAgreementButton({ matchId }: { matchId: string }) {
   const router = useRouter();
@@ -18,15 +19,23 @@ export function GenerateAgreementButton({ matchId }: { matchId: string }) {
         return;
       }
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `mutual-transfer-application-${matchId.slice(0, 8)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const filename = `mutual-transfer-application-${matchId.slice(0, 8)}.pdf`;
+
+      if (isNativeApp()) {
+        await saveAndShareNative(blob, filename);
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
       router.refresh();
+    } catch (e) {
+      setError((e as Error)?.message ?? "Couldn't save the document.");
     } finally {
       setBusy(false);
     }
@@ -35,11 +44,31 @@ export function GenerateAgreementButton({ matchId }: { matchId: string }) {
   return (
     <div>
       <button className="btn-primary" onClick={download} disabled={busy}>
-        {busy ? "Generating…" : "Download joint application (PDF)"}
+        {busy ? "Generating…" : isNativeApp() ? "Generate & share joint application (PDF)" : "Download joint application (PDF)"}
       </button>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
+}
+
+/** On Capacitor: write the PDF to the cache dir, then open the native share sheet. */
+async function saveAndShareNative(blob: Blob, filename: string) {
+  const [{ Filesystem, Directory }, { Share }] = await Promise.all([
+    import("@capacitor/filesystem"),
+    import("@capacitor/share"),
+  ]);
+  const base64 = await blobToBase64(blob);
+  const written = await Filesystem.writeFile({ path: filename, data: base64, directory: Directory.Cache });
+  await Share.share({ title: "Joint mutual-transfer application", url: written.uri });
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 export function ReportButton({ matchId, members }: { matchId: string; members: { id: string; label: string }[] }) {

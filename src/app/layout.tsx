@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { HoverTranslate } from "@/components/hover-translate";
+import { NativeBridge } from "@/components/native-bridge";
 
 export const metadata: Metadata = {
   title: "Mutual Transfer — find a posting swap",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <PwaRegister />
         <HoverTranslate />
+        <NativeBridge />
       </body>
     </html>
   );

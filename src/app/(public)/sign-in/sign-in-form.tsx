@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { SITE_URL } from "@/lib/env";
+import { authRedirectUrl } from "@/lib/native";
 
 export function SignInForm() {
   const router = useRouter();
@@ -17,7 +17,8 @@ export function SignInForm() {
   const [message, setMessage] = useState("");
 
   const supabase = createClient();
-  const redirectTo = `${SITE_URL}/auth/callback?next=${encodeURIComponent(next)}`;
+  // Native (Capacitor) uses a deep-link scheme; web uses the hosted callback URL.
+  const redirectTo = authRedirectUrl(next);
 
   async function sendMagicLink(e: React.FormEvent) {
     e.preventDefault();
