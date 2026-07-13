@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
+import { hasActiveSubscription } from "@/lib/billing";
 import { ActiveToggle, DeleteAccountButton } from "@/components/account-actions";
 
 export const metadata = { title: "Account settings — Mutual Transfer" };
 
 export default async function SettingsPage() {
   const profile = await requireProfile("/settings");
+  const premium = await hasActiveSubscription(profile.id);
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -16,6 +19,23 @@ export default async function SettingsPage() {
         <p className="text-sm text-slate-600">
           Verification status: <span className="font-medium capitalize">{profile.verification_status}</span>
         </p>
+      </div>
+
+      <div className="card flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+            Premium
+            {premium && <span className="badge bg-green-100 text-green-800">Active</span>}
+          </h2>
+          <p className="text-sm text-slate-600">
+            {premium
+              ? "You have an active subscription."
+              : "Unlock the official joint-application PDF and priority match alerts."}
+          </p>
+        </div>
+        <Link href="/billing" className={premium ? "btn-secondary" : "btn-primary"}>
+          {premium ? "Manage" : "Go Premium"}
+        </Link>
       </div>
 
       <div className="card space-y-3">

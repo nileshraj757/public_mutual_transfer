@@ -1,28 +1,35 @@
-import { Capacitor } from "@capacitor/core";
 import { SITE_URL } from "./env";
 
 /**
- * Native (Capacitor) helpers. All are safe to import into client components and
- * no-op on the web build (Capacitor reports the "web" platform there).
+ * Native (Capacitor) helpers. Safe to import into client components and a no-op
+ * on the web build.
+ *
+ * IMPORTANT: we deliberately do NOT statically `import "@capacitor/core"` here.
+ * That package's module format trips Next.js's dev-mode RSC chunk loader and
+ * also bloats the web bundle. Instead we read the `window.Capacitor` global that
+ * the native WebView injects at runtime, and lazily `import()` plugins only when
+ * actually running natively.
  */
+
+interface CapacitorGlobal {
+  isNativePlatform?: () => boolean;
+  getPlatform?: () => string;
+}
+
+function cap(): CapacitorGlobal | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as unknown as { Capacitor?: CapacitorGlobal }).Capacitor;
+}
 
 /** Custom URL scheme used for magic-link deep links into the native app. */
 export const APP_SCHEME = process.env.NEXT_PUBLIC_APP_SCHEME || "mutualtransfer";
 
 export function isNativeApp(): boolean {
-  try {
-    return Capacitor.isNativePlatform();
-  } catch {
-    return false;
-  }
+  return cap()?.isNativePlatform?.() ?? false;
 }
 
 export function nativePlatform(): "ios" | "android" | "web" {
-  try {
-    return Capacitor.getPlatform() as "ios" | "android" | "web";
-  } catch {
-    return "web";
-  }
+  return (cap()?.getPlatform?.() as "ios" | "android" | "web") ?? "web";
 }
 
 /**

@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
-const PROTECTED = ["/dashboard", "/browse", "/profile", "/preferences", "/matches", "/notifications", "/settings", "/onboarding", "/admin"];
+const PROTECTED = ["/dashboard", "/browse", "/profile", "/preferences", "/matches", "/notifications", "/settings", "/onboarding", "/admin", "/billing"];
 
 /**
  * Refreshes the Supabase auth session on every request and guards protected

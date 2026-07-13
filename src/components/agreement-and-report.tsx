@@ -1,13 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
 
-export function GenerateAgreementButton({ matchId }: { matchId: string }) {
+export function GenerateAgreementButton({ matchId, locked = false }: { matchId: string; locked?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  if (locked) {
+    return (
+      <div className="rounded-lg border border-brand-200 bg-brand-50 p-3">
+        <p className="text-sm text-slate-700">
+          Generating the official joint-application PDF is a <strong>Premium</strong> feature.
+        </p>
+        <Link href="/billing" className="btn-primary mt-2">Go Premium to generate</Link>
+      </div>
+    );
+  }
 
   async function download() {
     setBusy(true);

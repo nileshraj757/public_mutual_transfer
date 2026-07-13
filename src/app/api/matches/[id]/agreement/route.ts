@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { buildAgreementPdf, type AgreementMember } from "@/lib/pdf/agreement";
+import { canUsePremium } from "@/lib/billing";
 
 /** Generate the pre-filled joint mutual-transfer application PDF. Allowed only
  *  for members of a fully-consented match. */
@@ -21,6 +22,14 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   const { data: allConsented } = await supabase.rpc("match_all_consented", { p_match_id: params.id });
   if (!allConsented) {
     return NextResponse.json({ error: "All parties must consent before generating the application." }, { status: 403 });
+  }
+
+  // Premium gate (inert until Razorpay is configured — then it requires a sub).
+  if (!(await canUsePremium(user.id))) {
+    return NextResponse.json(
+      { error: "Generating the joint application is a Premium feature.", upgrade: "/billing" },
+      { status: 402 }
+    );
   }
 
   // Caller is a verified member of a consented match — safe to assemble full

@@ -11,6 +11,31 @@ export type MatchStatus =
   | "completed"
   | "cancelled";
 export type ReportStatus = "open" | "reviewing" | "resolved" | "dismissed";
+export type SubscriptionStatus =
+  | "created"
+  | "authenticated"
+  | "active"
+  | "pending"
+  | "halted"
+  | "cancelled"
+  | "completed"
+  | "expired"
+  | "paused";
+
+export interface Subscription {
+  id: string;
+  profile_id: string;
+  razorpay_subscription_id: string | null;
+  razorpay_customer_id: string | null;
+  plan_id: string | null;
+  status: SubscriptionStatus;
+  short_url: string | null;
+  current_start: string | null;
+  current_end: string | null;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Profile {
   id: string;

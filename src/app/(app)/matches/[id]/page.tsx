@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getMatchById, type MatchMemberView } from "@/lib/matches";
+import { isPremiumLocked } from "@/lib/billing";
 import { parseRules } from "@/lib/matching/rules";
 import type { RuleConfig } from "@/lib/types";
 import { MatchStatusBadge, MatchTypeBadge, VerificationBadge } from "@/components/badges";
@@ -36,6 +37,8 @@ export default async function MatchDetailPage({ params }: { params: { id: string
     const { data } = await supabase.rpc("reveal_contact", { p_match_id: match.id });
     contacts = Object.fromEntries(((data ?? []) as RevealedContact[]).map((c) => [c.profile_id, c]));
   }
+
+  const premiumLocked = match.allConsented ? await isPremiumLocked(profile.id) : false;
 
   const consentedCount = Object.values(match.consents).filter(Boolean).length;
   const labels: Record<string, string> = {};
@@ -114,7 +117,7 @@ export default async function MatchDetailPage({ params }: { params: { id: string
               Generate a pre-filled joint mutual-transfer application with everyone&apos;s details. Submit it to your
               competent authority — approval rests entirely with them.
             </p>
-            <GenerateAgreementButton matchId={match.id} />
+            <GenerateAgreementButton matchId={match.id} locked={premiumLocked} />
           </div>
         </>
       )}

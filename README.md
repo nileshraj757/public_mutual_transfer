@@ -191,6 +191,40 @@ text on a phone to see its Hindi translation.
 
 ---
 
+## Premium subscriptions (Razorpay)
+
+Optional monthly subscriptions via **Razorpay** (Indian gateway, recurring billing).
+It's wired to **degrade gracefully**: with no keys configured, *every feature
+stays free* — premium gating only switches on once you add your keys + plan id.
+No SDK dependency (REST API + `node:crypto`).
+
+**What premium gates:** generating the official **joint-application PDF** (and a
+hook for priority match alerts). The gate is in [src/lib/billing.ts](src/lib/billing.ts)
+(`canUsePremium`) — change what's gated there.
+
+**To go live (after you have your bank/KYC approved in Razorpay):**
+1. Run [supabase/migrations/0003_subscriptions.sql](supabase/migrations/0003_subscriptions.sql).
+2. In the **Razorpay Dashboard**: create API keys, create a monthly **Plan**
+   (→ `plan_…`), and add a **Webhook** at `https://<site>/api/webhooks/razorpay`
+   with the `subscription.*` events and a signing secret.
+3. Fill these in `.env.local` (see `.env.example`):
+   `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_PLAN_ID`,
+   `RAZORPAY_WEBHOOK_SECRET`, and the display labels.
+4. Restart. The **Premium** page (`/billing`, linked from Settings) now shows the
+   subscribe flow.
+
+**Flow:** `/api/billing/subscribe` creates a Razorpay subscription → Checkout
+authorizes the mandate (UPI Autopay / card / netbanking) → `/api/billing/verify`
+checks the signature → the **webhook** ([/api/webhooks/razorpay](src/app/api/webhooks/razorpay/route.ts))
+is the source of truth for activation, renewals and cancellation. Cancel anytime
+(`/api/billing/cancel`) — access lasts until the period ends.
+
+> Razorpay has **no monthly fee** (it takes a per-transaction cut), so this stays
+> consistent with the otherwise-free stack; you only need a Razorpay account +
+> KYC to accept live payments. Use **test mode** keys to try the whole flow free.
+
+---
+
 ## How matching works (algorithm)
 
 Implemented as pure, unit-tested functions in `src/lib/matching/` and bridged to
