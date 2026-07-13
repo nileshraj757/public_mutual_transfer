@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
       <div className="card space-y-2">
         <h2 className="font-semibold text-slate-900">Account</h2>
-        <p className="text-sm text-slate-600">Signed in as <strong>{profile.contact_email}</strong></p>
+        <p className="break-words text-sm text-slate-600">Signed in as <strong>{profile.contact_email}</strong></p>
         <p className="text-sm text-slate-600">
           Verification status: <span className="font-medium capitalize">{profile.verification_status}</span>
         </p>

@@ -332,7 +332,8 @@ export function HoverTranslate() {
         onClick={toggle}
         title={enabled ? "Hindi hover-translate: ON (click to turn off)" : "Hindi hover-translate: OFF (click to turn on)"}
         aria-pressed={enabled}
-        className={`fixed bottom-4 left-4 z-[100] flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold shadow-lg ring-1 transition ${
+        style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+        className={`fixed left-4 z-[100] flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold shadow-lg ring-1 transition ${
           enabled
             ? "bg-brand-600 text-white ring-brand-700 hover:bg-brand-700"
             : "bg-white text-slate-500 ring-slate-300 hover:bg-slate-50"

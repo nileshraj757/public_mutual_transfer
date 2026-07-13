@@ -107,7 +107,7 @@ export function ReportButton({ matchId, members }: { matchId: string; members: {
   return (
     <div className="text-sm">
       {!open ? (
-        <button className="text-xs text-slate-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+        <button className="-mx-3 min-h-11 px-3 py-2.5 text-xs text-slate-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
           Report this match / member
         </button>
       ) : (

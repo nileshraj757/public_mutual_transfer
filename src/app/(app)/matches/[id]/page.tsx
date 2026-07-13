@@ -191,7 +191,7 @@ function MemberCard({
           <p className="font-medium text-green-900">{contact.full_name ?? "Contact"}</p>
           {contact.current_office && <p className="text-green-800">{contact.current_office}</p>}
           {contact.contact_email && (
-            <p className="text-green-800">✉ <a className="underline" href={`mailto:${contact.contact_email}`}>{contact.contact_email}</a></p>
+            <p className="break-all text-green-800">✉ <a className="underline" href={`mailto:${contact.contact_email}`}>{contact.contact_email}</a></p>
           )}
           {contact.phone && <p className="text-green-800">☎ {contact.phone}</p>}
         </div>

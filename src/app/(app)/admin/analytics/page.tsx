@@ -75,28 +75,30 @@ export default async function AnalyticsPage() {
         {unmet.length === 0 ? (
           <p className="text-sm text-slate-500">No unmet demand detected.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-500">
-                <th className="py-1">District</th>
-                <th className="py-1 text-right">Want to move in</th>
-                <th className="py-1 text-right">Currently posted</th>
-                <th className="py-1 text-right">Gap</th>
-              </tr>
-            </thead>
-            <tbody>
-              {unmet.map((r) => (
-                <tr key={r.key} className="border-t border-slate-100">
-                  <td className="py-1.5">{r.district}, {r.state}</td>
-                  <td className="py-1.5 text-right">{r.demand}</td>
-                  <td className="py-1.5 text-right">{r.supply}</td>
-                  <td className="py-1.5 text-right">
-                    <span className="badge bg-amber-100 text-amber-800">+{r.gap}</span>
-                  </td>
+          <div className="-mx-5 overflow-x-auto px-5">
+            <table className="w-full min-w-[480px] text-sm">
+              <thead>
+                <tr className="text-left text-slate-500">
+                  <th className="py-1">District</th>
+                  <th className="py-1 text-right">Want to move in</th>
+                  <th className="py-1 text-right">Currently posted</th>
+                  <th className="py-1 text-right">Gap</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {unmet.map((r) => (
+                  <tr key={r.key} className="border-t border-slate-100">
+                    <td className="py-1.5">{r.district}, {r.state}</td>
+                    <td className="py-1.5 text-right">{r.demand}</td>
+                    <td className="py-1.5 text-right">{r.supply}</td>
+                    <td className="py-1.5 text-right">
+                      <span className="badge bg-amber-100 text-amber-800">+{r.gap}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

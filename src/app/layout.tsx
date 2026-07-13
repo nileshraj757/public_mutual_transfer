@@ -3,6 +3,7 @@ import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { HoverTranslate } from "@/components/hover-translate";
 import { NativeBridge } from "@/components/native-bridge";
+import { UpdateChecker } from "@/components/update-checker";
 
 export const metadata: Metadata = {
   title: "Mutual Transfer — find a posting swap",
@@ -17,12 +18,14 @@ export const viewport: Viewport = {
   themeColor: "#1e51eb",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <UpdateChecker />
         {children}
         <PwaRegister />
         <HoverTranslate />

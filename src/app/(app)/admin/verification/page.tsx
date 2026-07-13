@@ -40,7 +40,7 @@ function Queue({ title, profiles }: { title: string; profiles: any[] }) {
                 <p className="text-sm text-slate-600">
                   {p.designation} · {p.pay_level} · {p.current_district}, {p.current_state}
                 </p>
-                <p className="text-xs text-slate-400">{p.contact_email}</p>
+                <p className="break-words text-xs text-slate-400">{p.contact_email}</p>
               </div>
               <div className="flex items-center gap-3">
                 <VerificationBadge status={p.verification_status} />

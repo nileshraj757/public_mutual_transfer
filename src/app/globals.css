@@ -27,7 +27,9 @@ body {
     @apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    /* text-base (16px), not text-sm: Android/iOS WebViews auto-zoom on focusing
+       an input below 16px, which jars the layout on every field tap. */
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:text-sm;
   }
   .label {
     @apply mb-1 block text-sm font-medium text-slate-700;

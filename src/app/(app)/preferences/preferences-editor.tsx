@@ -91,10 +91,10 @@ export function PreferencesEditor({ initial }: { initial: PrefInput[] }) {
                   <span className="grid h-6 w-6 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-800">{i + 1}</span>
                   <span className="text-sm text-slate-800">{r.preferred_district}, {r.preferred_state}</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <button type="button" className="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">↑</button>
-                  <button type="button" className="rounded px-2 py-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30" onClick={() => move(i, 1)} disabled={i === rows.length - 1} aria-label="Move down">↓</button>
-                  <button type="button" className="rounded px-2 py-1 text-red-600 hover:bg-red-50" onClick={() => remove(i)} aria-label="Remove">✕</button>
+                <span className="flex items-center">
+                  <button type="button" className="grid h-11 w-11 place-items-center rounded text-slate-500 hover:bg-slate-100 disabled:opacity-30" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">↑</button>
+                  <button type="button" className="grid h-11 w-11 place-items-center rounded text-slate-500 hover:bg-slate-100 disabled:opacity-30" onClick={() => move(i, 1)} disabled={i === rows.length - 1} aria-label="Move down">↓</button>
+                  <button type="button" className="grid h-11 w-11 place-items-center rounded text-red-600 hover:bg-red-50" onClick={() => remove(i)} aria-label="Remove">✕</button>
                 </span>
               </li>
             ))}
