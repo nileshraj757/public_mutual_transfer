@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "926059851404",
+    "project_id": "transferapp-90a37",
+    "storage_bucket": "transferapp-90a37.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926059851404:android:0253c1a211627a1936d5a9",
+        "android_client_info": {
+          "package_name": "in.mutualtransfer.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLqEZWookkRGXGzCBN8cWkYcGq0SDtNRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
