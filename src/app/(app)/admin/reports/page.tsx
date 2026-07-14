@@ -17,19 +17,19 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-3">
       {reports.length === 0 ? (
-        <p className="card text-sm text-slate-500">No reports. 🎉</p>
+        <p className="card text-sm text-sand-500">No reports. 🎉</p>
       ) : (
         reports.map((r) => (
           <div key={r.id} className="card">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm text-slate-800">{r.reason}</p>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="text-sm text-sand-800">{r.reason}</p>
+                <p className="mt-1 text-xs text-sand-400">
                   {new Date(r.created_at).toLocaleString("en-IN")} · reporter {short(r.reporter_profile_id)} · against{" "}
                   {short(r.reported_profile_id)} {r.match_id ? `· match ${short(r.match_id)}` : ""}
                 </p>
               </div>
-              <span className="badge bg-slate-100 text-slate-700 capitalize">{r.status}</span>
+              <span className="badge bg-sand-100 text-sand-700 capitalize">{r.status}</span>
             </div>
             <form action={setReportStatus} className="mt-3 flex items-center gap-2">
               <input type="hidden" name="id" value={r.id} />

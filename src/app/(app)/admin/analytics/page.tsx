@@ -50,18 +50,18 @@ export default async function AnalyticsPage() {
       </div>
 
       <section className="card">
-        <h2 className="mb-3 font-semibold text-slate-900">Most-wanted districts (demand)</h2>
+        <h2 className="mb-3 font-semibold text-sand-900">Most-wanted districts (demand)</h2>
         {topDemand.length === 0 ? (
-          <p className="text-sm text-slate-500">No preference data yet.</p>
+          <p className="text-sm text-sand-500">No preference data yet.</p>
         ) : (
           <ul className="space-y-2">
             {topDemand.map((r) => (
               <li key={r.key} className="text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-700">{r.district}, {r.state}</span>
-                  <span className="text-slate-500">{r.demand} want · {r.supply} here</span>
+                  <span className="text-sand-700">{r.district}, {r.state}</span>
+                  <span className="text-sand-500">{r.demand} want · {r.supply} here</span>
                 </div>
-                <div className="mt-1 h-2 overflow-hidden rounded bg-slate-100">
+                <div className="mt-1 h-2 overflow-hidden rounded bg-sand-100">
                   <div className="h-full rounded bg-brand-500" style={{ width: `${(r.demand / maxDemand) * 100}%` }} />
                 </div>
               </li>
@@ -71,14 +71,14 @@ export default async function AnalyticsPage() {
       </section>
 
       <section className="card">
-        <h2 className="mb-3 font-semibold text-slate-900">Unmet-demand heatmap (demand &gt; supply)</h2>
+        <h2 className="mb-3 font-semibold text-sand-900">Unmet-demand heatmap (demand &gt; supply)</h2>
         {unmet.length === 0 ? (
-          <p className="text-sm text-slate-500">No unmet demand detected.</p>
+          <p className="text-sm text-sand-500">No unmet demand detected.</p>
         ) : (
           <div className="-mx-5 overflow-x-auto px-5">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="text-left text-slate-500">
+                <tr className="text-left text-sand-500">
                   <th className="py-1">District</th>
                   <th className="py-1 text-right">Want to move in</th>
                   <th className="py-1 text-right">Currently posted</th>
@@ -87,7 +87,7 @@ export default async function AnalyticsPage() {
               </thead>
               <tbody>
                 {unmet.map((r) => (
-                  <tr key={r.key} className="border-t border-slate-100">
+                  <tr key={r.key} className="border-t border-sand-100">
                     <td className="py-1.5">{r.district}, {r.state}</td>
                     <td className="py-1.5 text-right">{r.demand}</td>
                     <td className="py-1.5 text-right">{r.supply}</td>
@@ -108,8 +108,8 @@ export default async function AnalyticsPage() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="card">
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
-      <p className="text-sm text-slate-500">{label}</p>
+      <p className="font-display text-2xl font-semibold text-sand-900">{value}</p>
+      <p className="text-sm text-sand-500">{label}</p>
     </div>
   );
 }

@@ -26,21 +26,21 @@ export default async function VerificationQueuePage() {
 function Queue({ title, profiles }: { title: string; profiles: any[] }) {
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold text-slate-900">{title}</h2>
+      <h2 className="mb-3 text-lg font-semibold text-sand-900">{title}</h2>
       {profiles.length === 0 ? (
-        <p className="card text-sm text-slate-500">Nothing here.</p>
+        <p className="card text-sm text-sand-500">Nothing here.</p>
       ) : (
         <div className="space-y-2">
           {profiles.map((p) => (
             <div key={p.id} className="card flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-medium text-slate-900">
-                  {p.full_name ?? "—"} <span className="text-xs text-slate-400">({p.employee_id_masked ?? "no ID"})</span>
+                <p className="font-medium text-sand-900">
+                  {p.full_name ?? "—"} <span className="text-xs text-sand-400">({p.employee_id_masked ?? "no ID"})</span>
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-sand-600">
                   {p.designation} · {p.pay_level} · {p.current_district}, {p.current_state}
                 </p>
-                <p className="break-words text-xs text-slate-400">{p.contact_email}</p>
+                <p className="break-words text-xs text-sand-400">{p.contact_email}</p>
               </div>
               <div className="flex items-center gap-3">
                 <VerificationBadge status={p.verification_status} />

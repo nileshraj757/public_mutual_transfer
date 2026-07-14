@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { authRedirectUrl } from "@/lib/native";
+import { CheckCircle, Loader } from "@/components/icons";
 
 export function SignInForm() {
   const router = useRouter();
@@ -50,16 +51,16 @@ export function SignInForm() {
   }
 
   return (
-    <div className="card mt-6">
-      <div className="mb-4 flex gap-2 rounded-lg bg-slate-100 p-1 text-sm">
+    <div className="card mt-6 animate-fade-in-up">
+      <div className="mb-4 flex gap-1 rounded-full bg-sand-100 p-1 text-sm">
         <button
-          className={`flex-1 rounded-md px-3 py-1.5 ${mode === "magic" ? "bg-white font-medium shadow-sm" : "text-slate-600"}`}
+          className={`flex-1 rounded-full px-3 py-1.5 transition ${mode === "magic" ? "bg-white font-medium text-sand-900 shadow-warm" : "text-sand-600"}`}
           onClick={() => setMode("magic")}
         >
           Email link
         </button>
         <button
-          className={`flex-1 rounded-md px-3 py-1.5 ${mode === "password" ? "bg-white font-medium shadow-sm" : "text-slate-600"}`}
+          className={`flex-1 rounded-full px-3 py-1.5 transition ${mode === "password" ? "bg-white font-medium text-sand-900 shadow-warm" : "text-sand-600"}`}
           onClick={() => setMode("password")}
         >
           Password (demo)
@@ -67,7 +68,10 @@ export function SignInForm() {
       </div>
 
       {status === "sent" ? (
-        <p className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{message}</p>
+        <div className="flex animate-pop-in items-start gap-3 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
+          <p>{message}</p>
+        </div>
       ) : (
         <form onSubmit={mode === "magic" ? sendMagicLink : signInWithPassword} className="space-y-3">
           <div>
@@ -101,6 +105,7 @@ export function SignInForm() {
           {status === "error" && <p className="text-sm text-red-600">{message}</p>}
 
           <button type="submit" className="btn-primary w-full" disabled={status === "loading"}>
+            {status === "loading" && <Loader className="h-4 w-4" />}
             {status === "loading"
               ? "Working…"
               : mode === "magic"
@@ -110,7 +115,7 @@ export function SignInForm() {
         </form>
       )}
 
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-4 text-xs text-sand-500">
         By continuing you agree to our processing of your data for mutual-transfer facilitation, as described in the{" "}
         <a href="/privacy" className="text-brand-700 underline">Privacy Policy</a>.
       </p>

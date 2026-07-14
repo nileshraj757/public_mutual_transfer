@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
+import { Flag, Loader } from "@/components/icons";
 
 export function GenerateAgreementButton({ matchId, locked = false }: { matchId: string; locked?: boolean }) {
   const router = useRouter();
@@ -13,7 +14,7 @@ export function GenerateAgreementButton({ matchId, locked = false }: { matchId: 
   if (locked) {
     return (
       <div className="rounded-lg border border-brand-200 bg-brand-50 p-3">
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-sand-700">
           Generating the official joint-application PDF is a <strong>Premium</strong> feature.
         </p>
         <Link href="/billing" className="btn-primary mt-2">Go Premium to generate</Link>
@@ -56,6 +57,7 @@ export function GenerateAgreementButton({ matchId, locked = false }: { matchId: 
   return (
     <div>
       <button className="btn-primary" onClick={download} disabled={busy}>
+        {busy && <Loader className="h-4 w-4" />}
         {busy ? "Generating…" : isNativeApp() ? "Generate & share joint application (PDF)" : "Download joint application (PDF)"}
       </button>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -107,7 +109,8 @@ export function ReportButton({ matchId, members }: { matchId: string; members: {
   return (
     <div className="text-sm">
       {!open ? (
-        <button className="-mx-3 min-h-11 px-3 py-2.5 text-xs text-slate-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+        <button className="-mx-3 flex min-h-11 items-center gap-1.5 px-3 py-2.5 text-xs text-sand-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+          <Flag className="h-3.5 w-3.5" />
           Report this match / member
         </button>
       ) : (

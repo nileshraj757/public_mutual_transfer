@@ -78,7 +78,7 @@ export function BillingClient({
         name: planName,
         description: `${planName} — monthly subscription`,
         prefill: email ? { email } : undefined,
-        theme: { color: "#1e51eb" },
+        theme: { color: "#146152" },
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_subscription_id: string;
@@ -123,20 +123,20 @@ export function BillingClient({
     <div className="card">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">{planName}</h2>
-          <p className="text-sm text-slate-600">{priceLabel}</p>
+          <h2 className="text-lg font-semibold text-sand-900">{planName}</h2>
+          <p className="text-sm text-sand-600">{priceLabel}</p>
         </div>
         {isActive ? (
           <span className="badge bg-green-100 text-green-800">Active</span>
         ) : (
-          <span className="badge bg-slate-100 text-slate-600">{status ?? "Not subscribed"}</span>
+          <span className="badge bg-sand-100 text-sand-600">{status ?? "Not subscribed"}</span>
         )}
       </div>
 
       {isActive ? (
         <div className="mt-4 space-y-3">
           {currentEnd && (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-sand-600">
               {cancelAtPeriodEnd ? "Access ends on " : "Renews on "}
               <strong>{new Date(currentEnd).toLocaleDateString("en-IN")}</strong>.
             </p>
@@ -151,7 +151,7 @@ export function BillingClient({
         </div>
       ) : (
         <div className="mt-4">
-          <ul className="mb-4 space-y-1 text-sm text-slate-600">
+          <ul className="mb-4 space-y-1 text-sm text-sand-600">
             <li>✓ Generate & download the official joint-application PDF</li>
             <li>✓ Priority email alerts for new matches</li>
             <li>✓ Support the platform&apos;s free upkeep</li>
@@ -159,7 +159,7 @@ export function BillingClient({
           <button className="btn-primary" onClick={subscribe} disabled={busy}>
             {busy ? "Starting…" : `Subscribe — ${priceLabel}`}
           </button>
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-sand-400">
             Secure recurring payment via Razorpay (UPI Autopay / cards / netbanking). Cancel anytime.
           </p>
         </div>

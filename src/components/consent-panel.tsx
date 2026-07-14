@@ -40,8 +40,8 @@ export function ConsentPanel({ matchId, selfConsented, allConsented, consentedCo
 
   return (
     <div className="card">
-      <h3 className="font-semibold text-slate-900">Mutual consent</h3>
-      <p className="mt-1 text-sm text-slate-600">
+      <h3 className="font-semibold text-sand-900">Mutual consent</h3>
+      <p className="mt-1 text-sm text-sand-600">
         Contact details are revealed only when <strong>all {total} parties</strong> opt in. So far {consentedCount} of{" "}
         {total} are interested.
       </p>

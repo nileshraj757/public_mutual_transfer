@@ -12,8 +12,8 @@ export default async function ProfilePage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Your profile</h1>
-          <p className="mt-1 text-sm text-slate-600">Keep this accurate — it drives your matches.</p>
+          <h1 className="font-display text-2xl font-semibold text-sand-900">Your profile</h1>
+          <p className="mt-1 text-sm text-sand-600">Keep this accurate — it drives your matches.</p>
         </div>
         <VerificationBadge status={profile.verification_status} />
       </div>
@@ -27,7 +27,7 @@ export default async function ProfilePage() {
 
       <ProfileForm profile={profile} mode="edit" />
 
-      <p className="mt-6 text-sm text-slate-600">
+      <p className="mt-6 text-sm text-sand-600">
         Manage where you want to go on the <Link href="/preferences" className="text-brand-700 underline">Preferences</Link> page.
       </p>
     </div>

@@ -34,18 +34,18 @@ export function SwapRoute({
       <div className="space-y-1 text-sm">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-md bg-brand-600 px-2 py-0.5 text-xs font-medium text-white">You</span>
-          <span className="text-slate-500">{loc(members[selfIdx])}</span>
+          <span className="text-sand-500">{loc(members[selfIdx])}</span>
           <span aria-hidden className="text-brand-600">→</span>
-          <span className="font-semibold text-slate-900">{loc(destOf(selfIdx))}</span>
+          <span className="font-semibold text-sand-900">{loc(destOf(selfIdx))}</span>
         </div>
-        <p className="text-xs text-slate-400">{type === "direct" ? "Two-way mutual swap" : `${n}-way chain swap`}</p>
+        <p className="text-xs text-sand-400">{type === "direct" ? "Two-way mutual swap" : `${n}-way chain swap`}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-sand-600">
         {type === "direct"
           ? "Two-way swap — each person moves into the other person's posting:"
           : `${n}-way chain — follow each arrow: everyone moves into the next person's seat, and the last loops back to the first.`}
@@ -71,15 +71,15 @@ function Legend({ members }: { members: MatchMemberView[] }) {
           <li key={m.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
             <span
               className={`inline-flex w-16 shrink-0 justify-center rounded px-1.5 py-0.5 text-xs font-semibold ${
-                m.isSelf ? "bg-brand-600 text-white" : "bg-slate-200 text-slate-700"
+                m.isSelf ? "bg-brand-600 text-white" : "bg-sand-200 text-sand-700"
               }`}
             >
               {labelOf(m, i)}
             </span>
-            <span className="text-slate-700">{loc(m)}</span>
+            <span className="text-sand-700">{loc(m)}</span>
             <span aria-hidden className="font-semibold text-brand-600">➜</span>
-            <span className="font-semibold text-slate-900">{loc(dest)}</span>
-            <span className="text-xs text-slate-400">
+            <span className="font-semibold text-sand-900">{loc(dest)}</span>
+            <span className="text-xs text-sand-400">
               ({dest.isSelf ? "your seat" : `${labelOf(dest, destIdx)}'s seat`})
             </span>
           </li>
@@ -107,7 +107,10 @@ function ArrowDefs() {
   return (
     <defs>
       <marker id="swap-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e51eb" />
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#146152" />
+      </marker>
+      <marker id="swap-arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#D98E1B" />
       </marker>
     </defs>
   );
@@ -118,15 +121,15 @@ function NodeCard({ x, y, member, index }: { x: number; y: number; member: Match
     <foreignObject x={x - CARD_W / 2} y={y - CARD_H / 2} width={CARD_W} height={CARD_H}>
       <div
         className={`flex h-full w-full flex-col items-center justify-center rounded-lg border px-2 text-center shadow-sm ${
-          member.isSelf ? "border-brand-400 bg-brand-50" : "border-slate-200 bg-white"
+          member.isSelf ? "border-brand-400 bg-brand-50" : "border-sand-200 bg-white"
         }`}
       >
         <span
-          className={`text-[11px] font-bold uppercase tracking-wide ${member.isSelf ? "text-brand-700" : "text-slate-500"}`}
+          className={`text-[11px] font-bold uppercase tracking-wide ${member.isSelf ? "text-brand-700" : "text-sand-500"}`}
         >
           {labelOf(member, index)}
         </span>
-        <span className="line-clamp-2 text-[12px] font-medium leading-tight text-slate-800">{loc(member)}</span>
+        <span className="line-clamp-2 text-[12px] font-medium leading-tight text-sand-800">{loc(member)}</span>
       </div>
     </foreignObject>
   );
@@ -174,18 +177,21 @@ function ChainDiagram({ members }: { members: MatchMemberView[] }) {
           y1={e.sy}
           x2={e.ex}
           y2={e.ey}
-          stroke="#1e51eb"
+          stroke="#146152"
           strokeWidth={2.5}
+          strokeDasharray="3 8"
+          strokeLinecap="round"
           markerEnd="url(#swap-arrow)"
+          className="animate-mt-dash"
         />
       ))}
 
       {/* Centre label */}
-      <circle cx={C} cy={C} r={30} fill="#eef5ff" stroke="#bcd6ff" />
-      <text x={C} y={C - 2} textAnchor="middle" fill="#173dd4" fontSize="13" fontWeight="700">
+      <circle cx={C} cy={C} r={30} fill="#E9F1EA" stroke="#BFD8CB" />
+      <text x={C} y={C - 2} textAnchor="middle" fill="#0F4E42" fontSize="13" fontWeight="700">
         {n}-way
       </text>
-      <text x={C} y={C + 13} textAnchor="middle" fill="#1e51eb" fontSize="10">
+      <text x={C} y={C + 13} textAnchor="middle" fill="#146152" fontSize="10">
         chain ↻
       </text>
 
@@ -221,27 +227,33 @@ function SwapDiagram({ members }: { members: MatchMemberView[] }) {
     >
       <ArrowDefs />
 
-      {/* a → b (top) */}
+      {/* a → b (top, green) */}
       <path
         d={`M ${leftEdge} ${ay - 12} Q ${midX} ${ay - 56} ${rightEdge} ${ay - 12}`}
         fill="none"
-        stroke="#1e51eb"
+        stroke="#146152"
         strokeWidth={2.5}
+        strokeDasharray="3 8"
+        strokeLinecap="round"
         markerEnd="url(#swap-arrow)"
+        className="animate-mt-dash"
       />
-      <text x={midX} y={ay - 44} textAnchor="middle" fill="#64748b" fontSize="11">
+      <text x={midX} y={ay - 44} textAnchor="middle" fill="#8A948F" fontSize="11">
         moves to
       </text>
 
-      {/* b → a (bottom) */}
+      {/* b → a (bottom, amber) */}
       <path
         d={`M ${rightEdge} ${ay + 12} Q ${midX} ${ay + 56} ${leftEdge} ${ay + 12}`}
         fill="none"
-        stroke="#1e51eb"
+        stroke="#D98E1B"
         strokeWidth={2.5}
-        markerEnd="url(#swap-arrow)"
+        strokeDasharray="3 8"
+        strokeLinecap="round"
+        markerEnd="url(#swap-arrow-amber)"
+        className="animate-mt-dash"
       />
-      <text x={midX} y={ay + 50} textAnchor="middle" fill="#64748b" fontSize="11">
+      <text x={midX} y={ay + 50} textAnchor="middle" fill="#8A948F" fontSize="11">
         moves to
       </text>
 

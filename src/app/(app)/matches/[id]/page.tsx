@@ -11,6 +11,7 @@ import { SwapRoute } from "@/components/swap-route";
 import { ConsentPanel } from "@/components/consent-panel";
 import { MessageThread } from "@/components/message-thread";
 import { GenerateAgreementButton, ReportButton } from "@/components/agreement-and-report";
+import { Mail, Phone } from "@/components/icons";
 
 export const metadata = { title: "Match details — Mutual Transfer" };
 
@@ -54,15 +55,15 @@ export default async function MatchDetailPage({ params }: { params: { id: string
             <MatchTypeBadge type={match.type} size={match.members.length} />
             <MatchStatusBadge status={match.status} />
           </div>
-          <span className="text-xs text-slate-400">Created {new Date(match.created_at).toLocaleDateString("en-IN")}</span>
+          <span className="text-xs text-sand-400">Created {new Date(match.created_at).toLocaleDateString("en-IN")}</span>
         </div>
         <SwapRoute members={match.members} type={match.type} />
       </div>
 
       {/* Eligibility */}
       <div className="card">
-        <h2 className="font-semibold text-slate-900">Eligibility</h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <h2 className="font-semibold text-sand-900">Eligibility</h2>
+        <p className="mt-1 text-sm text-sand-600">
           This match satisfies all hard rules. Both sides&apos; preferred locations cover each other&apos;s current
           posting.
         </p>
@@ -74,7 +75,7 @@ export default async function MatchDetailPage({ params }: { params: { id: string
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-sand-500">
           Soft factors below are shown for your judgement only — they do not block the match.
         </p>
       </div>
@@ -112,8 +113,8 @@ export default async function MatchDetailPage({ params }: { params: { id: string
         <>
           <MessageThread matchId={match.id} selfId={profile.id} labels={labels} />
           <div className="card">
-            <h3 className="font-semibold text-slate-900">Joint application</h3>
-            <p className="mb-3 mt-1 text-sm text-slate-600">
+            <h3 className="font-semibold text-sand-900">Joint application</h3>
+            <p className="mb-3 mt-1 text-sm text-sand-600">
               Generate a pre-filled joint mutual-transfer application with everyone&apos;s details. Submit it to your
               competent authority — approval rests entirely with them.
             </p>
@@ -153,18 +154,18 @@ function MemberCard({
   return (
     <div className="card">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">{member.isSelf ? "You" : `Member ${index + 1}`}</h3>
+        <h3 className="font-semibold text-sand-900">{member.isSelf ? "You" : `Member ${index + 1}`}</h3>
         <div className="flex items-center gap-2">
           <VerificationBadge status={member.verification_status} />
           {consented ? (
             <span className="badge bg-blue-100 text-blue-800">Interested</span>
           ) : (
-            <span className="badge bg-slate-100 text-slate-600">No response</span>
+            <span className="badge bg-sand-100 text-sand-600">No response</span>
           )}
         </div>
       </div>
 
-      <dl className="space-y-1 text-sm text-slate-600">
+      <dl className="space-y-1 text-sm text-sand-600">
         <KV k="Current posting" v={[member.current_district, member.current_state].filter(Boolean).join(", ")} />
         <KV k="Designation" v={member.designation} />
         <KV k="Pay level" v={member.pay_level} />
@@ -172,14 +173,14 @@ function MemberCard({
 
       <div className="mt-3 flex items-center gap-2 rounded-md bg-brand-50 px-3 py-2 text-sm">
         <span className="text-brand-600" aria-hidden>➜</span>
-        <span className="text-slate-600">{member.isSelf ? "You move to" : "Moves to"}</span>
-        <span className="font-semibold text-slate-900">{movingTo}</span>
+        <span className="text-sand-600">{member.isSelf ? "You move to" : "Moves to"}</span>
+        <span className="font-semibold text-sand-900">{movingTo}</span>
       </div>
 
       {/* Soft factors */}
       <div className="mt-3 flex flex-wrap gap-1">
         {showSeniority && years != null && (
-          <span className="badge bg-slate-100 text-slate-600">~{years} yrs service</span>
+          <span className="badge bg-sand-100 text-sand-600">~{years} yrs service</span>
         )}
         {inCoolOff && <span className="badge bg-amber-100 text-amber-800">Within cooling-off</span>}
         {member.disciplinary_pending && <span className="badge bg-red-100 text-red-800">Disciplinary pending</span>}
@@ -187,13 +188,21 @@ function MemberCard({
 
       {/* Revealed contact (only after everyone consents) */}
       {contact && !member.isSelf && (
-        <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3 text-sm">
+        <div className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm">
           <p className="font-medium text-green-900">{contact.full_name ?? "Contact"}</p>
           {contact.current_office && <p className="text-green-800">{contact.current_office}</p>}
           {contact.contact_email && (
-            <p className="break-all text-green-800">✉ <a className="underline" href={`mailto:${contact.contact_email}`}>{contact.contact_email}</a></p>
+            <p className="flex items-center gap-1.5 break-all text-green-800">
+              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <a className="underline" href={`mailto:${contact.contact_email}`}>{contact.contact_email}</a>
+            </p>
           )}
-          {contact.phone && <p className="text-green-800">☎ {contact.phone}</p>}
+          {contact.phone && (
+            <p className="flex items-center gap-1.5 text-green-800">
+              <Phone className="h-3.5 w-3.5 shrink-0" />
+              {contact.phone}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -203,8 +212,8 @@ function MemberCard({
 function KV({ k, v }: { k: string; v: string | null }) {
   return (
     <div className="flex justify-between gap-2">
-      <dt className="text-slate-400">{k}</dt>
-      <dd className="text-right text-slate-700">{v || "—"}</dd>
+      <dt className="text-sand-400">{k}</dt>
+      <dd className="text-right text-sand-700">{v || "—"}</dd>
     </div>
   );
 }

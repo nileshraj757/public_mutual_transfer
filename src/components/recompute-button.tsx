@@ -28,7 +28,7 @@ export function RecomputeButton() {
       <button className="btn-secondary" onClick={refresh} disabled={pending}>
         {pending ? "Refreshing…" : "Refresh matches"}
       </button>
-      {msg && <span className="text-xs text-slate-500">{msg}</span>}
+      {msg && <span className="text-xs text-sand-500">{msg}</span>}
     </div>
   );
 }

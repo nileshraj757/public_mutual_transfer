@@ -16,8 +16,8 @@ export default async function BillingPage() {
   return (
     <div className="max-w-2xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Premium</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="font-display text-2xl font-semibold text-sand-900">Premium</h1>
+        <p className="mt-1 text-sm text-sand-600">
           Premium unlocks the official joint-application document and priority match alerts. The actual transfer always
           depends on the competent authority&apos;s approval.
         </p>
@@ -34,7 +34,7 @@ export default async function BillingPage() {
         priceLabel={priceLabel}
       />
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-sand-400">
         Payments are processed securely by Razorpay. We never store your card or bank details.
       </p>
     </div>

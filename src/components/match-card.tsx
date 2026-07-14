@@ -8,18 +8,18 @@ export function MatchCard({ match }: { match: MatchView }) {
   const consentedCount = Object.values(match.consents).filter(Boolean).length;
 
   return (
-    <Link href={`/matches/${match.id}`} className="card block transition hover:border-brand-300 hover:shadow">
+    <Link href={`/matches/${match.id}`} className="card block hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-warm-md">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <MatchTypeBadge type={match.type} size={match.members.length} />
           <MatchStatusBadge status={match.status} />
         </div>
-        <span className="text-xs text-slate-400">{new Date(match.created_at).toLocaleDateString("en-IN")}</span>
+        <span className="text-xs text-sand-400">{new Date(match.created_at).toLocaleDateString("en-IN")}</span>
       </div>
 
       <SwapRoute members={match.members} type={match.type} compact />
 
-      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+      <div className="mt-3 flex items-center justify-between text-xs text-sand-500">
         <span>
           {others[0]?.designation ?? "—"} · {others[0]?.pay_level ?? "—"}
         </span>

@@ -46,7 +46,7 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
   return (
     <form action={onSubmit} className="space-y-5">
       <div className="card space-y-4">
-        <h2 className="font-semibold text-slate-900">Identity</h2>
+        <h2 className="font-semibold text-sand-900">Identity</h2>
         <div>
           <label className="label" htmlFor="full_name">Full name *</label>
           <input id="full_name" name="full_name" required className="input" defaultValue={profile?.full_name ?? ""} />
@@ -61,12 +61,12 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
             className="input"
             placeholder={profile?.employee_id_masked ? "Leave blank to keep current" : "e.g. JA10293"}
           />
-          <p className="mt-1 text-xs text-slate-500">Stored hashed/masked. Used only for verification; never shown to other users.</p>
+          <p className="mt-1 text-xs text-sand-500">Stored hashed/masked. Used only for verification; never shown to other users.</p>
         </div>
       </div>
 
       <div className="card space-y-4">
-        <h2 className="font-semibold text-slate-900">Service details (matched on these)</h2>
+        <h2 className="font-semibold text-sand-900">Service details (matched on these)</h2>
         <FieldWithSuggestions name="cadre" label="Cadre / department / establishment *" defaultValue={profile?.cadre ?? ""} suggestions={CADRE_SUGGESTIONS} required />
         <FieldWithSuggestions name="designation" label="Designation / post *" defaultValue={profile?.designation ?? ""} suggestions={DESIGNATION_SUGGESTIONS} required />
         <div>
@@ -81,7 +81,7 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
       </div>
 
       <div className="card space-y-4">
-        <h2 className="font-semibold text-slate-900">Current posting</h2>
+        <h2 className="font-semibold text-sand-900">Current posting</h2>
         <LocationSelect required defaultState={profile?.current_state ?? ""} defaultDistrict={profile?.current_district ?? ""} />
         <div>
           <label className="label" htmlFor="current_office">Current office (optional)</label>
@@ -100,19 +100,19 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
       </div>
 
       <div className="card space-y-4">
-        <h2 className="font-semibold text-slate-900">Contact &amp; declarations</h2>
+        <h2 className="font-semibold text-sand-900">Contact &amp; declarations</h2>
         <div>
           <label className="label" htmlFor="phone">Phone (private — revealed only after mutual consent)</label>
           <input id="phone" name="phone" className="input" defaultValue={profile?.phone ?? ""} placeholder="+91 …" />
         </div>
-        <label className="flex items-start gap-2 text-sm text-slate-700">
+        <label className="flex items-start gap-2 text-sm text-sand-700">
           <input type="checkbox" name="disciplinary_pending" defaultChecked={profile?.disciplinary_pending ?? false} className="mt-0.5" />
           <span>I have a pending disciplinary matter (self-declared; shown as a soft factor to potential matches).</span>
         </label>
       </div>
 
       {mode === "onboarding" && (
-        <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700">
+        <label className="flex items-start gap-2 rounded-lg border border-sand-200 bg-white p-4 text-sm text-sand-700">
           <input type="checkbox" name="consent_dpdp" required className="mt-0.5" />
           <span>
             I consent to the processing of my data for the sole purpose of mutual-transfer facilitation, as described in

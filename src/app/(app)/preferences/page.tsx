@@ -22,8 +22,8 @@ export default async function PreferencesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Where do you want to go?</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="font-display text-2xl font-semibold text-sand-900">Where do you want to go?</h1>
+        <p className="mt-1 text-sm text-sand-600">
           List the districts you&apos;d accept a transfer to, most-wanted first. We match these against other employees&apos;
           current postings.
         </p>

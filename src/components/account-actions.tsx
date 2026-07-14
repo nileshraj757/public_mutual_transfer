@@ -25,7 +25,7 @@ export function ActiveToggle({ initial }: { initial: boolean }) {
   return (
     <label className="flex items-center gap-3">
       <input type="checkbox" checked={active} onChange={toggle} disabled={pending} className="h-4 w-4" />
-      <span className="text-sm text-slate-700">
+      <span className="text-sm text-sand-700">
         {active ? "Active — I appear in matches and browse" : "Paused — hidden from matching and browse"}
       </span>
     </label>
@@ -54,7 +54,7 @@ export function DeleteAccountButton() {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-sand-600">
         This permanently deletes your profile, preferences, matches, messages, notifications and your login — everything.
         This cannot be undone. Type <strong>DELETE</strong> to confirm.
       </p>

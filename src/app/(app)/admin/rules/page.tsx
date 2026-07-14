@@ -10,8 +10,8 @@ export default async function RulesEditorPage() {
   return (
     <div className="space-y-6">
       <div className="card">
-        <h2 className="mb-1 font-semibold text-slate-900">Eligibility rules</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="mb-1 font-semibold text-sand-900">Eligibility rules</h2>
+        <p className="text-sm text-sand-600">
           Hard constraints must be <em>equal</em> between matched employees (e.g. cadre, designation, pay level). Soft
           rules (like chain length or cooling-off) tune behaviour and display. Toggle <code>active</code> to enable/disable
           without deleting.
@@ -49,7 +49,7 @@ export default async function RulesEditorPage() {
       </div>
 
       <div className="card">
-        <h3 className="mb-3 font-semibold text-slate-900">Add a rule</h3>
+        <h3 className="mb-3 font-semibold text-sand-900">Add a rule</h3>
         <form action={upsertRule} className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr,2fr,1fr,auto,auto,auto] sm:items-end">
           <div>
             <label className="label">Key</label>
@@ -71,7 +71,7 @@ export default async function RulesEditorPage() {
           </label>
           <button className="btn-primary px-3 py-1.5 text-sm" type="submit">Add</button>
         </form>
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-sand-500">
           Recognized keys: <code>cadre</code>, <code>designation</code>, <code>pay_level</code> (hard equality);
           <code>chain_max_length</code>, <code>cooling_off_months</code>, <code>show_seniority</code> (behaviour/display).
         </p>

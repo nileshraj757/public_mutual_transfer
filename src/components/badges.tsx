@@ -1,4 +1,5 @@
 import type { MatchStatus, VerificationStatus } from "@/lib/types";
+import { Shield, CheckCircle } from "./icons";
 
 export function VerificationBadge({ status }: { status: VerificationStatus }) {
   const map: Record<VerificationStatus, string> = {
@@ -11,12 +12,17 @@ export function VerificationBadge({ status }: { status: VerificationStatus }) {
     pending: "Unverified",
     rejected: "Rejected",
   };
-  return <span className={`badge ${map[status]}`}>{label[status]}</span>;
+  return (
+    <span className={`badge ${map[status]}`}>
+      <Shield className="h-3 w-3" />
+      {label[status]}
+    </span>
+  );
 }
 
 export function MatchStatusBadge({ status }: { status: MatchStatus }) {
   const map: Record<MatchStatus, string> = {
-    suggested: "bg-slate-100 text-slate-700",
+    suggested: "bg-sand-100 text-sand-700",
     both_interested: "bg-blue-100 text-blue-800",
     contact_shared: "bg-indigo-100 text-indigo-800",
     agreement_generated: "bg-violet-100 text-violet-800",
@@ -31,7 +37,12 @@ export function MatchStatusBadge({ status }: { status: MatchStatus }) {
     completed: "Completed",
     cancelled: "Cancelled",
   };
-  return <span className={`badge ${map[status]}`}>{label[status]}</span>;
+  return (
+    <span className={`badge ${map[status]}`}>
+      {status === "completed" && <CheckCircle className="h-3 w-3" />}
+      {label[status]}
+    </span>
+  );
 }
 
 export function MatchTypeBadge({ type, size }: { type: "direct" | "chain"; size: number }) {

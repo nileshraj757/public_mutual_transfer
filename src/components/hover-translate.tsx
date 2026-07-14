@@ -311,13 +311,13 @@ export function HoverTranslate() {
           data-hovertx-ui
           role="tooltip"
           lang="hi"
-          className="pointer-events-none fixed z-[100] max-w-xs rounded-lg bg-slate-900 px-3 py-2 text-sm text-white shadow-xl ring-1 ring-black/10"
+          className="pointer-events-none fixed z-[100] max-w-xs rounded-lg bg-sand-900 px-3 py-2 text-sm text-white shadow-xl ring-1 ring-black/10"
           style={{ left: tip.x, top: tip.y }}
         >
-          <span className="mb-0.5 block text-[10px] uppercase tracking-wide text-slate-400">हिन्दी अनुवाद</span>
+          <span className="mb-0.5 block text-[10px] uppercase tracking-wide text-sand-400">हिन्दी अनुवाद</span>
           {tip.loading ? (
-            <span className="flex items-center gap-2 text-slate-200">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-500 border-t-white" />
+            <span className="flex items-center gap-2 text-sand-200">
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-sand-500 border-t-white" />
               अनुवाद हो रहा है…
             </span>
           ) : (
@@ -336,7 +336,7 @@ export function HoverTranslate() {
         className={`fixed left-4 z-[100] flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold shadow-lg ring-1 transition ${
           enabled
             ? "bg-brand-600 text-white ring-brand-700 hover:bg-brand-700"
-            : "bg-white text-slate-500 ring-slate-300 hover:bg-slate-50"
+            : "bg-white text-sand-500 ring-sand-300 hover:bg-sand-50"
         }`}
       >
         <span aria-hidden className="text-base leading-none">अ</span>

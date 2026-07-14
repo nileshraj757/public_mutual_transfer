@@ -1,17 +1,20 @@
 import { Suspense } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
 import { SignInForm } from "./sign-in-form";
+import { MailSpot } from "@/components/illustrations";
 
 export const metadata = { title: "Sign in — Mutual Transfer" };
 
 export default function SignInPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
-      <h1 className="text-2xl font-bold text-slate-900">Sign in or create your account</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        We use free, password-less email links — no SMS, no cost. Enter your email and we&apos;ll send you a secure
-        sign-in link.
-      </p>
+      <div className="text-center">
+        <MailSpot className="mx-auto h-24 w-auto animate-pop-in" />
+        <h1 className="mt-3 font-display text-2xl font-semibold text-sand-900">Welcome back</h1>
+        <p className="mt-2 text-sm text-sand-600">
+          Password-less sign-in — we email you a secure magic link. No SMS, no cost.
+        </p>
+      </div>
 
       {!isSupabaseConfigured ? (
         <div className="card mt-6 border-amber-300 bg-amber-50 text-sm text-amber-900">

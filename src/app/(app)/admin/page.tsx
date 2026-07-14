@@ -23,16 +23,16 @@ export default async function AdminOverviewPage() {
       <div className="grid gap-3 sm:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="card">
-            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-            <p className="text-sm text-slate-500">{s.label}</p>
+            <p className="font-display text-2xl font-semibold text-sand-900">{s.value}</p>
+            <p className="text-sm text-sand-500">{s.label}</p>
           </div>
         ))}
       </div>
 
       <div className="card flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-slate-900">Recompute all matches</h2>
-          <p className="text-sm text-slate-600">Rebuilds the full match graph (direct + chains) for every active profile.</p>
+          <h2 className="font-semibold text-sand-900">Recompute all matches</h2>
+          <p className="text-sm text-sand-600">Rebuilds the full match graph (direct + chains) for every active profile.</p>
         </div>
         <form action={triggerRecomputeAll}>
           <button className="btn-primary" type="submit">Recompute now</button>

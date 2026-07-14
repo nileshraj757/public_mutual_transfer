@@ -66,19 +66,19 @@ export function MessageThread({ matchId, selfId, labels }: MessageThreadProps) {
 
   return (
     <div className="card">
-      <h3 className="mb-3 font-semibold text-slate-900">Messages</h3>
-      <div className="mb-3 max-h-80 space-y-2 overflow-y-auto rounded-lg bg-slate-50 p-3">
+      <h3 className="mb-3 font-semibold text-sand-900">Messages</h3>
+      <div className="mb-3 max-h-80 space-y-2 overflow-y-auto rounded-lg bg-sand-50 p-3">
         {messages.length === 0 ? (
-          <p className="text-center text-sm text-slate-400">No messages yet. Say hello and coordinate your swap.</p>
+          <p className="text-center text-sm text-sand-400">No messages yet. Say hello and coordinate your swap.</p>
         ) : (
           messages.map((m) => {
             const mine = m.sender_profile_id === selfId;
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${mine ? "bg-brand-600 text-white" : "bg-white text-slate-800 shadow-sm"}`}>
+                <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${mine ? "bg-brand-600 text-white" : "bg-white text-sand-800 shadow-sm"}`}>
                   {!mine && <p className="mb-0.5 text-[11px] font-medium opacity-70">{labels[m.sender_profile_id] ?? "Member"}</p>}
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                  <p className={`mt-0.5 text-[10px] ${mine ? "text-brand-100" : "text-slate-400"}`}>
+                  <p className={`mt-0.5 text-[10px] ${mine ? "text-brand-100" : "text-sand-400"}`}>
                     {new Date(m.created_at).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
                   </p>
                 </div>

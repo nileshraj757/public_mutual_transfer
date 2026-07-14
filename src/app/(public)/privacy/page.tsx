@@ -2,9 +2,9 @@ export const metadata = { title: "Privacy Policy — Mutual Transfer" };
 
 export default function PrivacyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 text-slate-700">
-      <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-slate-500">
+    <div className="mx-auto max-w-3xl px-4 py-12 text-sand-700">
+      <h1 className="text-3xl font-bold text-sand-900">Privacy Policy</h1>
+      <p className="mt-2 text-sm text-sand-500">
         Aligned with India&apos;s Digital Personal Data Protection Act, 2023 (DPDP).
       </p>
 
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-lg font-semibold text-sand-900">{title}</h2>
       <p className="mt-1">{children}</p>
     </section>
   );

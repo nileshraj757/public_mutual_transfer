@@ -11,23 +11,23 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Account settings</h1>
+      <h1 className="font-display text-2xl font-semibold text-sand-900">Account settings</h1>
 
       <div className="card space-y-2">
-        <h2 className="font-semibold text-slate-900">Account</h2>
-        <p className="break-words text-sm text-slate-600">Signed in as <strong>{profile.contact_email}</strong></p>
-        <p className="text-sm text-slate-600">
+        <h2 className="font-semibold text-sand-900">Account</h2>
+        <p className="break-words text-sm text-sand-600">Signed in as <strong>{profile.contact_email}</strong></p>
+        <p className="text-sm text-sand-600">
           Verification status: <span className="font-medium capitalize">{profile.verification_status}</span>
         </p>
       </div>
 
       <div className="card flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 font-semibold text-sand-900">
             Premium
             {premium && <span className="badge bg-green-100 text-green-800">Active</span>}
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-sand-600">
             {premium
               ? "You have an active subscription."
               : "Unlock the official joint-application PDF and priority match alerts."}
@@ -39,13 +39,13 @@ export default async function SettingsPage() {
       </div>
 
       <div className="card space-y-3">
-        <h2 className="font-semibold text-slate-900">Visibility</h2>
+        <h2 className="font-semibold text-sand-900">Visibility</h2>
         <ActiveToggle initial={profile.is_active} />
       </div>
 
       <div className="card space-y-3">
-        <h2 className="font-semibold text-slate-900">Your data (DPDP)</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="font-semibold text-sand-900">Your data (DPDP)</h2>
+        <p className="text-sm text-sand-600">
           You can review and correct your data anytime on the Profile and Preferences pages. To exercise your right to
           erasure, delete your account below.
         </p>

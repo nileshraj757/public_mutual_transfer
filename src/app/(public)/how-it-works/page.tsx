@@ -6,10 +6,10 @@ export const metadata = { title: "How it works — Mutual Transfer" };
 export default function HowItWorksPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="text-3xl font-bold text-slate-900">How it works</h1>
+      <h1 className="text-3xl font-bold text-sand-900">How it works</h1>
       <Disclaimer className="my-6" />
 
-      <div className="prose prose-slate max-w-none space-y-6 text-slate-700">
+      <div className="prose prose-slate max-w-none space-y-6 text-sand-700">
         <Section title="1. Eligibility (the rules)">
           <p>
             A swap is valid only when both employees match on the <strong>hard</strong> rules — by default the same
@@ -63,7 +63,7 @@ export default function HowItWorksPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+      <h2 className="font-display text-xl font-semibold text-sand-900">{title}</h2>
       <div className="mt-2 space-y-3">{children}</div>
     </section>
   );

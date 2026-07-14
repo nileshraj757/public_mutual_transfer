@@ -34,8 +34,8 @@ export default async function BrowsePage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Browse available options</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="font-display text-2xl font-semibold text-sand-900">Browse available options</h1>
+        <p className="mt-1 text-sm text-sand-600">
           Anonymized open requests. Names, employee IDs, emails and phone numbers are never shown here — contact is
           shared only inside a mutual match after both sides consent.
         </p>
@@ -48,33 +48,33 @@ export default async function BrowsePage({
       {error ? (
         <p className="card text-sm text-red-600">Couldn&apos;t load options: {error.message}</p>
       ) : results.length === 0 ? (
-        <p className="card text-sm text-slate-500">No matching options. Try widening your filters.</p>
+        <p className="card text-sm text-sand-500">No matching options. Try widening your filters.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((r) => (
             <div key={r.profile_id} className="card">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-900">
+                <span className="text-sm font-semibold text-sand-900">
                   {r.current_district}, {r.current_state}
                 </span>
                 <VerificationBadge status={r.verification_status} />
               </div>
-              <dl className="space-y-1 text-xs text-slate-600">
+              <dl className="space-y-1 text-xs text-sand-600">
                 <Row k="Designation" v={r.designation} />
                 <Row k="Cadre" v={r.cadre} />
                 <Row k="Pay level" v={r.pay_level} />
               </dl>
               <div className="mt-3">
-                <p className="text-xs font-medium text-slate-500">Wants to move to:</p>
+                <p className="text-xs font-medium text-sand-500">Wants to move to:</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {r.preferred.length ? (
                     r.preferred.slice(0, 4).map((p) => (
-                      <span key={`${p.state}-${p.district}`} className="badge bg-slate-100 text-slate-700">
+                      <span key={`${p.state}-${p.district}`} className="badge bg-sand-100 text-sand-700">
                         {p.district}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-400">Not specified</span>
+                    <span className="text-xs text-sand-400">Not specified</span>
                   )}
                 </div>
               </div>
@@ -91,8 +91,8 @@ export default async function BrowsePage({
 function Row({ k, v }: { k: string; v: string | null }) {
   return (
     <div className="flex justify-between gap-2">
-      <dt className="text-slate-400">{k}</dt>
-      <dd className="text-right text-slate-700">{v ?? "—"}</dd>
+      <dt className="text-sand-400">{k}</dt>
+      <dd className="text-right text-sand-700">{v ?? "—"}</dd>
     </div>
   );
 }
@@ -115,7 +115,7 @@ function Pager({
   return (
     <div className="flex items-center justify-between">
       <a href={build(Math.max(1, page - 1))} className={`btn-secondary ${page <= 1 ? "pointer-events-none opacity-40" : ""}`}>← Previous</a>
-      <span className="text-sm text-slate-500">Page {page}</span>
+      <span className="text-sm text-sand-500">Page {page}</span>
       <a href={build(page + 1)} className={`btn-secondary ${hasMore ? "" : "pointer-events-none opacity-40"}`}>Next →</a>
     </div>
   );
