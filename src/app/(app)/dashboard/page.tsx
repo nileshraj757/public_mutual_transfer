@@ -1,11 +1,9 @@
-import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { getUserMatches } from "@/lib/matches";
 import { MatchCard } from "@/components/match-card";
 import { RecomputeButton } from "@/components/recompute-button";
 import { VerificationBadge } from "@/components/badges";
 import { EmptyState } from "@/components/illustrations";
-import { ArrowRight } from "@/components/icons";
 
 export const metadata = { title: "Your matches — Mutual Transfer" };
 
@@ -39,7 +37,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <EmptyHint text="No direct swaps yet. Add more preferred districts to widen your reach, or check Browse for options." />
+          <EmptyHint text="No direct swaps yet. Add more preferred districts to widen your reach and improve your chances of a match." />
         )}
       </Section>
 
@@ -56,17 +54,6 @@ export default async function DashboardPage() {
           <EmptyHint text="No chains involving you right now. These appear automatically when a cycle of compatible employees forms." />
         )}
       </Section>
-
-      <div className="card flex flex-wrap items-center justify-between gap-3 bg-brand-50">
-        <div>
-          <h3 className="font-semibold text-sand-900">Looking for more options?</h3>
-          <p className="text-sm text-sand-600">Browse all relevant open requests, even without a perfect mutual match.</p>
-        </div>
-        <Link href="/browse" className="btn-primary">
-          Browse available options
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
     </div>
   );
 }
