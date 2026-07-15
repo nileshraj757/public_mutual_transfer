@@ -21,7 +21,8 @@ function person(
 ): MatchCandidate {
   return {
     id,
-    cadre: "Subordinate Courts Establishment",
+    court_level: "District & Sessions Court",
+    cadre: "Ministerial / Establishment staff",
     designation: "Junior Assistant",
     pay_level: "Level-2",
     current_state: current[0],
@@ -61,7 +62,8 @@ describe("rules engine", () => {
       { id: "4", key: "chain_max_length", label: "", value: "4", is_hard_constraint: false, active: true },
     ];
     const parsed = parseRules(rows);
-    expect(parsed.hardKeys.sort()).toEqual(["cadre", "pay_level"]);
+    // court_level has no row here, so it defaults ON alongside the explicit cadre/pay_level.
+    expect(parsed.hardKeys.sort()).toEqual(["cadre", "court_level", "pay_level"]);
     expect(parsed.chainMaxLength).toBe(4);
   });
 

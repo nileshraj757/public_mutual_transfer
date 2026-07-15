@@ -72,7 +72,7 @@ export default async function RulesEditorPage() {
           <button className="btn-primary px-3 py-1.5 text-sm" type="submit">Add</button>
         </form>
         <p className="mt-3 text-xs text-sand-500">
-          Recognized keys: <code>cadre</code>, <code>designation</code>, <code>pay_level</code> (hard equality);
+          Recognized keys: <code>court_level</code>, <code>cadre</code>, <code>designation</code>, <code>pay_level</code> (hard equality);
           <code>chain_max_length</code>, <code>cooling_off_months</code>, <code>show_seniority</code> (behaviour/display).
         </p>
       </div>

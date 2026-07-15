@@ -42,6 +42,7 @@ export interface Profile {
   full_name: string | null;
   employee_id_hash: string | null;
   employee_id_masked: string | null;
+  court_level: string | null;
   cadre: string | null;
   designation: string | null;
   pay_level: string | null;
@@ -131,6 +132,7 @@ export interface BrowseProfile {
 /** Compact shape the matching engine operates on (a slice of Profile + prefs). */
 export interface MatchCandidate {
   id: string;
+  court_level: string | null;
   cadre: string | null;
   designation: string | null;
   pay_level: string | null;

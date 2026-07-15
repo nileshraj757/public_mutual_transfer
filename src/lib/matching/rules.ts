@@ -1,8 +1,8 @@
 import type { MatchCandidate, RuleConfig } from "@/lib/types";
 
 /** The hard-constraint attributes the engine can equality-check on a profile. */
-export type HardKey = "cadre" | "designation" | "pay_level";
-const ALL_HARD_KEYS: HardKey[] = ["cadre", "designation", "pay_level"];
+export type HardKey = "court_level" | "cadre" | "designation" | "pay_level";
+const ALL_HARD_KEYS: HardKey[] = ["court_level", "cadre", "designation", "pay_level"];
 
 export interface MatchRules {
   /** Attributes that must be EQUAL for a swap to be valid. */

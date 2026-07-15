@@ -167,6 +167,8 @@ function MemberCard({
 
       <dl className="space-y-1 text-sm text-sand-600">
         <KV k="Current posting" v={[member.current_district, member.current_state].filter(Boolean).join(", ")} />
+        <KV k="Court level" v={member.court_level} />
+        <KV k="Cadre" v={member.cadre} />
         <KV k="Designation" v={member.designation} />
         <KV k="Pay level" v={member.pay_level} />
       </dl>

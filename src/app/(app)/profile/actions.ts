@@ -26,8 +26,13 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
 
   const fullName = str(formData.get("full_name"));
   const employeeId = str(formData.get("employee_id"));
-  const cadre = str(formData.get("cadre"));
-  const designation = str(formData.get("designation"));
+  const courtLevel = str(formData.get("court_level"));
+  const cadre = str(formData.get("cadre")); // service/cadre category (canonical)
+  // Designation comes from a dropdown filtered by court level + cadre; "Other"
+  // reveals a free-text field whose value is submitted as designation_other.
+  const designationChoice = str(formData.get("designation"));
+  const designationOther = str(formData.get("designation_other"));
+  const designation = designationChoice === "Other (specify)" ? designationOther : designationChoice;
   const payLevel = str(formData.get("pay_level"));
   const currentState = str(formData.get("state"));
   const currentDistrict = str(formData.get("district"));
@@ -38,7 +43,7 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
   const disciplinary = formData.get("disciplinary_pending") === "on";
   const consent = formData.get("consent_dpdp") === "on";
 
-  if (!fullName || !cadre || !designation || !payLevel || !currentState || !currentDistrict) {
+  if (!fullName || !courtLevel || !cadre || !designation || !payLevel || !currentState || !currentDistrict) {
     return { ok: false, error: "Please complete all required fields." };
   }
 
@@ -57,6 +62,7 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
   const base = {
     id: user.id,
     full_name: fullName,
+    court_level: courtLevel,
     cadre,
     designation,
     pay_level: payLevel,

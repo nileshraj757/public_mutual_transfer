@@ -3,6 +3,7 @@ import type { MatchRow, MatchStatus } from "@/lib/types";
 
 export interface MatchMemberView {
   id: string;
+  court_level: string | null;
   cadre: string | null;
   designation: string | null;
   pay_level: string | null;
@@ -54,7 +55,7 @@ export async function getUserMatches(userId: string): Promise<MatchView[]> {
     admin
       .from("profiles")
       .select(
-        "id, cadre, designation, pay_level, current_state, current_district, current_office, verification_status, disciplinary_pending, last_transfer_date, joining_date"
+        "id, court_level, cadre, designation, pay_level, current_state, current_district, current_office, verification_status, disciplinary_pending, last_transfer_date, joining_date"
       )
       .in("id", allMemberIds),
     admin
@@ -91,6 +92,7 @@ export async function getUserMatches(userId: string): Promise<MatchView[]> {
       const p = profileById.get(id);
       return {
         id,
+        court_level: p?.court_level ?? null,
         cadre: p?.cadre ?? null,
         designation: p?.designation ?? null,
         pay_level: p?.pay_level ?? null,

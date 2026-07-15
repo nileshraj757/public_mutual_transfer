@@ -15,7 +15,7 @@ async function loadPoolAndRules(admin = createAdminClient()) {
     await Promise.all([
       admin
         .from("profiles")
-        .select("id, cadre, designation, pay_level, current_state, current_district, is_active")
+        .select("id, court_level, cadre, designation, pay_level, current_state, current_district, is_active")
         .eq("is_active", true),
       admin.from("preferences").select("profile_id, preferred_state, preferred_district, rank"),
       admin.from("rules_config").select("*"),
@@ -34,6 +34,7 @@ async function loadPoolAndRules(admin = createAdminClient()) {
 
   const pool: MatchCandidate[] = (profiles ?? []).map((p) => ({
     id: p.id,
+    court_level: p.court_level,
     cadre: p.cadre,
     designation: p.designation,
     pay_level: p.pay_level,
