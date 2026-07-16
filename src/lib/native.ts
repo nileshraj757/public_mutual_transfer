@@ -40,7 +40,12 @@ export function nativePlatform(): "ios" | "android" | "web" {
  */
 export function authRedirectUrl(next: string): string {
   const n = encodeURIComponent(next || "/dashboard");
-  return isNativeApp() ? `${APP_SCHEME}://auth/callback?next=${n}` : `${SITE_URL}/auth/callback?next=${n}`;
+  if (isNativeApp()) return `${APP_SCHEME}://auth/callback?next=${n}`;
+  // Prefer the real page origin so a magic link always returns to wherever the
+  // user actually signed in from (deployed site or localhost) rather than a
+  // possibly-stale NEXT_PUBLIC_SITE_URL. Supabase must still allow-list it.
+  const origin = typeof window !== "undefined" && window.location?.origin ? window.location.origin : SITE_URL;
+  return `${origin}/auth/callback?next=${n}`;
 }
 
 /** Register for native push and persist the device token (best-effort). */
