@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Mutual transfer facilitation platform for court/judicial-department employees (free-tier only stack).",
+  "workspaces": [
+    "mobile"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,6 +16,10 @@
     "test:watch": "vitest",
     "seed": "node scripts/seed.mjs",
     "db:reset": "echo 'Run supabase/migrations/0001_init.sql then supabase/seed.sql against your Supabase project (see README).'",
+    "mobile:build": "npm -w mobile run build",
+    "mobile:sync": "npm run mobile:build && cap sync",
+    "mobile:android": "npm run mobile:sync && cap run android",
+    "mobile:ios": "npm run mobile:sync && cap run ios",
     "cap:add:android": "cap add android",
     "cap:add:ios": "cap add ios",
     "cap:sync": "cap sync",

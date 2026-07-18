@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/lib/env";
 import type { Profile } from "@/lib/types";
 
 export interface SessionUser {
@@ -47,9 +48,24 @@ export async function requireProfile(next = "/dashboard"): Promise<Profile> {
   return profile;
 }
 
-/** Require an admin profile; 404-style redirect to dashboard otherwise. */
+/**
+ * Whether the signed-in user has admin access — either the DB `is_admin` flag
+ * or an allowlisted sign-in email (see {@link isAdminEmail}).
+ */
+export async function isAdmin(): Promise<boolean> {
+  const user = await getUser();
+  if (!user) return false;
+  if (isAdminEmail(user.email)) return true;
+  const profile = await getProfile();
+  return Boolean(profile?.is_admin);
+}
+
+/** Require an admin; redirect to sign-in/onboarding/dashboard otherwise. */
 export async function requireAdmin(): Promise<Profile> {
-  const profile = await requireProfile("/admin");
-  if (!profile.is_admin) redirect("/dashboard");
+  const user = await getUser();
+  if (!user) redirect(`/sign-in?next=${encodeURIComponent("/admin")}`);
+  const profile = await getProfile();
+  if (!profile) redirect("/onboarding");
+  if (!profile.is_admin && !isAdminEmail(user.email)) redirect("/dashboard");
   return profile;
 }

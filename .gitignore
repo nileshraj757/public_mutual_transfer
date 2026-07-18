@@ -8,6 +8,13 @@
 /out/
 next-env.d.ts
 
+# mobile (Capacitor) build outputs
+/mobile/.next/
+/mobile/out/
+
+# supabase local
+/supabase/.temp/
+
 # production
 /build
 

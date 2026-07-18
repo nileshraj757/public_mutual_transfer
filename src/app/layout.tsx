@@ -20,12 +20,12 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Mutual Transfer — find a posting swap",
+  title: "Transfer Setu — find a posting swap",
   description:
     "A free facilitation platform that helps eligible court/judicial-department employees discover and arrange mutual transfers (posting swaps).",
   manifest: "/manifest.json",
-  applicationName: "Mutual Transfer",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Mutual Transfer" },
+  applicationName: "Transfer Setu",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Transfer Setu" },
 };
 
 export const viewport: Viewport = {

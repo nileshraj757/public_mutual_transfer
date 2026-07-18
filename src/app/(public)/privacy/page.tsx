@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy Policy — Mutual Transfer" };
+export const metadata = { title: "Privacy Policy — Transfer Setu" };
 
 export default function PrivacyPage() {
   return (

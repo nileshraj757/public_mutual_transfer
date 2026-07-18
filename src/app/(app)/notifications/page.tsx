@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { NotificationRow } from "@/lib/types";
 import { markAllRead } from "./actions";
 
-export const metadata = { title: "Notifications — Mutual Transfer" };
+export const metadata = { title: "Notifications — Transfer Setu" };
 
 export default async function NotificationsPage() {
   const profile = await requireProfile("/notifications");

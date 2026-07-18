@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isNativeApp } from "@/lib/native";
 import type { Message } from "@/lib/types";
 
 interface MessageThreadProps {
@@ -49,18 +50,32 @@ export function MessageThread({ matchId, selfId, labels }: MessageThreadProps) {
     if (!text) return;
     setSending(true);
     setError("");
-    // Send through the rate-limited API route (reads still go direct via RLS).
-    const res = await fetch(`/api/matches/${matchId}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body: text }),
-    });
-    setSending(false);
-    if (!res.ok) {
-      setError((await res.json().catch(() => ({})))?.error ?? "Couldn't send.");
-    } else {
+    try {
+      if (isNativeApp()) {
+        // Direct insert (RLS permits members of a fully-consented match).
+        const { error } = await supabase
+          .from("messages")
+          .insert({ match_id: matchId, sender_profile_id: selfId, body: text });
+        if (error) {
+          setError(error.message);
+          return;
+        }
+      } else {
+        // Send through the rate-limited API route (reads still go direct via RLS).
+        const res = await fetch(`/api/matches/${matchId}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ body: text }),
+        });
+        if (!res.ok) {
+          setError((await res.json().catch(() => ({})))?.error ?? "Couldn't send.");
+          return;
+        }
+      }
       setBody("");
       load();
+    } finally {
+      setSending(false);
     }
   }
 

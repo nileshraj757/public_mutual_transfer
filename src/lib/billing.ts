@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { billingEnabled } from "@/lib/razorpay";
 import type { Subscription } from "@/lib/types";
+import { isActiveSubscription } from "@/lib/billing-core";
+
+export { isActiveSubscription };
 
 /** The signed-in user's most recent subscription row (read via their RLS). */
 export async function getLatestSubscription(userId: string): Promise<Subscription | null> {
@@ -13,14 +16,6 @@ export async function getLatestSubscription(userId: string): Promise<Subscriptio
     .limit(1)
     .maybeSingle();
   return (data as Subscription) ?? null;
-}
-
-/** Is this subscription currently granting access? */
-export function isActiveSubscription(sub: Subscription | null): boolean {
-  if (!sub) return false;
-  if (sub.status !== "active" && sub.status !== "authenticated") return false;
-  if (sub.current_end && new Date(sub.current_end).getTime() < Date.now()) return false;
-  return true;
 }
 
 export async function hasActiveSubscription(userId: string): Promise<boolean> {

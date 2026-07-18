@@ -28,6 +28,15 @@ export function isNativeApp(): boolean {
   return cap()?.isNativePlatform?.() ?? false;
 }
 
+/**
+ * Path to a match detail screen. The web app uses the dynamic route
+ * /matches/[id]; the statically-exported mobile app can't prerender runtime ids,
+ * so it uses a query param (/matches?id=…) instead.
+ */
+export function matchHref(id: string): string {
+  return isNativeApp() ? `/matches?id=${id}` : `/matches/${id}`;
+}
+
 export function nativePlatform(): "ios" | "android" | "web" {
   return (cap()?.getPlatform?.() as "ios" | "android" | "web") ?? "web";
 }
@@ -62,11 +71,20 @@ export async function registerPushNotifications(): Promise<void> {
 
     await PushNotifications.addListener("registration", async (token) => {
       try {
-        await fetch("/api/account/push-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: token.value, platform: nativePlatform() }),
-        });
+        // Standalone app: persist the token directly via RLS (device_tokens_own).
+        // Dynamic import avoids a static import cycle with supabase/client.
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+        await supabase
+          .from("device_tokens")
+          .upsert(
+            { profile_id: user.id, token: token.value, platform: nativePlatform() },
+            { onConflict: "profile_id,token" }
+          );
       } catch {
         /* token sync is best-effort */
       }

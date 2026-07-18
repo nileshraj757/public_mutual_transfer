@@ -3,7 +3,7 @@ import { requireProfile } from "@/lib/auth";
 import { hasActiveSubscription } from "@/lib/billing";
 import { ActiveToggle, DeleteAccountButton } from "@/components/account-actions";
 
-export const metadata = { title: "Account settings — Mutual Transfer" };
+export const metadata = { title: "Account settings — Transfer Setu" };
 
 export default async function SettingsPage() {
   const profile = await requireProfile("/settings");

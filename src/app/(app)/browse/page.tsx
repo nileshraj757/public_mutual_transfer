@@ -5,7 +5,7 @@ import { BrowseFilters } from "@/components/browse-filters";
 import { VerificationBadge } from "@/components/badges";
 import type { BrowseProfile } from "@/lib/types";
 
-export const metadata = { title: "Browse options — Mutual Transfer" };
+export const metadata = { title: "Browse options — Transfer Setu" };
 
 const PAGE_SIZE = 24;
 
@@ -62,7 +62,7 @@ export default async function BrowsePage({
               <dl className="space-y-1 text-xs text-sand-600">
                 <Row k="Designation" v={r.designation} />
                 <Row k="Cadre" v={r.cadre} />
-                <Row k="Pay level" v={r.pay_level} />
+                <Row k="Grade pay" v={r.pay_level} />
               </dl>
               <div className="mt-3">
                 <p className="text-xs font-medium text-sand-500">Wants to move to:</p>

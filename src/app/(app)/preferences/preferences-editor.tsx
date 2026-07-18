@@ -3,10 +3,19 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LOCATION_DATA } from "@/lib/locations";
-import { savePreferences, type PrefInput } from "./actions";
+import type { ActionResult } from "@/lib/profile-core";
+import type { PrefInput } from "@/lib/preferences-core";
 import { ChevronUp, ChevronDown, XIcon, Loader } from "@/components/icons";
 
-export function PreferencesEditor({ initial }: { initial: PrefInput[] }) {
+interface PreferencesEditorProps {
+  initial: PrefInput[];
+  /** Persist the list. Web passes the server action; mobile a direct upsert. */
+  onSubmit: (prefs: PrefInput[]) => Promise<ActionResult>;
+  /** Mobile re-fetch after save (router.refresh() is a no-op under export). */
+  afterSave?: () => void;
+}
+
+export function PreferencesEditor({ initial, onSubmit, afterSave }: PreferencesEditorProps) {
   const router = useRouter();
   const params = useSearchParams();
   const onboarding = params.get("onboarding") === "1";
@@ -42,7 +51,7 @@ export function PreferencesEditor({ initial }: { initial: PrefInput[] }) {
 
   function save() {
     startTransition(async () => {
-      const res = await savePreferences(rows);
+      const res = await onSubmit(rows);
       if (res.ok) {
         setMsg({ ok: true, text: "Preferences saved." });
         if (onboarding) {
@@ -51,6 +60,7 @@ export function PreferencesEditor({ initial }: { initial: PrefInput[] }) {
         } else {
           router.refresh();
         }
+        afterSave?.();
       } else {
         setMsg({ ok: false, text: res.error ?? "Something went wrong." });
       }

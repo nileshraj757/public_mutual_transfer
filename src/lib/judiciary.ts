@@ -5,6 +5,9 @@
  * value so the engine's equality check on (court_level, cadre, designation,
  * pay_level) actually works.
  *
+ * pay_level stores pre-7th-CPC Grade Pay amounts (GRADE_PAY_OPTIONS below) —
+ * the classification most court/ministerial staff actually use day to day.
+ *
  * Designation options are a function of court level + service/cadre category.
  * An "Other (specify)" escape hatch is always offered so nothing is unfillable;
  * those free-text values simply won't match until curated into the lists.
@@ -38,8 +41,9 @@ export const CADRE_CATEGORIES = [
   "Class IV / MTS",
 ] as const;
 
-/** 7th CPC pay levels (staff cadres); judicial officers usually pick the top few / Other. */
-export const PAY_LEVELS = Array.from({ length: 18 }, (_, i) => `Level-${i + 1}`);
+/** Pre-7th-CPC Grade Pay amounts (₹), stored in profiles.pay_level. */
+const GRADE_PAY_AMOUNTS = [1800, 1900, 2000, 2400, 2800, 4200, 4600, 4800, 5400, 6600, 7600, 8700, 8900, 10000];
+export const GRADE_PAY_OPTIONS = GRADE_PAY_AMOUNTS.map((n) => `₹${n.toLocaleString("en-IN")}`);
 
 // ── Judicial Officer designations, per court level ────────────────────────────
 const JUDICIAL_BY_LEVEL: Record<string, string[]> = {

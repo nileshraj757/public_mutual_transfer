@@ -4,40 +4,29 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { authRedirectUrl } from "@/lib/native";
-import { CheckCircle, Loader, Phone } from "@/components/icons";
+import { postAuthDestination } from "@/lib/post-auth-route";
+import { CheckCircle, Loader } from "@/components/icons";
 
-type Mode = "magic" | "phone" | "password";
+type Mode = "signin" | "signup";
 type Status = "idle" | "loading" | "sent" | "error";
-
-/** Strip spaces/dashes; ensure a leading + so Supabase gets E.164 (+919876543210). */
-function normalizePhone(raw: string): string {
-  const cleaned = raw.replace(/[\s-()]/g, "");
-  return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
-}
 
 export function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
 
-  const [mode, setMode] = useState<Mode>("magic");
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("+91 ");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false); // phone flow: moved to code-entry step
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
   const supabase = createClient();
-  const redirectTo = authRedirectUrl(next);
 
   function switchMode(m: Mode) {
     setMode(m);
     setStatus("idle");
     setMessage("");
-    setOtpSent(false);
-    setOtp("");
   }
 
   function fail(msg: string) {
@@ -45,43 +34,31 @@ export function SignInForm() {
     setMessage(msg);
   }
 
-  async function sendMagicLink(e: React.FormEvent) {
+  async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setStatus("loading");
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signUp({
       email,
-      options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
+      password,
+      options: { emailRedirectTo: authRedirectUrl(next) },
     });
     if (error) return fail(error.message);
     setStatus("sent");
-    setMessage(`Check ${email} for your sign-in link.`);
+    setMessage(`We sent a confirmation link to ${email}. Click it to activate your account before signing in.`);
   }
 
-  async function sendPhoneOtp(e: React.FormEvent) {
+  async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setStatus("loading");
-    const { error } = await supabase.auth.signInWithOtp({ phone: normalizePhone(phone) });
-    if (error) return fail(error.message);
-    setOtpSent(true);
-    setStatus("idle");
-    setMessage("");
-  }
-
-  async function verifyPhoneOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setStatus("loading");
-    const { error } = await supabase.auth.verifyOtp({ phone: normalizePhone(phone), token: otp.trim(), type: "sms" });
-    if (error) return fail(error.message);
-    router.push(next);
-    router.refresh();
-  }
-
-  async function signInWithPassword(e: React.FormEvent) {
-    e.preventDefault();
-    setStatus("loading");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return fail(error.message);
-    router.push(next);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      if (/email not confirmed/i.test(error.message)) {
+        return fail("Please confirm your email first — check your inbox for the confirmation link we sent when you signed up.");
+      }
+      return fail(error.message);
+    }
+    const dest = await postAuthDestination(supabase, data.user.id, next);
+    router.push(dest);
     router.refresh();
   }
 
@@ -91,9 +68,8 @@ export function SignInForm() {
     <div className="card mt-6 animate-fade-in-up">
       <div className="mb-4 flex gap-1 rounded-full bg-sand-100 p-1 text-sm">
         {([
-          ["magic", "Email"],
-          ["phone", "Phone OTP"],
-          ["password", "Password"],
+          ["signin", "Sign in"],
+          ["signup", "Sign up"],
         ] as [Mode, string][]).map(([m, label]) => (
           <button
             key={m}
@@ -106,70 +82,13 @@ export function SignInForm() {
         ))}
       </div>
 
-      {mode === "magic" && status === "sent" ? (
+      {mode === "signup" && status === "sent" ? (
         <div className="flex animate-pop-in items-start gap-3 rounded-xl bg-green-50 p-3 text-sm text-green-800">
           <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>{message}</p>
         </div>
-      ) : mode === "phone" ? (
-        // ── Phone OTP: two steps (enter number → enter code) ──
-        !otpSent ? (
-          <form onSubmit={sendPhoneOtp} className="space-y-3">
-            <div>
-              <label className="label" htmlFor="phone">Mobile number</label>
-              <input
-                id="phone"
-                type="tel"
-                inputMode="tel"
-                required
-                className="input"
-                placeholder="+91 98765 43210"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <p className="mt-1 text-xs text-sand-500">Include your country code. We&apos;ll text you a 6-digit code.</p>
-            </div>
-            {status === "error" && <p className="text-sm text-red-600">{message}</p>}
-            <button type="submit" className="btn-primary w-full" disabled={loading}>
-              {loading ? <Loader className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-              {loading ? "Sending…" : "Send OTP"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={verifyPhoneOtp} className="space-y-3">
-            <div>
-              <label className="label" htmlFor="otp">Enter the 6-digit code</label>
-              <input
-                id="otp"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                required
-                className="input tracking-[0.4em]"
-                placeholder="••••••"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              />
-              <p className="mt-1 text-xs text-sand-500">Sent to {normalizePhone(phone)}.</p>
-            </div>
-            {status === "error" && <p className="text-sm text-red-600">{message}</p>}
-            <button type="submit" className="btn-primary w-full" disabled={loading || otp.length < 6}>
-              {loading && <Loader className="h-4 w-4" />}
-              {loading ? "Verifying…" : "Verify & sign in"}
-            </button>
-            <button
-              type="button"
-              className="w-full text-center text-xs text-sand-500 underline"
-              onClick={() => { setOtpSent(false); setOtp(""); setStatus("idle"); setMessage(""); }}
-            >
-              Change number / resend
-            </button>
-          </form>
-        )
       ) : (
-        // ── Email link / Password ──
-        <form onSubmit={mode === "magic" ? sendMagicLink : signInWithPassword} className="space-y-3">
+        <form onSubmit={mode === "signup" ? signUp : signIn} className="space-y-3">
           <div>
             <label className="label" htmlFor="email">Email address</label>
             <input
@@ -183,26 +102,25 @@ export function SignInForm() {
             />
           </div>
 
-          {mode === "password" && (
-            <div>
-              <label className="label" htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                required
-                className="input"
-                placeholder="Demo accounts use: Passw0rd!"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          )}
+          <div>
+            <label className="label" htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              required
+              minLength={mode === "signup" ? 8 : undefined}
+              className="input"
+              placeholder={mode === "signup" ? "At least 8 characters" : "••••••••"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
           {status === "error" && <p className="text-sm text-red-600">{message}</p>}
 
           <button type="submit" className="btn-primary w-full" disabled={loading}>
             {loading && <Loader className="h-4 w-4" />}
-            {loading ? "Working…" : mode === "magic" ? "Send me a sign-in link" : "Sign in"}
+            {loading ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
           </button>
         </form>
       )}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 
-export const metadata = { title: "How it works — Mutual Transfer" };
+export const metadata = { title: "How it works — Transfer Setu" };
 
 export default function HowItWorksPage() {
   return (

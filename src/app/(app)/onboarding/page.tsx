@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { getProfile, requireUser } from "@/lib/auth";
 import { ProfileForm } from "@/components/profile-form";
+import { saveProfile } from "@/app/(app)/profile/actions";
 
-export const metadata = { title: "Set up your profile — Mutual Transfer" };
+export const metadata = { title: "Set up your profile — Transfer Setu" };
 
 export default async function OnboardingPage() {
   await requireUser("/onboarding");
@@ -19,7 +20,7 @@ export default async function OnboardingPage() {
           These details determine who you can swap with. Next, you&apos;ll add the locations you want.
         </p>
       </div>
-      <ProfileForm profile={null} mode="onboarding" />
+      <ProfileForm profile={null} mode="onboarding" onSubmit={saveProfile} />
     </div>
   );
 }

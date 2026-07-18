@@ -2,7 +2,7 @@ import { requireProfile } from "@/lib/auth";
 import { getLatestSubscription, isActiveSubscription } from "@/lib/billing";
 import { BillingClient } from "@/components/billing-client";
 
-export const metadata = { title: "Premium — Mutual Transfer" };
+export const metadata = { title: "Premium — Transfer Setu" };
 
 export default async function BillingPage() {
   const profile = await requireProfile("/billing");
@@ -10,7 +10,7 @@ export default async function BillingPage() {
   const active = isActiveSubscription(sub);
 
   const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-  const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "Mutual Transfer Premium";
+  const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "Transfer Setu Premium";
   const priceLabel = process.env.NEXT_PUBLIC_PREMIUM_PRICE_LABEL || "Monthly subscription";
 
   return (

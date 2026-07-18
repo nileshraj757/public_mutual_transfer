@@ -1,0 +1,107 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { usePathname } from "next/navigation";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import type { Profile } from "@/lib/types";
+
+interface AuthValue {
+  /** True until the first session + profile resolution completes. */
+  loading: boolean;
+  session: Session | null;
+  profile: Profile | null;
+  supabase: SupabaseClient;
+  /** Re-fetch the current user's profile row (after edits/onboarding). */
+  refreshProfile: () => Promise<void>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthValue | null>(null);
+
+/**
+ * Client-side auth for the standalone app. Replaces the web app's server-side
+ * session (middleware + requireUser/requireProfile). The session lives in
+ * localStorage (see src/lib/supabase/client.ts native branch).
+ *
+ * Shared components each call createClient() (their own instance) but all read
+ * the same `mt-auth` storage key, so to stay in sync regardless of which
+ * instance mutated auth, we re-read the session on every navigation, plus listen
+ * to this instance's auth events.
+ */
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  const supabase = useMemo(() => createClient(), []);
+  const pathname = usePathname();
+
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  const loadProfile = useCallback(
+    async (userId: string | undefined) => {
+      if (!userId) {
+        setProfile(null);
+        return;
+      }
+      const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+      setProfile((data as Profile) ?? null);
+    },
+    [supabase]
+  );
+
+  // Resolve the session on mount, on every navigation, and on auth events.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const {
+        data: { session: s },
+      } = await supabase.auth.getSession();
+      if (!active) return;
+      setSession(s);
+      await loadProfile(s?.user.id);
+      setLoading(false);
+    })();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      loadProfile(s?.user.id);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+    // Re-run on navigation so auth mutations made by other client instances
+    // (sign-in form, callback page, sign-out button) are picked up.
+  }, [supabase, loadProfile, pathname]);
+
+  const value: AuthValue = {
+    loading,
+    session,
+    profile,
+    supabase,
+    refreshProfile: () => loadProfile(session?.user.id),
+    signOut: async () => {
+      await supabase.auth.signOut();
+      setSession(null);
+      setProfile(null);
+    },
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthValue {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within <AppProviders>");
+  return ctx;
+}

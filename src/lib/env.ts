@@ -22,3 +22,22 @@ export function officialEmailDomains(): string[] {
     .map((d) => d.trim().toLowerCase())
     .filter(Boolean);
 }
+
+/** Built-in super admin — always has admin access regardless of the DB flag. */
+export const SUPER_ADMIN_EMAIL = "nileshraj757@gmail.com";
+
+/** Emails that unconditionally get admin access. The built-in super admin plus
+ *  any comma-separated addresses in ADMIN_EMAILS. */
+export function adminEmails(): string[] {
+  const configured = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return Array.from(new Set([SUPER_ADMIN_EMAIL, ...configured]));
+}
+
+/** True when the given sign-in email is on the admin allowlist. */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return adminEmails().includes(email.toLowerCase());
+}

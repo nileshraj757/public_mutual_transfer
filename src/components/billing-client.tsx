@@ -2,6 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
+import { callFn } from "@/lib/functions";
+import { createClient } from "@/lib/supabase/client";
 
 declare global {
   interface Window {
@@ -32,6 +35,8 @@ interface BillingClientProps {
   email: string | null;
   planName: string;
   priceLabel: string;
+  /** Mobile re-fetch hook (router.refresh() is a no-op under static export). */
+  onDone?: () => void;
 }
 
 export function BillingClient({
@@ -43,6 +48,7 @@ export function BillingClient({
   email,
   planName,
   priceLabel,
+  onDone,
 }: BillingClientProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -53,14 +59,31 @@ export function BillingClient({
     setError("");
     setBusy(true);
     try {
-      const res = await fetch("/api/billing/subscribe", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
+      let data: {
+        alreadyActive?: boolean;
+        error?: string;
+        keyId?: string;
+        subscriptionId?: string;
+        shortUrl?: string;
+      };
+      if (isNativeApp()) {
+        try {
+          data = await callFn(createClient(), "billing-subscribe");
+        } catch (e) {
+          setError((e as Error).message || "Couldn't start checkout.");
+          return;
+        }
+      } else {
+        const res = await fetch("/api/billing/subscribe", { method: "POST" });
+        data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setError(data.error ?? "Couldn't start checkout.");
+          return;
+        }
+      }
       if (data.alreadyActive) {
         router.refresh();
-        return;
-      }
-      if (!res.ok) {
-        setError(data.error ?? "Couldn't start checkout.");
+        onDone?.();
         return;
       }
 
@@ -84,12 +107,17 @@ export function BillingClient({
           razorpay_subscription_id: string;
           razorpay_signature: string;
         }) => {
-          await fetch("/api/billing/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response),
-          });
+          if (isNativeApp()) {
+            await callFn(createClient(), "billing-verify", { ...response });
+          } else {
+            await fetch("/api/billing/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+          }
           router.refresh();
+          onDone?.();
         },
       });
       rzp.open();
@@ -101,9 +129,21 @@ export function BillingClient({
   function cancel() {
     setError("");
     startTransition(async () => {
-      const res = await fetch("/api/billing/cancel", { method: "POST" });
-      if (res.ok) router.refresh();
-      else setError((await res.json().catch(() => ({})))?.error ?? "Couldn't cancel.");
+      try {
+        if (isNativeApp()) {
+          await callFn(createClient(), "billing-cancel");
+        } else {
+          const res = await fetch("/api/billing/cancel", { method: "POST" });
+          if (!res.ok) {
+            setError((await res.json().catch(() => ({})))?.error ?? "Couldn't cancel.");
+            return;
+          }
+        }
+        router.refresh();
+        onDone?.();
+      } catch (e) {
+        setError((e as Error).message || "Couldn't cancel.");
+      }
     });
   }
 

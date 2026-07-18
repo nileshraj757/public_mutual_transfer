@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
+import { createClient } from "@/lib/supabase/client";
 
 interface ConsentPanelProps {
   matchId: string;
@@ -9,9 +11,11 @@ interface ConsentPanelProps {
   allConsented: boolean;
   consentedCount: number;
   total: number;
+  /** Mobile re-fetch (router.refresh() is a no-op under static export). */
+  onDone?: () => void;
 }
 
-export function ConsentPanel({ matchId, selfConsented, allConsented, consentedCount, total }: ConsentPanelProps) {
+export function ConsentPanel({ matchId, selfConsented, allConsented, consentedCount, total, onDone }: ConsentPanelProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -19,13 +23,45 @@ export function ConsentPanel({ matchId, selfConsented, allConsented, consentedCo
   function setConsent(consented: boolean) {
     setError("");
     startTransition(async () => {
-      const res = await fetch(`/api/matches/${matchId}/consent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ consented }),
-      });
-      if (res.ok) router.refresh();
-      else setError((await res.json().catch(() => ({})))?.error ?? "Couldn't update consent.");
+      try {
+        if (isNativeApp()) {
+          const supabase = createClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            setError("Not signed in.");
+            return;
+          }
+          const { error: e } = await supabase.from("match_consents").upsert(
+            {
+              match_id: matchId,
+              profile_id: user.id,
+              consented,
+              consented_at: consented ? new Date().toISOString() : null,
+            },
+            { onConflict: "match_id,profile_id" }
+          );
+          if (e) {
+            setError(e.message);
+            return;
+          }
+        } else {
+          const res = await fetch(`/api/matches/${matchId}/consent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consented }),
+          });
+          if (!res.ok) {
+            setError((await res.json().catch(() => ({})))?.error ?? "Couldn't update consent.");
+            return;
+          }
+        }
+        router.refresh();
+        onDone?.();
+      } catch (e) {
+        setError((e as Error).message || "Couldn't update consent.");
+      }
     });
   }
 

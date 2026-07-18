@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { ProfileForm } from "@/components/profile-form";
+import { saveProfile } from "./actions";
 import { VerificationBadge } from "@/components/badges";
 
-export const metadata = { title: "Your profile — Mutual Transfer" };
+export const metadata = { title: "Your profile — Transfer Setu" };
 
 export default async function ProfilePage() {
   const profile = await requireProfile("/profile");
@@ -25,7 +26,7 @@ export default async function ProfilePage() {
         </div>
       )}
 
-      <ProfileForm profile={profile} mode="edit" />
+      <ProfileForm profile={profile} mode="edit" onSubmit={saveProfile} />
 
       <p className="mt-6 text-sm text-sand-600">
         Manage where you want to go on the <Link href="/preferences" className="text-brand-700 underline">Preferences</Link> page.

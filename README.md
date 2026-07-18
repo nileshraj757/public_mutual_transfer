@@ -1,4 +1,4 @@
-# Mutual Transfer — facilitation platform for court/judicial employees
+# Transfer Setu — facilitation platform for court/judicial employees
 
 A **$0 / free-tier-only** web app that helps court & judicial-department employees
 discover and arrange **mutual transfers (posting swaps)**. It finds direct swaps
@@ -14,9 +14,9 @@ PDF**.
 
 ## What's built (feature checklist)
 
-- **Auth & onboarding** — password-less email magic-link sign-in (free, no SMS),
-  optional password sign-in for demo accounts, profile + ranked-preferences
-  onboarding wizard, official-email-domain auto-verification or admin manual
+- **Auth & onboarding** — email + password sign-up with mandatory email
+  confirmation before first sign-in, profile + ranked-preferences onboarding
+  wizard, official-email-domain auto-verification or admin manual
   verification, clearly-labelled unverified profiles.
 - **Matching** — direct + chain (cycle-detection) engine, incremental per-user
   recompute cached in the `matches` table, dashboard feed (direct → chains), and a
@@ -49,7 +49,7 @@ PDF**.
 | Styling | **Tailwind CSS** | Open source. |
 | Hosting | **Vercel free (Hobby)** | Serverless functions + static. Free for personal/non-commercial; generous limits. (Cloudflare Pages / Netlify free are drop-in alternatives.) |
 | DB + Auth + Storage + RLS | **Supabase free** | 500 MB Postgres, 50K monthly active auth users, social/email auth, Row Level Security — no credit card. |
-| Email (auth) | **Supabase built-in mailer** | Free; used for magic links. |
+| Email (auth) | **Supabase built-in mailer** | Free; used for signup-confirmation emails. |
 | Email (notifications, optional) | **Resend free** | 3,000 emails/mo, 100/day. Optional — app works without it. |
 | PDF | **pdf-lib** | Open source, runs server-side. |
 | Location data | **Bundled JSON** (`data/india-states-districts.json`) | Free, no maps/geocoding API. |
@@ -80,7 +80,7 @@ SUPABASE_SERVICE_ROLE_KEY=...        # server-only, never exposed to the browser
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 OFFICIAL_EMAIL_DOMAINS=              # optional, e.g. hcourt.gov.in
 # RESEND_API_KEY=...                 # optional notification email
-# NOTIFY_EMAIL_FROM="Mutual Transfer <notify@yourdomain>"
+# NOTIFY_EMAIL_FROM="Transfer Setu <notify@yourdomain>"
 ```
 
 ### 4. Create the database
@@ -144,28 +144,37 @@ The app is already an installable PWA ([public/manifest.json](public/manifest.js
   [PWABuilder](https://www.pwabuilder.com) or `bubblewrap` to produce a Trusted
   Web Activity (TWA) `.aab`, then upload to the Play Console.
 
-### Option B — Capacitor (native shell for both stores)
-Capacitor wraps the **deployed (SSR) site** in a native WebView, so all server
-rendering, server actions, API routes and middleware keep working — no static
-export, no rewrite. Native bits (deep-link auth, status bar, back button, splash,
-PDF share, push) are wired in [src/components/native-bridge.tsx](src/components/native-bridge.tsx)
-and [src/lib/native.ts](src/lib/native.ts), and no-op on the web build.
+### Option B — Capacitor (standalone native app for both stores)
+The native app is **standalone**: a statically-exported client bundle is shipped
+**inside** the APK/IPA (no live-site WebView), so screens open instantly and
+offline, like Uber/PhonePe. It talks directly to **Supabase** (RLS) for everyday
+data and to **Supabase Edge Functions** for privileged ops. The existing Vercel
+web app is unchanged.
+
+- Mobile frontend: a separate, client-only Next.js app in [mobile/](mobile/)
+  (`output: 'export'`), reusing `src/components` + pure `src/lib` via the `@/*`
+  alias. Client auth/guard/callback live in [mobile/app](mobile/app).
+- Privileged backend: [supabase/functions/](supabase/functions/) (see its
+  [README](supabase/functions/README.md)). Deploy these + apply migration
+  [0005_match_member_views_rpc.sql](supabase/migrations/0005_match_member_views_rpc.sql).
+- Native bits (deep-link auth, status bar, back button, splash, push) are in
+  [src/components/native-bridge.tsx](src/components/native-bridge.tsx) and
+  [src/lib/native.ts](src/lib/native.ts), no-op on the web build.
 
 ```bash
-# 1. Point the shell at your deployed app (or your dev machine's LAN IP for testing)
-export CAP_SERVER_URL="https://your-app.vercel.app"
+# 1. Build the static app bundle + copy it into the native projects
+npm run mobile:sync
 
-# 2. Generate the native projects (needs Xcode / Android Studio installed)
+# 2. First time only — generate the native projects (needs Xcode/Android Studio)
 npm run cap:add:android
 npm run cap:add:ios
 
-# 3. Sync config + plugins, then open the IDE to run on a device/emulator
-CAP_SERVER_URL="$CAP_SERVER_URL" npm run cap:sync
-npm run cap:open:android      # or: npm run cap:open:ios
+# 3. Run on a device/emulator (builds, syncs, launches)
+npm run mobile:android        # or: npm run mobile:ios
 ```
 
 **Required native config (do once in the generated projects):**
-- **Custom URL scheme** for magic-link deep links — must equal
+- **Custom URL scheme** for signup-confirmation deep links — must equal
   `NEXT_PUBLIC_APP_SCHEME` (default `mutualtransfer`):
   - iOS: add a URL Type with scheme `mutualtransfer` in `Info.plist`.
   - Android: add an `intent-filter` for `mutualtransfer://auth` in

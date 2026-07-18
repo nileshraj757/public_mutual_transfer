@@ -1,6 +1,6 @@
 # Architecture & Production Reference
 
-Technical reference for how Mutual Transfer is built, deployed, and operated. For setup/local-dev instructions see [README.md](README.md); this document covers *how the system fits together and runs in production*.
+Technical reference for how Transfer Setu is built, deployed, and operated. For setup/local-dev instructions see [README.md](README.md); this document covers *how the system fits together and runs in production*.
 
 ## 1. System overview
 

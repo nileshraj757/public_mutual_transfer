@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { postAuthDestination } from "@/lib/post-auth-route";
 
 /**
- * Handles the magic-link / OAuth redirect: exchanges the auth code for a
- * session cookie, then sends the user to onboarding (no profile yet) or their
- * intended destination.
+ * Handles the signup-confirmation / magic-link redirect: exchanges the auth
+ * code for a session cookie, then sends the user to onboarding (no profile
+ * yet) or their intended destination.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -15,17 +16,11 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Route first-time users to onboarding.
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", user.id)
-          .maybeSingle();
-        const dest = profile ? next : "/onboarding";
+        const dest = await postAuthDestination(supabase, user.id, next);
         return NextResponse.redirect(`${origin}${dest}`);
       }
     }

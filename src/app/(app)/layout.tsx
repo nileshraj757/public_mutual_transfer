@@ -1,11 +1,13 @@
 import { TopNav } from "@/components/top-nav";
 import { Disclaimer } from "@/components/disclaimer";
 import { getProfile, requireUser } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  await requireUser();
+  const user = await requireUser();
   const profile = await getProfile();
+  const isAdmin = Boolean(profile?.is_admin) || isAdminEmail(user.email);
 
   let unread = 0;
   if (profile) {
@@ -19,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
-      <TopNav signedIn isAdmin={profile?.is_admin} unread={unread} />
+      <TopNav signedIn isAdmin={isAdmin} unread={unread} />
       <main className="mx-auto max-w-5xl px-4 py-6">
         <Disclaimer className="mb-5" />
         {children}

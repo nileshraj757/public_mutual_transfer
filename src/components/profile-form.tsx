@@ -3,17 +3,23 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LocationSelect } from "@/components/location-select";
-import { saveProfile, type ActionResult } from "@/app/(app)/profile/actions";
-import { COURT_LEVELS, CADRE_CATEGORIES, PAY_LEVELS, designationOptions, OTHER } from "@/lib/judiciary";
+import type { ActionResult } from "@/lib/profile-core";
+import { COURT_LEVELS, CADRE_CATEGORIES, GRADE_PAY_OPTIONS, designationOptions, OTHER } from "@/lib/judiciary";
 import { MapPin, Users, Loader } from "@/components/icons";
 import type { Profile } from "@/lib/types";
 
 interface ProfileFormProps {
   profile: Profile | null;
   mode: "onboarding" | "edit";
+  /** Persist the form. Web passes the server action; mobile passes a direct
+   *  Supabase upsert. */
+  onSubmit: (formData: FormData) => Promise<ActionResult>;
+  /** Called after a successful save (mobile re-fetch; router.refresh() is a
+   *  no-op under static export). */
+  afterSave?: () => void;
 }
 
-export function ProfileForm({ profile, mode }: ProfileFormProps) {
+export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ActionResult | null>(null);
@@ -44,19 +50,20 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
     setDesignationOther("");
   }
 
-  async function onSubmit(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     setPending(true);
-    const res = await saveProfile(formData);
+    const res = await onSubmit(formData);
     setResult(res);
     setPending(false);
     if (res.ok) {
       if (mode === "onboarding") router.push("/preferences?onboarding=1");
       else router.refresh();
+      afterSave?.();
     }
   }
 
   return (
-    <form action={onSubmit} className="space-y-5">
+    <form action={handleSubmit} className="space-y-5">
       {/* Identity */}
       <div className="card space-y-4">
         <h2 className="font-semibold text-sand-900">Identity</h2>
@@ -94,18 +101,8 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
         </div>
         <LocationSelect required defaultState={profile?.current_state ?? ""} defaultDistrict={profile?.current_district ?? ""} />
         <div>
-          <label className="label" htmlFor="current_office">Court complex / place of posting (optional)</label>
-          <input id="current_office" name="current_office" className="input" defaultValue={profile?.current_office ?? ""} placeholder="e.g. Patna District Court" />
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label className="label" htmlFor="joining_date">Joining date, present post (optional)</label>
-            <input id="joining_date" name="joining_date" type="date" className="input" defaultValue={profile?.joining_date ?? ""} />
-          </div>
-          <div>
-            <label className="label" htmlFor="last_transfer_date">Last transfer date (optional)</label>
-            <input id="last_transfer_date" name="last_transfer_date" type="date" className="input" defaultValue={profile?.last_transfer_date ?? ""} />
-          </div>
+          <label className="label" htmlFor="joining_date">Joining date, present post (optional)</label>
+          <input id="joining_date" name="joining_date" type="date" className="input" defaultValue={profile?.joining_date ?? ""} />
         </div>
       </div>
 
@@ -161,10 +158,10 @@ export function ProfileForm({ profile, mode }: ProfileFormProps) {
         </div>
 
         <div>
-          <label className="label" htmlFor="pay_level">Pay level (7th CPC) *</label>
+          <label className="label" htmlFor="pay_level">Grade pay *</label>
           <select id="pay_level" name="pay_level" required className="input" defaultValue={profile?.pay_level ?? ""}>
             <option value="">Select…</option>
-            {PAY_LEVELS.map((p) => <option key={p} value={p}>{p}</option>)}
+            {GRADE_PAY_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
       </div>

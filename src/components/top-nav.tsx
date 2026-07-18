@@ -21,7 +21,7 @@ export function TopNav({ signedIn, isAdmin, unread = 0 }: TopNavProps) {
       <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <Link href={signedIn ? "/dashboard" : "/"} className="flex items-center gap-2.5 font-display font-semibold text-sand-900 transition hover:opacity-80">
           <Logo className="h-8 w-8" />
-          <span className="hidden sm:inline">Mutual Transfer</span>
+          <span className="hidden sm:inline">Transfer Setu</span>
         </Link>
 
         {signedIn ? (

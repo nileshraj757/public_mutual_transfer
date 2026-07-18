@@ -40,11 +40,12 @@ export function NativeBridge() {
           const code = u.searchParams.get("code");
           const next = u.searchParams.get("next") || "/dashboard";
           if (code) {
+            // Trailing slash: the static export serves /auth/callback/index.html.
             window.location.replace(
-              `/auth/callback?code=${encodeURIComponent(code)}&next=${encodeURIComponent(next)}`
+              `/auth/callback/?code=${encodeURIComponent(code)}&next=${encodeURIComponent(next)}`
             );
           } else if (u.host === "auth" || u.pathname.includes("auth")) {
-            window.location.replace("/sign-in?error=auth");
+            window.location.replace("/sign-in/?error=auth");
           }
         } catch {
           /* malformed deep link — ignore */

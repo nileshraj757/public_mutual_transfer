@@ -2,8 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { LOCATION_DATA } from "@/lib/locations";
-
-const PAY_LEVELS = ["Level-1", "Level-2", "Level-3", "Level-4", "Level-5", "Level-6", "Level-7"];
+import { GRADE_PAY_OPTIONS } from "@/lib/judiciary";
 
 export function BrowseFilters() {
   const router = useRouter();
@@ -47,10 +46,10 @@ export function BrowseFilters() {
         <input className="input" defaultValue={designation} placeholder="Any" onBlur={(e) => update({ designation: e.target.value })} onKeyDown={(e) => e.key === "Enter" && update({ designation: (e.target as HTMLInputElement).value })} />
       </div>
       <div>
-        <label className="label">Pay level</label>
+        <label className="label">Grade pay</label>
         <select className="input" value={pay} onChange={(e) => update({ pay_level: e.target.value })}>
           <option value="">Any</option>
-          {PAY_LEVELS.map((p) => <option key={p} value={p}>{p}</option>)}
+          {GRADE_PAY_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
       </div>
     </div>

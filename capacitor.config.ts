@@ -1,30 +1,26 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 /**
- * Capacitor wraps the deployed Next.js app in a native iOS/Android shell.
+ * Capacitor packages the STANDALONE app: the statically-exported client bundle in
+ * `mobile/out` is shipped inside the APK/IPA and talks to Supabase (RLS) + the
+ * Supabase Edge Functions over the network. No `server.url` — the UI is local, so
+ * screens open instantly and offline, like a native app.
  *
- * Because this app is server-rendered (SSR + server actions + API routes), we do
- * NOT bundle a static export. Instead the WebView loads the live HTTPS site set
- * in `server.url` (your Vercel deployment). `webDir` only needs a tiny
- * placeholder for the CLI.
+ * Build + sync with:  npm run mobile:sync   (see package.json scripts)
  *
- * Set CAP_SERVER_URL when syncing, e.g.
- *   CAP_SERVER_URL="https://your-app.vercel.app" npm run cap:sync
- * Leave it unset for local device testing against your dev machine
- * (e.g. http://192.168.1.x:3000).
+ * `androidScheme: "https"` gives the WebView a stable origin (https://localhost)
+ * so the localStorage-backed Supabase session and PKCE verifier persist across
+ * launches.
  */
-const serverUrl = process.env.CAP_SERVER_URL;
-
 const config: CapacitorConfig = {
+  // Package ID intentionally unchanged — Android treats a different appId as a
+  // different app entirely (breaks in-place upgrade of already-installed builds).
   appId: "in.mutualtransfer.app",
-  appName: "Mutual Transfer",
-  webDir: "mobile/www",
-  server: serverUrl
-    ? {
-        url: serverUrl,
-        cleartext: serverUrl.startsWith("http://"),
-      }
-    : undefined,
+  appName: "Transfer Setu",
+  webDir: "mobile/out",
+  server: {
+    androidScheme: "https",
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 1200,

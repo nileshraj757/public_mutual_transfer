@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { recomputeAll } from "@/lib/matching/recompute";
+import { isAdminEmail } from "@/lib/env";
 import type { ReportStatus, VerificationStatus } from "@/lib/types";
 
 async function assertAdmin() {
@@ -11,6 +12,7 @@ async function assertAdmin() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not signed in");
+  if (isAdminEmail(user.email)) return supabase;
   const { data } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
   if (!data?.is_admin) throw new Error("Forbidden");
   return supabase;

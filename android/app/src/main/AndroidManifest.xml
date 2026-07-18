@@ -22,6 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Magic-link / OAuth deep link: mutualtransfer://auth/callback?code=...
+                 Caught by NativeBridge's appUrlOpen listener (src/components/native-bridge.tsx),
+                 which forwards the code into the in-WebView /auth/callback page. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mutualtransfer" android:host="auth" />
+            </intent-filter>
+
         </activity>
 
         <provider

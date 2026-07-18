@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PreferencesEditor } from "./preferences-editor";
+import { savePreferences } from "./actions";
 
-export const metadata = { title: "Your preferences — Mutual Transfer" };
+export const metadata = { title: "Your preferences — Transfer Setu" };
 
 export default async function PreferencesPage() {
   const profile = await requireProfile("/preferences");
@@ -29,7 +30,7 @@ export default async function PreferencesPage() {
         </p>
       </div>
       <Suspense>
-        <PreferencesEditor initial={initial} />
+        <PreferencesEditor initial={initial} onSubmit={savePreferences} />
       </Suspense>
     </div>
   );

@@ -2,9 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
+import { callFn } from "@/lib/functions";
+import { createClient } from "@/lib/supabase/client";
 
-/** Triggers a fresh match computation for the current user via the API. */
-export function RecomputeButton() {
+/** Triggers a fresh match computation for the current user. Web calls the API
+ *  route; the standalone app calls the match-recompute Edge Function. `onDone`
+ *  lets the mobile pages re-fetch (router.refresh() is a no-op under export). */
+export function RecomputeButton({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState("");
@@ -12,13 +17,25 @@ export function RecomputeButton() {
   function refresh() {
     setMsg("");
     startTransition(async () => {
-      const res = await fetch("/api/matches/recompute", { method: "POST" });
-      const json = await res.json().catch(() => ({}));
-      if (res.ok) {
-        setMsg(json.created ? `${json.created} new match(es) found.` : "Up to date.");
+      try {
+        let created = 0;
+        if (isNativeApp()) {
+          const data = await callFn<{ created?: number }>(createClient(), "match-recompute");
+          created = data.created ?? 0;
+        } else {
+          const res = await fetch("/api/matches/recompute", { method: "POST" });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            setMsg(json.error ?? "Couldn't refresh.");
+            return;
+          }
+          created = json.created ?? 0;
+        }
+        setMsg(created ? `${created} new match(es) found.` : "Up to date.");
         router.refresh();
-      } else {
-        setMsg(json.error ?? "Couldn't refresh.");
+        onDone?.();
+      } catch (e) {
+        setMsg((e as Error).message || "Couldn't refresh.");
       }
     });
   }

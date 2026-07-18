@@ -1,0 +1,21 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          { "name": "next/headers", "message": "Server-only. The mobile static build has no request cookies/headers — use the browser Supabase client instead." },
+          { "name": "@/lib/auth", "message": "Server-only (uses next/headers + redirect). Use the mobile AuthProvider / RequireProfile guard instead." },
+          { "name": "@/lib/supabase/server", "message": "Server-only (cookie client + service role). Use @/lib/supabase/client (browser) or a Supabase Edge Function." },
+          { "name": "@/lib/notify", "message": "Server-only (service role). Move to a Supabase Edge Function." },
+          { "name": "@/lib/razorpay", "message": "Server-only secret. Call the billing Edge Functions instead." }
+        ],
+        "patterns": [
+          { "group": ["@/lib/matching/recompute"], "message": "Server-only (service role + notify). Trigger recompute via the match-recompute Edge Function. (engine.ts and rules.ts are pure and safe to import.)" },
+          { "group": ["@/lib/pdf/*"], "message": "Server-only. Generate PDFs via the match-agreement Edge Function." }
+        ]
+      }
+    ]
+  }
+}

@@ -13,7 +13,7 @@ import { MessageThread } from "@/components/message-thread";
 import { GenerateAgreementButton, ReportButton } from "@/components/agreement-and-report";
 import { Mail, Phone } from "@/components/icons";
 
-export const metadata = { title: "Match details — Mutual Transfer" };
+export const metadata = { title: "Match details — Transfer Setu" };
 
 interface RevealedContact {
   profile_id: string;
@@ -25,10 +25,10 @@ interface RevealedContact {
 
 export default async function MatchDetailPage({ params }: { params: { id: string } }) {
   const profile = await requireProfile(`/matches/${params.id}`);
-  const match = await getMatchById(profile.id, params.id);
+  const supabase = createClient();
+  const match = await getMatchById(supabase, profile.id, params.id);
   if (!match) notFound();
 
-  const supabase = createClient();
   const { data: rulesRows } = await supabase.from("rules_config").select("*");
   const rules = parseRules((rulesRows ?? []) as RuleConfig[]);
 
@@ -170,7 +170,7 @@ function MemberCard({
         <KV k="Court level" v={member.court_level} />
         <KV k="Cadre" v={member.cadre} />
         <KV k="Designation" v={member.designation} />
-        <KV k="Pay level" v={member.pay_level} />
+        <KV k="Grade pay" v={member.pay_level} />
       </dl>
 
       <div className="mt-3 flex items-center gap-2 rounded-md bg-brand-50 px-3 py-2 text-sm">

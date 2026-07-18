@@ -65,7 +65,7 @@ export async function buildAgreementPdf(input: AgreementInput): Promise<Uint8Arr
     ctx.y = drawKV(ctx, "Employee ID (masked)", m.employee_id_masked);
     ctx.y = drawKV(ctx, "Cadre / Establishment", m.cadre);
     ctx.y = drawKV(ctx, "Designation / Post", m.designation);
-    ctx.y = drawKV(ctx, "Pay Level / Scale", m.pay_level);
+    ctx.y = drawKV(ctx, "Grade Pay", m.pay_level);
     ctx.y = drawKV(ctx, "Present Posting", joinLoc(m.current_office, m.current_district, m.current_state));
     ctx.y = drawKV(ctx, "Requested Posting", joinLoc(null, m.desired_district, m.desired_state), 8);
   });

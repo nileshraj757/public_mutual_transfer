@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isNativeApp } from "@/lib/native";
+import { callFn } from "@/lib/functions";
 
-export function ActiveToggle({ initial }: { initial: boolean }) {
+export function ActiveToggle({ initial, onDone }: { initial: boolean; onDone?: () => void }) {
   const router = useRouter();
   const [active, setActive] = useState(initial);
   const [pending, startTransition] = useTransition();
@@ -13,12 +15,17 @@ export function ActiveToggle({ initial }: { initial: boolean }) {
     const next = !active;
     setActive(next);
     startTransition(async () => {
-      await fetch("/api/account/active", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_active: next }),
-      });
+      if (isNativeApp()) {
+        await callFn(createClient(), "account-active", { is_active: next });
+      } else {
+        await fetch("/api/account/active", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_active: next }),
+        });
+      }
       router.refresh();
+      onDone?.();
     });
   }
 
@@ -41,13 +48,23 @@ export function DeleteAccountButton() {
   function remove() {
     setError("");
     startTransition(async () => {
-      const res = await fetch("/api/account/delete", { method: "POST" });
-      if (res.ok) {
-        await createClient().auth.signOut();
-        router.push("/?deleted=1");
-        router.refresh();
-      } else {
-        setError((await res.json().catch(() => ({})))?.error ?? "Couldn't delete your account.");
+      try {
+        if (isNativeApp()) {
+          await callFn(createClient(), "account-delete");
+          await createClient().auth.signOut();
+          router.replace("/sign-in");
+          return;
+        }
+        const res = await fetch("/api/account/delete", { method: "POST" });
+        if (res.ok) {
+          await createClient().auth.signOut();
+          router.push("/?deleted=1");
+          router.refresh();
+        } else {
+          setError((await res.json().catch(() => ({})))?.error ?? "Couldn't delete your account.");
+        }
+      } catch (e) {
+        setError((e as Error).message || "Couldn't delete your account.");
       }
     });
   }

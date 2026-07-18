@@ -1,15 +1,16 @@
 import { requireProfile } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { getUserMatches } from "@/lib/matches";
 import { MatchCard } from "@/components/match-card";
 import { RecomputeButton } from "@/components/recompute-button";
 import { VerificationBadge } from "@/components/badges";
 import { EmptyState } from "@/components/illustrations";
 
-export const metadata = { title: "Your matches — Mutual Transfer" };
+export const metadata = { title: "Your matches — Transfer Setu" };
 
 export default async function DashboardPage() {
   const profile = await requireProfile("/dashboard");
-  const matches = await getUserMatches(profile.id);
+  const matches = await getUserMatches(createClient(), profile.id);
 
   const direct = matches.filter((m) => m.type === "direct" && m.status !== "cancelled");
   const chains = matches.filter((m) => m.type === "chain" && m.status !== "cancelled");

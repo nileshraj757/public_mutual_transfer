@@ -4,12 +4,24 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
+import { createClient } from "@/lib/supabase/client";
 import { Flag, Loader } from "@/components/icons";
 
 export function GenerateAgreementButton({ matchId, locked = false }: { matchId: string; locked?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  // PDF generation isn't ported to the mobile backend yet (see
+  // supabase/functions/README.md) — direct users to the website for now.
+  if (isNativeApp()) {
+    return (
+      <div className="rounded-lg border border-sand-200 bg-sand-50 p-3 text-sm text-sand-600">
+        The official joint-application PDF can be generated on the{" "}
+        <span className="font-medium text-sand-800">Transfer Setu website</span> (sign in with the same account).
+      </div>
+    );
+  }
 
   if (locked) {
     return (
@@ -94,11 +106,26 @@ export function ReportButton({ matchId, members }: { matchId: string; members: {
 
   function submit() {
     startTransition(async () => {
-      await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match_id: matchId, reported_profile_id: reportedId, reason }),
-      });
+      if (isNativeApp()) {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("reports").insert({
+            reporter_profile_id: user.id,
+            reported_profile_id: reportedId,
+            match_id: matchId,
+            reason: reason.trim(),
+          });
+        }
+      } else {
+        await fetch("/api/reports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ match_id: matchId, reported_profile_id: reportedId, reason }),
+        });
+      }
       setDone(true);
       setOpen(false);
     });

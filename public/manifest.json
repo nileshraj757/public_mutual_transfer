@@ -1,6 +1,6 @@
 {
-  "name": "Mutual Transfer",
-  "short_name": "MutualTransfer",
+  "name": "Transfer Setu",
+  "short_name": "TransferSetu",
   "description": "Find and arrange mutual transfers (posting swaps) for court/judicial-department employees.",
   "start_url": "/dashboard",
   "scope": "/",

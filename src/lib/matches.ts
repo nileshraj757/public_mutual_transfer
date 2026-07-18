@@ -1,4 +1,4 @@
-import { createAdminClient, createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MatchRow, MatchStatus } from "@/lib/types";
 
 export interface MatchMemberView {
@@ -31,13 +31,41 @@ export interface MatchView {
   selfConsented: boolean;
 }
 
+interface MemberProfileRow {
+  id: string;
+  court_level: string | null;
+  cadre: string | null;
+  designation: string | null;
+  pay_level: string | null;
+  current_state: string | null;
+  current_district: string | null;
+  current_office: string | null;
+  verification_status: MatchMemberView["verification_status"];
+  disciplinary_pending: boolean;
+  last_transfer_date: string | null;
+  joining_date: string | null;
+}
+interface MemberPrefRow {
+  profile_id: string;
+  preferred_state: string;
+  preferred_district: string;
+  rank: number;
+}
+
 /**
  * Build enriched match views for a user. Match rows are read with the user's RLS
  * (so only their matches return). Member display data is anonymized — name,
  * email and phone are never included here; those come only from reveal_contact().
+ *
+ * Pass the caller's Supabase client: the web app passes its cookie-bound server
+ * client, the mobile app passes the browser (anon + RLS) client. Anonymized
+ * co-member attributes come from the get_match_member_views() SECURITY DEFINER
+ * RPC, so neither path needs the service-role key.
  */
-export async function getUserMatches(userId: string): Promise<MatchView[]> {
-  const supabase = createClient();
+export async function getUserMatches(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<MatchView[]> {
   const { data: rows } = await supabase
     .from("matches")
     .select("*")
@@ -47,21 +75,10 @@ export async function getUserMatches(userId: string): Promise<MatchView[]> {
   const matches = (rows ?? []) as MatchRow[];
   if (!matches.length) return [];
 
-  const allMemberIds = [...new Set(matches.flatMap((m) => m.member_profile_ids))];
-
-  // Anonymized member data via service role (safe columns only).
-  const admin = createAdminClient();
-  const [{ data: profiles }, { data: prefs }, { data: consents }] = await Promise.all([
-    admin
-      .from("profiles")
-      .select(
-        "id, court_level, cadre, designation, pay_level, current_state, current_district, current_office, verification_status, disciplinary_pending, last_transfer_date, joining_date"
-      )
-      .in("id", allMemberIds),
-    admin
-      .from("preferences")
-      .select("profile_id, preferred_state, preferred_district, rank")
-      .in("profile_id", allMemberIds),
+  // Anonymized member data (safe columns only) via the RLS-safe RPC, plus this
+  // user's consent rows (readable under RLS).
+  const [{ data: memberViews }, { data: consents }] = await Promise.all([
+    supabase.rpc("get_match_member_views"),
     supabase
       .from("match_consents")
       .select("match_id, profile_id, consented")
@@ -70,6 +87,13 @@ export async function getUserMatches(userId: string): Promise<MatchView[]> {
         matches.map((m) => m.id)
       ),
   ]);
+
+  const views = (memberViews ?? {}) as {
+    profiles?: MemberProfileRow[];
+    preferences?: MemberPrefRow[];
+  };
+  const profiles = views.profiles ?? [];
+  const prefs = views.preferences ?? [];
 
   const prefByProfile = new Map<string, { state: string; district: string; rank: number }[]>();
   for (const p of prefs ?? []) {
@@ -125,7 +149,11 @@ export async function getUserMatches(userId: string): Promise<MatchView[]> {
   });
 }
 
-export async function getMatchById(userId: string, matchId: string): Promise<MatchView | null> {
-  const all = await getUserMatches(userId);
+export async function getMatchById(
+  supabase: SupabaseClient,
+  userId: string,
+  matchId: string
+): Promise<MatchView | null> {
+  const all = await getUserMatches(supabase, userId);
   return all.find((m) => m.id === matchId) ?? null;
 }

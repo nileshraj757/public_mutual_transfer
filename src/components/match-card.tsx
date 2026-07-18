@@ -2,13 +2,14 @@ import Link from "next/link";
 import type { MatchView } from "@/lib/matches";
 import { MatchStatusBadge, MatchTypeBadge } from "@/components/badges";
 import { SwapRoute } from "@/components/swap-route";
+import { matchHref } from "@/lib/native";
 
 export function MatchCard({ match }: { match: MatchView }) {
   const others = match.members.filter((m) => !m.isSelf);
   const consentedCount = Object.values(match.consents).filter(Boolean).length;
 
   return (
-    <Link href={`/matches/${match.id}`} className="card block hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-warm-md">
+    <Link href={matchHref(match.id)} className="card block hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-warm-md">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <MatchTypeBadge type={match.type} size={match.members.length} />
