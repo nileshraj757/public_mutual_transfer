@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { isNativeApp, registerPushNotifications } from "@/lib/native";
 
 /**
  * Wires native-shell behaviours when running inside Capacitor (no-op on web):
  *  - hides the splash screen and styles the status bar,
- *  - completes magic-link / Google OAuth via deep link (forwards the code to /auth/callback),
+ *  - completes magic-link / Google OAuth via deep link (exchanges the code and
+ *    soft-navigates to the destination),
  *  - maps the Android hardware back button to in-app history,
  *  - registers for push notifications.
  */
 export function NativeBridge() {
+  const router = useRouter();
+
   useEffect(() => {
     if (!isNativeApp()) return;
     let cleanups: Array<() => void> = [];
@@ -34,7 +38,17 @@ export function NativeBridge() {
       }
 
       // Magic-link / Google OAuth deep link: mutualtransfer://auth/callback?code=...&next=...
-      const urlSub = await App.addListener("appUrlOpen", ({ url }) => {
+      //
+      // We exchange the code and soft-navigate HERE rather than hard-loading a
+      // separate /auth/callback/ HTML page. Capacitor's static file server does
+      // not reliably resolve nested index.html for a deep two-level path like
+      // /auth/callback/ — it falls back to the root index.html, so that page
+      // never ran and the app bounced back to /sign-in. Handling it inside the
+      // already-running SPA (router.replace = soft navigation, no static file
+      // lookup) sidesteps that entirely. The singleton Supabase client shared
+      // with AppProviders holds the PKCE verifier and, once the session is set,
+      // its onAuthStateChange fires so guards see the session immediately.
+      const urlSub = await App.addListener("appUrlOpen", async ({ url }) => {
         // Dismiss the system browser tab used for Google sign-in now that
         // control is back in the app. No-op and harmless if none is open.
         import("@capacitor/browser")
@@ -44,16 +58,28 @@ export function NativeBridge() {
           const u = new URL(url);
           const code = u.searchParams.get("code");
           const next = u.searchParams.get("next") || "/dashboard";
-          if (code) {
-            // Trailing slash: the static export serves /auth/callback/index.html.
-            window.location.replace(
-              `/auth/callback/?code=${encodeURIComponent(code)}&next=${encodeURIComponent(next)}`
-            );
-          } else if (u.host === "auth" || u.pathname.includes("auth")) {
-            window.location.replace("/sign-in/?error=auth");
+          if (!code) {
+            if (u.host === "auth" || u.pathname.includes("auth")) router.replace("/sign-in?error=auth");
+            return;
           }
+
+          const [{ createClient }, { postAuthDestination }] = await Promise.all([
+            import("@/lib/supabase/client"),
+            import("@/lib/post-auth-route"),
+          ]);
+          const supabase = createClient();
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            router.replace("/sign-in?error=auth");
+            return;
+          }
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          const dest = user ? await postAuthDestination(supabase, user.id, next) : "/sign-in?error=auth";
+          router.replace(dest);
         } catch {
-          /* malformed deep link — ignore */
+          router.replace("/sign-in?error=auth");
         }
       });
       cleanups.push(() => urlSub.remove());
@@ -72,7 +98,7 @@ export function NativeBridge() {
       cleanups.forEach((fn) => fn());
       cleanups = [];
     };
-  }, []);
+  }, [router]);
 
   return null;
 }
