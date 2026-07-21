@@ -59,7 +59,7 @@ export async function saveProfileForm(
   const disciplinary = formData.get("disciplinary_pending") === "on";
   const consent = formData.get("consent_dpdp") === "on";
 
-  if (!fullName || !courtLevel || !cadre || !designation || !payLevel || !currentState || !currentDistrict) {
+  if (!fullName || !courtLevel || !cadre || !designation || !payLevel || !currentState || !currentDistrict || !phone) {
     return { ok: false, error: "Please complete all required fields." };
   }
 

@@ -170,8 +170,8 @@ export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormP
       <div className="card space-y-4">
         <h2 className="font-semibold text-sand-900">Contact &amp; declarations</h2>
         <div>
-          <label className="label" htmlFor="phone">Phone (private — revealed only after mutual consent)</label>
-          <input id="phone" name="phone" className="input" defaultValue={profile?.phone ?? ""} placeholder="+91 …" />
+          <label className="label" htmlFor="phone">Phone * (private — revealed only after mutual consent)</label>
+          <input id="phone" name="phone" required className="input" defaultValue={profile?.phone ?? ""} placeholder="+91 …" />
         </div>
         <label className="flex items-start gap-2 text-sm text-sand-700">
           <input type="checkbox" name="disciplinary_pending" defaultChecked={profile?.disciplinary_pending ?? false} className="mt-0.5 accent-brand-600" />
