@@ -6,7 +6,7 @@ import { isNativeApp, registerPushNotifications } from "@/lib/native";
 /**
  * Wires native-shell behaviours when running inside Capacitor (no-op on web):
  *  - hides the splash screen and styles the status bar,
- *  - completes magic-link auth via deep link (forwards the code to /auth/callback),
+ *  - completes magic-link / Google OAuth via deep link (forwards the code to /auth/callback),
  *  - maps the Android hardware back button to in-app history,
  *  - registers for push notifications.
  */
@@ -33,8 +33,13 @@ export function NativeBridge() {
         /* ignore */
       }
 
-      // Magic-link deep link: mutualtransfer://auth/callback?code=...&next=...
+      // Magic-link / Google OAuth deep link: mutualtransfer://auth/callback?code=...&next=...
       const urlSub = await App.addListener("appUrlOpen", ({ url }) => {
+        // Dismiss the system browser tab used for Google sign-in now that
+        // control is back in the app. No-op and harmless if none is open.
+        import("@capacitor/browser")
+          .then(({ Browser }) => Browser.close())
+          .catch(() => {});
         try {
           const u = new URL(url);
           const code = u.searchParams.get("code");

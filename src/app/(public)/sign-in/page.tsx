@@ -11,9 +11,7 @@ export default function SignInPage() {
       <div className="text-center">
         <MailSpot className="mx-auto h-24 w-auto animate-pop-in" />
         <h1 className="mt-3 font-display text-2xl font-semibold text-sand-900">Welcome back</h1>
-        <p className="mt-2 text-sm text-sand-600">
-          Sign in with an email magic link, a one-time code on your phone, or your password.
-        </p>
+        <p className="mt-2 text-sm text-sand-600">Sign in with Google, or your email and password.</p>
       </div>
 
       {!isSupabaseConfigured ? (
