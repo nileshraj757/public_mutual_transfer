@@ -2,24 +2,34 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { postAuthDestination } from "@/lib/post-auth-route";
+import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
 /**
- * Client-side signup-confirmation / magic-link PKCE completion. Replaces the
- * web app's server route src/app/auth/callback/route.ts.
+ * Client-side signup-confirmation / magic-link / OAuth PKCE completion.
+ * Replaces the web app's server route src/app/auth/callback/route.ts.
  *
  * The native deep link (mutualtransfer://auth/callback?code=…) is caught by
  * NativeBridge, which forwards ?code=&next= to this in-WebView page. We exchange
  * the code for a session (the PKCE verifier is in localStorage from sign-in),
  * then route to onboarding (no profile yet) or the intended destination.
  *
+ * Uses the shared Supabase client from useAuth() rather than creating a new
+ * one: exchangeCodeForSession must run on the SAME client instance that
+ * AppProviders reads from, so its onAuthStateChange listener picks up the new
+ * session immediately. A separate createClient() here would write the session
+ * to the same localStorage key but leave AppProviders' in-memory client state
+ * (which supabase-js caches after its first getSession() call, not re-read
+ * live from storage) unaware of it — the guard would then see no session and
+ * bounce straight back to /sign-in even though sign-in actually succeeded.
+ *
  * useSearchParams isn't used (it forces a Suspense boundary under static export);
  * we read window.location directly instead.
  */
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const { supabase } = useAuth();
   const [error, setError] = useState(false);
   const ran = useRef(false);
 
@@ -36,7 +46,6 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      const supabase = createClient();
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (exchangeError) {
         setError(true);
@@ -54,7 +63,7 @@ export default function AuthCallbackPage() {
       const dest = await postAuthDestination(supabase, user.id, next);
       router.replace(dest);
     })();
-  }, [router]);
+  }, [router, supabase]);
 
   if (error) {
     return (
