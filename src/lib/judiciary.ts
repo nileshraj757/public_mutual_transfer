@@ -9,8 +9,9 @@
  * the classification most court/ministerial staff actually use day to day.
  *
  * Designation options are a function of court level + service/cadre category.
- * An "Other (specify)" escape hatch is always offered so nothing is unfillable;
- * those free-text values simply won't match until curated into the lists.
+ * An "Other (specify)" escape hatch is offered for most cadres so nothing is
+ * unfillable; those free-text values simply won't match until curated into the
+ * lists. (The Stenographic cadre is the exception — its list is exhaustive.)
  */
 
 export const OTHER = "Other (specify)";
@@ -33,10 +34,8 @@ export const COURT_LEVELS = [
 
 /** #6 — service / cadre category. The real cadre split. */
 export const CADRE_CATEGORIES = [
-  "Judicial Officer",
   "Ministerial / Establishment staff",
   "Stenographic cadre",
-  "Process serving / Nazarat",
   "Technical (IT / System Officer)",
   "Class IV / MTS",
 ] as const;
@@ -134,17 +133,19 @@ const MINISTERIAL_SUPREME_COURT = [
   "Junior Court Assistant",
   "Chamber Attendant",
 ];
-const STENO = ["Stenographer Grade I", "Stenographer Grade II", "Stenographer Grade III", "Personal Assistant", "Typist"];
+const STENO = ["Stenographer Grade I", "Stenographer Grade II", "Stenographer Grade III"];
 const PROCESS = ["Nazir", "Bailiff", "Process Server", "Summon Server"];
 const TECHNICAL = ["System Officer", "System Assistant", "IT Manager", "Technical Assistant"];
 const CLASS_IV = ["Peon", "Chowkidar", "Sweeper", "Farash", "Mali", "Multi-Tasking Staff (MTS)"];
 
 /**
  * Canonical designation options for a (court level, cadre category) pair.
- * Always ends with OTHER so the field is never a dead end.
+ * Ends with OTHER so the field is never a dead end — except the Stenographic
+ * cadre, whose curated Grade I/II/III list is exhaustive (no free-text entry).
  */
 export function designationOptions(courtLevel: string, cadre: string): string[] {
   let base: string[];
+  let allowOther = true;
   switch (cadre) {
     case "Judicial Officer":
       base = JUDICIAL_BY_LEVEL[courtLevel] ?? ["Presiding Officer / Judge"];
@@ -159,6 +160,7 @@ export function designationOptions(courtLevel: string, cadre: string): string[] 
       break;
     case "Stenographic cadre":
       base = STENO;
+      allowOther = false;
       break;
     case "Process serving / Nazarat":
       base = PROCESS;
@@ -172,5 +174,5 @@ export function designationOptions(courtLevel: string, cadre: string): string[] 
     default:
       base = [];
   }
-  return [...base, OTHER];
+  return allowOther ? [...base, OTHER] : base;
 }
