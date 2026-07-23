@@ -68,24 +68,24 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
         <div className="flex items-start gap-4">
           <Avatar name={profile.full_name} />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate font-display text-2xl font-semibold text-sand-900">
-                {profile.full_name || "Your profile"}
-              </h1>
+            <h1 className="font-display text-2xl font-semibold leading-tight text-sand-900">
+              {profile.full_name || "Your profile"}
+            </h1>
+            <div className="mt-1.5">
               <VerificationBadge status={profile.verification_status} />
             </div>
-            <p className="mt-0.5 truncate text-sm text-sand-600">
+            <p className="mt-2 text-sm text-sand-600">
               {[profile.designation, profile.court_level].filter(Boolean).join(" · ") || "Complete your profile"}
             </p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-sm text-sand-500">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
-              {posting}
+            <p className="mt-1 flex items-start gap-1.5 text-sm text-sand-500">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{posting}</span>
             </p>
           </div>
-          <button type="button" className="btn-primary shrink-0" onClick={() => setEditing(true)}>
-            Edit profile
-          </button>
         </div>
+        <button type="button" className="btn-primary mt-4 w-full sm:w-auto" onClick={() => setEditing(true)}>
+          Edit profile
+        </button>
       </div>
 
       {profile.verification_status !== "verified" && (
@@ -98,8 +98,7 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
       {/* Account & contact */}
       <Section icon={<Mail className="h-4 w-4 text-brand-600" />} title="Account & contact">
         <Row label="Email">
-          <span className="text-sand-700">{displayEmail || "—"}</span>
-          <span className="ml-2 rounded-full bg-sand-100 px-2 py-0.5 text-[11px] text-sand-500">Can&apos;t be changed</span>
+          <span className="break-all text-sand-700">{displayEmail || "—"}</span>
         </Row>
         <Row label="Phone">
           <span className="flex items-center gap-1.5 text-sand-700">
@@ -169,8 +168,8 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2.5 text-sm">
-      <dt className="text-sand-500">{label}</dt>
-      <dd className="flex items-center text-right">{children}</dd>
+      <dt className="shrink-0 text-sand-500">{label}</dt>
+      <dd className="flex min-w-0 items-center justify-end text-right">{children}</dd>
     </div>
   );
 }
