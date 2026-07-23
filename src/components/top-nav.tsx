@@ -11,6 +11,7 @@ interface TopNavProps {
 
 const links = [
   { href: "/dashboard", label: "Matches" },
+  { href: "/inbox", label: "Chats" },
   { href: "/preferences", label: "Preferences" },
   { href: "/profile", label: "Profile" },
 ];
