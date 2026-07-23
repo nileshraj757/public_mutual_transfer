@@ -14,6 +14,7 @@ const links = [
   { href: "/inbox", label: "Chats" },
   { href: "/preferences", label: "Preferences" },
   { href: "/profile", label: "Profile" },
+  { href: "/how-it-works", label: "How to use" },
 ];
 
 export function TopNav({ signedIn, isAdmin, unread = 0 }: TopNavProps) {

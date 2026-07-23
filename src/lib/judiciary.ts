@@ -18,18 +18,10 @@ export const OTHER = "Other (specify)";
 
 /** #1 — court level / establishment type. Drives the designation list. */
 export const COURT_LEVELS = [
-  "Supreme Court of India",
-  "High Court",
   "District & Sessions Court",
-  "Civil Court (Sr. / Jr. Division)",
   "Family Court",
-  "Special / Designated Court",
   "Commercial Court",
-  "Labour Court / Industrial Tribunal",
-  "Consumer Commission (State / District)",
-  "Tribunal",
   "Gram Nyayalaya",
-  "Legal Services Authority",
 ] as const;
 
 /** #6 — service / cadre category. The real cadre split. */
