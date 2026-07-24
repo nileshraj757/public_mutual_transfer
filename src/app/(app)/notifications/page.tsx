@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { NotificationRow } from "@/lib/types";
-import { markAllRead } from "./actions";
 
 export const metadata = { title: "Notifications — Transfer Setu" };
 
@@ -17,17 +16,18 @@ export default async function NotificationsPage() {
     .limit(100);
 
   const notifications = (data ?? []) as NotificationRow[];
-  const hasUnread = notifications.some((n) => !n.read);
+
+  // Opening this view counts as reading the alerts: mark any unread ones read so
+  // the nav badge clears on the next navigation. The list still reflects the
+  // pre-update state, so the user can see which ones were new this visit.
+  if (notifications.some((n) => !n.read)) {
+    await supabase.from("notifications").update({ read: true }).eq("profile_id", profile.id).eq("read", false);
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold text-sand-900">Notifications</h1>
-        {hasUnread && (
-          <form action={markAllRead}>
-            <button className="btn-secondary" type="submit">Mark all read</button>
-          </form>
-        )}
       </div>
 
       {notifications.length === 0 ? (

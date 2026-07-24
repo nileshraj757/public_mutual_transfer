@@ -21,6 +21,10 @@ interface AuthValue {
   supabase: SupabaseClient;
   /** Re-fetch the current user's profile row (after edits/onboarding). */
   refreshProfile: () => Promise<void>;
+  /** Unread notification count for the nav badge. */
+  unreadCount: number;
+  /** Re-count unread notifications (after opening/marking the alerts read). */
+  refreshUnread: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -43,6 +47,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const loadProfile = useCallback(
     async (userId: string | undefined) => {
@@ -55,6 +60,21 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     },
     [supabase]
   );
+
+  const refreshUnread = useCallback(async () => {
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("read", false);
+    setUnreadCount(count ?? 0);
+  }, [supabase]);
+
+  // Keep the unread badge in sync with the session (login/logout) and refresh it
+  // whenever the alerts view marks things read (via refreshUnread from context).
+  useEffect(() => {
+    if (session) refreshUnread();
+    else setUnreadCount(0);
+  }, [session, refreshUnread]);
 
   // Resolve the session on mount, on every navigation, and on auth events.
   useEffect(() => {
@@ -90,6 +110,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     profile,
     supabase,
     refreshProfile: () => loadProfile(session?.user.id),
+    unreadCount,
+    refreshUnread,
     signOut: async () => {
       await supabase.auth.signOut();
       setSession(null);

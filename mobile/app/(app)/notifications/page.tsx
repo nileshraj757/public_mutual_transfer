@@ -15,9 +15,13 @@ function mobileLink(link: string | null): string | null {
 }
 
 export default function NotificationsPage() {
-  const { supabase, profile } = useAuth();
+  const { supabase, profile, refreshUnread } = useAuth();
   const [notifications, setNotifications] = useState<NotificationRow[] | null>(null);
 
+  // Load the alerts and, since opening this view counts as reading them, mark any
+  // unread ones read in the background and refresh the nav badge. The list keeps
+  // the original read/unread state for THIS view so the user can still see which
+  // ones were new; they show as read on the next visit.
   const load = useCallback(async () => {
     if (!profile) return;
     const { data } = await supabase
@@ -26,36 +30,29 @@ export default function NotificationsPage() {
       .eq("profile_id", profile.id)
       .order("created_at", { ascending: false })
       .limit(100);
-    setNotifications((data ?? []) as NotificationRow[]);
-  }, [supabase, profile]);
+    const rows = (data ?? []) as NotificationRow[];
+    setNotifications(rows);
+
+    if (rows.some((n) => !n.read)) {
+      await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("profile_id", profile.id)
+        .eq("read", false);
+      await refreshUnread();
+    }
+  }, [supabase, profile, refreshUnread]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  async function markAllRead() {
-    if (!profile) return;
-    await supabase
-      .from("notifications")
-      .update({ read: true })
-      .eq("profile_id", profile.id)
-      .eq("read", false);
-    load();
-  }
-
   if (!profile || notifications === null) return <Splash />;
-
-  const hasUnread = notifications.some((n) => !n.read);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold text-sand-900">Notifications</h1>
-        {hasUnread && (
-          <button className="btn-secondary" type="button" onClick={markAllRead}>
-            Mark all read
-          </button>
-        )}
       </div>
 
       {notifications.length === 0 ? (

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { TopNav } from "@/components/top-nav";
 import { Disclaimer } from "@/components/disclaimer";
 import { isAdminEmail } from "@/lib/env";
@@ -18,27 +17,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  const { supabase, profile, session } = useAuth();
-  const [unread, setUnread] = useState(0);
+  const { profile, session, unreadCount } = useAuth();
   const isAdmin = Boolean(profile?.is_admin) || isAdminEmail(session?.user.email);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const { count } = await supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("read", false);
-      if (active) setUnread(count ?? 0);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [supabase]);
 
   return (
     <div className="min-h-screen">
-      <TopNav signedIn isAdmin={isAdmin} unread={unread} />
+      <TopNav signedIn isAdmin={isAdmin} unread={unreadCount} />
       <main className="mx-auto max-w-5xl px-4 py-6">
         <Disclaimer className="mb-5" />
         {children}
