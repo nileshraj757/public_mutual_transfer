@@ -16,20 +16,20 @@ export function GenerateAgreementButton({ matchId, locked = false }: { matchId: 
   // supabase/functions/README.md) — direct users to the website for now.
   if (isNativeApp()) {
     return (
-      <div className="rounded-lg border border-sand-200 bg-sand-50 p-3 text-sm text-sand-600">
+      <div className="ts-card text-sm" style={{ color: "var(--ts-muted)" }}>
         The official joint-application PDF can be generated on the{" "}
-        <span className="font-medium text-sand-800">TransferSetu website</span> (sign in with the same account).
+        <span className="font-semibold" style={{ color: "var(--ts-text-strong)" }}>TransferSetu website</span> (sign in with the same account).
       </div>
     );
   }
 
   if (locked) {
     return (
-      <div className="rounded-lg border border-brand-200 bg-brand-50 p-3">
-        <p className="text-sm text-sand-700">
-          Generating the official joint-application PDF is a <strong>Premium</strong> feature.
+      <div className="ts-card" style={{ borderColor: "var(--ts-warning-border)" }}>
+        <p className="text-sm" style={{ color: "var(--ts-muted)" }}>
+          Generating the official joint-application PDF is a <strong style={{ color: "var(--ts-text-strong)" }}>Premium</strong> feature.
         </p>
-        <Link href="/billing" className="btn-primary mt-2">Go Premium to generate</Link>
+        <Link href="/billing" className="ts-btn-primary mt-3 w-full">Go Premium to generate</Link>
       </div>
     );
   }
@@ -68,11 +68,11 @@ export function GenerateAgreementButton({ matchId, locked = false }: { matchId: 
 
   return (
     <div>
-      <button className="btn-primary" onClick={download} disabled={busy}>
+      <button className="ts-btn-secondary w-full" onClick={download} disabled={busy}>
         {busy && <Loader className="h-4 w-4" />}
         {busy ? "Generating…" : isNativeApp() ? "Generate & share joint application (PDF)" : "Download joint application (PDF)"}
       </button>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
     </div>
   );
 }
@@ -141,7 +141,7 @@ function ReasonPicker({ category, setCategory, detail, setDetail }: {
 }) {
   return (
     <>
-      <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
+      <select className="ts-input" value={category} onChange={(e) => setCategory(e.target.value)}>
         <option value="">Reason…</option>
         {REPORT_REASONS.map((r) => (
           <option key={r} value={r}>{r}</option>
@@ -149,7 +149,7 @@ function ReasonPicker({ category, setCategory, detail, setDetail }: {
       </select>
       {category === "Other" && (
         <textarea
-          className="input"
+          className="ts-input"
           rows={3}
           placeholder="Describe the issue…"
           value={detail}
@@ -178,24 +178,24 @@ export function ReportButton({ matchId, members }: { matchId: string; members: {
     });
   }
 
-  if (done) return <p className="text-xs text-green-600">Report submitted. Thank you.</p>;
+  if (done) return <p className="text-xs" style={{ color: "var(--ts-accent-strong)" }}>Report submitted. Thank you.</p>;
 
   return (
     <div className="text-sm">
       {!open ? (
-        <button className="-mx-3 flex min-h-11 items-center gap-1.5 px-3 py-2.5 text-xs text-sand-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+        <button className="flex items-center gap-1.5 py-2 text-xs underline" style={{ color: "var(--ts-faint)" }} onClick={() => setOpen(true)}>
           <Flag className="h-3.5 w-3.5" />
           Report this match / member
         </button>
       ) : (
-        <div className="card mt-2 space-y-2">
-          <select className="input" value={reportedId} onChange={(e) => setReportedId(e.target.value)}>
+        <div className="ts-card mt-2 space-y-2">
+          <select className="ts-input" value={reportedId} onChange={(e) => setReportedId(e.target.value)}>
             {members.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
           <ReasonPicker category={category} setCategory={setCategory} detail={detail} setDetail={setDetail} />
           <div className="flex gap-2">
-            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason}>Submit report</button>
-            <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => setOpen(false)}>Cancel</button>
+            <button className="ts-btn-danger px-3 py-2 text-xs" onClick={submit} disabled={pending || !reason}>Submit report</button>
+            <button className="ts-btn-secondary px-3 py-2 text-xs" onClick={() => setOpen(false)}>Cancel</button>
           </div>
         </div>
       )}
@@ -222,21 +222,21 @@ export function ReportProfileButton({ profileId }: { profileId: string }) {
     });
   }
 
-  if (done) return <p className="text-xs text-green-600">Report submitted. Thank you.</p>;
+  if (done) return <p className="text-xs" style={{ color: "var(--ts-accent-strong)" }}>Report submitted. Thank you.</p>;
 
   return (
     <div className="text-sm">
       {!open ? (
-        <button className="flex items-center gap-1 text-xs text-sand-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+        <button className="flex items-center gap-1 text-xs underline" style={{ color: "var(--ts-faint)" }} onClick={() => setOpen(true)}>
           <Flag className="h-3.5 w-3.5" />
           Report
         </button>
       ) : (
-        <div className="card mt-2 space-y-2">
+        <div className="ts-card mt-2 space-y-2">
           <ReasonPicker category={category} setCategory={setCategory} detail={detail} setDetail={setDetail} />
           <div className="flex gap-2">
-            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason}>Submit report</button>
-            <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => setOpen(false)}>Cancel</button>
+            <button className="ts-btn-danger px-3 py-2 text-xs" onClick={submit} disabled={pending || !reason}>Submit report</button>
+            <button className="ts-btn-secondary px-3 py-2 text-xs" onClick={() => setOpen(false)}>Cancel</button>
           </div>
         </div>
       )}

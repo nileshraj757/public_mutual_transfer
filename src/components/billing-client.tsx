@@ -101,7 +101,7 @@ export function BillingClient({
         name: planName,
         description: `${planName} — monthly subscription`,
         prefill: email ? { email } : undefined,
-        theme: { color: "#146152" },
+        theme: { color: "#2fc488" },
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_subscription_id: string;
@@ -149,9 +149,9 @@ export function BillingClient({
 
   if (!configured) {
     return (
-      <div className="card border-amber-300 bg-amber-50">
-        <h2 className="font-semibold text-amber-900">Premium is coming soon</h2>
-        <p className="mt-1 text-sm text-amber-800">
+      <div className="ts-card" style={{ borderColor: "var(--ts-warning-border)" }}>
+        <h2 className="font-semibold" style={{ color: "var(--ts-text-strong)" }}>Premium is coming soon</h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--ts-muted)" }}>
           Subscriptions aren&apos;t available yet — payment details are being set up. All features are currently free.
           Check back shortly.
         </p>
@@ -160,53 +160,70 @@ export function BillingClient({
   }
 
   return (
-    <div className="card">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-sand-900">{planName}</h2>
-          <p className="text-sm text-sand-600">{priceLabel}</p>
-        </div>
+    <div className="ts-card" style={{ borderColor: "var(--ts-warning-border)", boxShadow: "var(--ts-shadow-card), 0 0 40px rgba(240,166,60,0.1)" }}>
+      <p className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-warning)" }}>PREMIUM</p>
+      <div className="mt-1 flex items-baseline gap-2">
+        <h2 className="font-display text-2xl font-extrabold" style={{ color: "var(--ts-text-strong)" }}>{planName}</h2>
         {isActive ? (
-          <span className="badge bg-green-100 text-green-800">Active</span>
+          <span className="ts-badge" style={{ background: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" }}>Active</span>
         ) : (
-          <span className="badge bg-sand-100 text-sand-600">{status ?? "Not subscribed"}</span>
+          <span className="ts-badge" style={{ background: "var(--ts-surface)", color: "var(--ts-muted)" }}>{status ?? "Not subscribed"}</span>
         )}
       </div>
+      <p className="text-sm" style={{ color: "var(--ts-muted)" }}>{priceLabel}</p>
 
       {isActive ? (
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-3">
           {currentEnd && (
-            <p className="text-sm text-sand-600">
-              {cancelAtPeriodEnd ? "Access ends on " : "Renews on "}
-              <strong>{new Date(currentEnd).toLocaleDateString("en-IN")}</strong>.
-            </p>
+            <div className="rounded-xl px-3.5 py-3 text-sm font-semibold" style={{ background: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" }}>
+              {cancelAtPeriodEnd ? "Access ends on " : "Active · renews "}
+              {new Date(currentEnd).toLocaleDateString("en-IN")}
+            </div>
           )}
           {cancelAtPeriodEnd ? (
-            <p className="text-sm text-amber-700">Cancellation scheduled — you keep premium until the period ends.</p>
+            <p className="text-sm" style={{ color: "var(--ts-warning)" }}>Cancellation scheduled — you keep premium until the period ends.</p>
           ) : (
-            <button className="btn-secondary" onClick={cancel} disabled={pending}>
+            <button className="ts-btn-secondary w-full" onClick={cancel} disabled={pending}>
               {pending ? "Cancelling…" : "Cancel subscription"}
             </button>
           )}
         </div>
       ) : (
         <div className="mt-4">
-          <ul className="mb-4 space-y-1 text-sm text-sand-600">
-            <li>✓ See your Direct & Chain matches in full</li>
-            <li>✓ Send connection requests and chat once there&apos;s mutual interest</li>
-            <li>✓ Get match, message and request alerts</li>
-            <li>✓ Generate & download the official joint-application PDF</li>
+          <ul className="mb-5 space-y-2 text-sm" style={{ color: "var(--ts-muted)" }}>
+            <li className="flex items-start gap-2"><CheckMark />See your Direct &amp; Chain matches in full</li>
+            <li className="flex items-start gap-2"><CheckMark />Send connection requests and chat once there&apos;s mutual interest</li>
+            <li className="flex items-start gap-2"><CheckMark />Get match, message and request alerts</li>
+            <li className="flex items-start gap-2"><CheckMark />Generate &amp; download the official joint-application PDF</li>
           </ul>
-          <button className="btn-primary" onClick={subscribe} disabled={busy}>
-            {busy ? "Starting…" : `Subscribe — ${priceLabel}`}
+          <button
+            className="relative w-full overflow-hidden rounded-2xl py-3.5 text-sm font-bold"
+            style={{ background: "linear-gradient(135deg, var(--ts-warning), var(--ts-warning-strong))", color: "var(--ts-on-warning)" }}
+            onClick={subscribe}
+            disabled={busy}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 w-2/5 animate-ts-sweep"
+              style={{ background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent)" }}
+            />
+            <span className="relative">{busy ? "Starting…" : `Subscribe — ${priceLabel}`}</span>
           </button>
-          <p className="mt-2 text-xs text-sand-400">
+          <p className="mt-2.5 text-xs" style={{ color: "var(--ts-faint)" }}>
             Secure recurring payment via Razorpay (UPI Autopay / cards / netbanking). Cancel anytime.
           </p>
         </div>
       )}
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
     </div>
+  );
+}
+
+function CheckMark() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ts-warning)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden>
+      <path d="M5 13l4.5 4.5L19 7" />
+    </svg>
   );
 }

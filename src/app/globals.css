@@ -51,3 +51,157 @@ h1, h2, h3, .font-display {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * "ts-*" design layer — the Transfer Setu mobile-app glass redesign.
+ *
+ * Additive on purpose: these variables/classes never redefine the tokens or
+ * `.card`/`.btn*`/`.input`/`.label`/`.badge` classes above, so the web app
+ * (and any component that hasn't opted in) renders byte-for-byte as before.
+ * Components that opt into the new look use `.ts-*` classes instead.
+ *
+ * `.dark` is only ever toggled on the mobile app's <html> element (see
+ * mobile/app/_components/settings/appearance), so these dark values never
+ * reach the web app.
+ * ──────────────────────────────────────────────────────────────────────── */
+:root {
+  --ts-bg-gradient: linear-gradient(180deg, #fbfaf6 0%, #f3f1e9 55%, #eef1ec 100%);
+  --ts-bg-outer: #eef1ec;
+
+  --ts-text: #10201a;
+  --ts-text-strong: rgba(16, 32, 26, 0.92);
+  --ts-muted: rgba(16, 32, 26, 0.55);
+  --ts-muted-2: rgba(16, 32, 26, 0.42);
+  --ts-faint: rgba(16, 32, 26, 0.32);
+
+  --ts-surface: rgba(255, 255, 255, 0.62);
+  --ts-surface-strong: rgba(255, 255, 255, 0.72);
+  --ts-surface-soft: rgba(255, 255, 255, 0.55);
+  --ts-surface-hover: rgba(255, 255, 255, 0.78);
+  --ts-sticky-bg: rgba(251, 250, 246, 0.72);
+
+  --ts-border: rgba(16, 32, 26, 0.1);
+  --ts-border-strong: rgba(16, 32, 26, 0.16);
+
+  --ts-accent: #3fd99b;
+  --ts-accent-strong: #2fc488;
+  --ts-accent-soft: rgba(63, 217, 155, 0.16);
+  --ts-accent-border: rgba(63, 217, 155, 0.35);
+  --ts-on-accent: #06251a;
+
+  --ts-warning: #f0a63c;
+  --ts-warning-strong: #d98e1b;
+  --ts-warning-soft: rgba(240, 166, 60, 0.16);
+  --ts-warning-border: rgba(240, 166, 60, 0.35);
+  --ts-on-warning: #2a1a02;
+
+  --ts-danger: #f87171;
+  --ts-danger-soft: rgba(248, 113, 113, 0.1);
+  --ts-danger-border: rgba(248, 113, 113, 0.25);
+  --ts-on-danger: #2a0808;
+
+  --ts-shadow-card: 0 10px 30px rgba(13, 32, 27, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --ts-shadow-pop: 0 14px 34px rgba(13, 32, 27, 0.16);
+  --ts-ring: rgba(63, 217, 155, 0.35);
+
+  --ts-blob-1: rgba(63, 217, 155, 0.22);
+  --ts-blob-2: rgba(240, 166, 60, 0.18);
+}
+
+.dark {
+  --ts-bg-gradient: linear-gradient(180deg, #0a0f0d 0%, #0d1512 55%, #090d0c 100%);
+  --ts-bg-outer: #060807;
+
+  --ts-text: #ffffff;
+  --ts-text-strong: rgba(255, 255, 255, 0.95);
+  --ts-muted: rgba(255, 255, 255, 0.55);
+  --ts-muted-2: rgba(255, 255, 255, 0.45);
+  --ts-faint: rgba(255, 255, 255, 0.35);
+
+  --ts-surface: rgba(255, 255, 255, 0.055);
+  --ts-surface-strong: rgba(255, 255, 255, 0.08);
+  --ts-surface-soft: rgba(255, 255, 255, 0.05);
+  --ts-surface-hover: rgba(255, 255, 255, 0.1);
+  --ts-sticky-bg: rgba(9, 13, 12, 0.6);
+
+  --ts-border: rgba(255, 255, 255, 0.1);
+  --ts-border-strong: rgba(255, 255, 255, 0.18);
+
+  --ts-accent: #3fd99b;
+  --ts-accent-strong: #2fc488;
+  --ts-accent-soft: rgba(63, 217, 155, 0.16);
+  --ts-accent-border: rgba(63, 217, 155, 0.35);
+  --ts-on-accent: #06251a;
+
+  --ts-warning: #f0a63c;
+  --ts-warning-strong: #d98e1b;
+  --ts-warning-soft: rgba(240, 166, 60, 0.16);
+  --ts-warning-border: rgba(240, 166, 60, 0.35);
+  --ts-on-warning: #2a1a02;
+
+  --ts-danger: #f87171;
+  --ts-danger-soft: rgba(248, 113, 113, 0.1);
+  --ts-danger-border: rgba(248, 113, 113, 0.25);
+  --ts-on-danger: #2a0808;
+
+  --ts-shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --ts-shadow-pop: 0 14px 34px rgba(0, 0, 0, 0.4);
+  --ts-ring: rgba(63, 217, 155, 0.4);
+
+  --ts-blob-1: rgba(63, 217, 155, 0.28);
+  --ts-blob-2: rgba(240, 166, 60, 0.22);
+}
+
+@layer components {
+  .ts-shell {
+    background: var(--ts-bg-gradient);
+    color: var(--ts-text);
+  }
+  .ts-card {
+    @apply rounded-[20px] border p-4 backdrop-blur-xl transition duration-150 ease-out;
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+    box-shadow: var(--ts-shadow-card);
+  }
+  .ts-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition duration-150 ease-out focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.96];
+    --tw-ring-color: var(--ts-ring);
+  }
+  .ts-btn-primary {
+    @apply ts-btn text-[color:var(--ts-on-accent)] shadow-[0_8px_24px_rgba(63,217,155,0.3)];
+    background: linear-gradient(135deg, var(--ts-accent), var(--ts-accent-strong));
+  }
+  .ts-btn-secondary {
+    @apply ts-btn border backdrop-blur-xl;
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+    color: var(--ts-text-strong);
+  }
+  .ts-btn-danger {
+    @apply ts-btn border;
+    background: var(--ts-danger-soft);
+    border-color: var(--ts-danger-border);
+    color: var(--ts-danger);
+  }
+  .ts-input {
+    @apply w-full rounded-xl border px-3.5 py-3 text-base outline-none transition duration-150 ease-out focus:ring-2 sm:text-sm;
+    background: var(--ts-surface-soft);
+    border-color: var(--ts-border);
+    color: var(--ts-text);
+    --tw-ring-color: var(--ts-ring);
+  }
+  .ts-input::placeholder {
+    color: var(--ts-faint);
+  }
+  .ts-label {
+    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.4px];
+    color: var(--ts-muted);
+  }
+  .ts-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.3px];
+  }
+  .ts-chip {
+    @apply flex-none whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-semibold transition;
+  }
+}
+

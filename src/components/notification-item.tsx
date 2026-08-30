@@ -7,6 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { isNativeApp } from "@/lib/native";
 import { callFn } from "@/lib/functions";
 import type { NotificationRow } from "@/lib/types";
+import { Shield, Chat, Sparkle } from "@/components/icons";
+
+function kindIcon(kind: string) {
+  if (kind.includes("verif")) return Shield;
+  if (kind.includes("chat") || kind.includes("message")) return Chat;
+  return Sparkle;
+}
 
 /**
  * A single alert. Opening it (tapping the card / following its link) marks THAT
@@ -44,14 +51,21 @@ export function NotificationItem({
     return <MatchRequestItem n={n} read={read} markRead={markRead} />;
   }
 
+  const Icon = kindIcon(n.kind);
   const inner = (
-    <div className={`card flex items-start justify-between gap-3 ${read ? "" : "border-brand-300 bg-brand-50/40"}`}>
-      <div>
-        <p className="font-medium text-sand-900">{n.title}</p>
-        {n.body && <p className="text-sm text-sand-600">{n.body}</p>}
-        <p className="mt-1 text-xs text-sand-400">{new Date(n.created_at).toLocaleString("en-IN")}</p>
+    <div
+      className="ts-card animate-ts-card-in flex items-start gap-3"
+      style={{ background: read ? "var(--ts-surface-soft)" : "var(--ts-accent-soft)", borderColor: "var(--ts-border)" }}
+    >
+      <div className="grid h-9 w-9 flex-none place-items-center rounded-xl" style={{ background: "var(--ts-surface)", color: "var(--ts-accent-strong)" }}>
+        <Icon className="h-4 w-4" />
       </div>
-      {!read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-600" aria-label="Unread" />}
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] leading-snug" style={{ color: "var(--ts-text-strong)" }}>{n.title}</p>
+        {n.body && <p className="text-sm" style={{ color: "var(--ts-muted)" }}>{n.body}</p>}
+        <p className="mt-1 text-[11px]" style={{ color: "var(--ts-faint)" }}>{new Date(n.created_at).toLocaleString("en-IN")}</p>
+      </div>
+      {!read && <span className="mt-1 h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--ts-accent)" }} aria-label="Unread" />}
     </div>
   );
 
@@ -109,30 +123,37 @@ function MatchRequestItem({
     }
   }
 
+  const Icon = kindIcon(n.kind);
   return (
-    <div className={`card flex items-start justify-between gap-3 ${read ? "" : "border-brand-300 bg-brand-50/40"}`}>
-      <div className="flex-1">
-        <p className="font-medium text-sand-900">{n.title}</p>
-        {n.body && <p className="text-sm text-sand-600">{n.body}</p>}
-        <p className="mt-1 text-xs text-sand-400">{new Date(n.created_at).toLocaleString("en-IN")}</p>
+    <div
+      className="ts-card animate-ts-card-in flex items-start gap-3"
+      style={{ background: read ? "var(--ts-surface-soft)" : "var(--ts-accent-soft)", borderColor: "var(--ts-border)" }}
+    >
+      <div className="grid h-9 w-9 flex-none place-items-center rounded-xl" style={{ background: "var(--ts-surface)", color: "var(--ts-accent-strong)" }}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] leading-snug" style={{ color: "var(--ts-text-strong)" }}>{n.title}</p>
+        {n.body && <p className="text-sm" style={{ color: "var(--ts-muted)" }}>{n.body}</p>}
+        <p className="mt-1 text-[11px]" style={{ color: "var(--ts-faint)" }}>{new Date(n.created_at).toLocaleString("en-IN")}</p>
 
         {responded ? (
-          <p className="mt-2 text-sm font-medium text-sand-600">
+          <p className="mt-2 text-sm font-semibold" style={{ color: "var(--ts-muted)" }}>
             {responded === "accepted" ? "You accepted this request." : "You declined this request."}
           </p>
         ) : (
           <div className="mt-2 flex gap-2">
-            <button type="button" className="btn-primary" onClick={() => respond(true)} disabled={pending}>
+            <button type="button" className="ts-btn-primary px-4 py-2 text-xs" onClick={() => respond(true)} disabled={pending}>
               {pending ? "Saving…" : "Accept"}
             </button>
-            <button type="button" className="btn-secondary" onClick={() => respond(false)} disabled={pending}>
+            <button type="button" className="ts-btn-secondary px-4 py-2 text-xs" onClick={() => respond(false)} disabled={pending}>
               Decline
             </button>
           </div>
         )}
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
       </div>
-      {!read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-600" aria-label="Unread" />}
+      {!read && <span className="mt-1 h-1.5 w-1.5 flex-none rounded-full" style={{ background: "var(--ts-accent)" }} aria-label="Unread" />}
     </div>
   );
 }

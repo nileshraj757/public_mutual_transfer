@@ -25,17 +25,18 @@ export function PremiumTeaser({ headline, blurb, children }: PremiumTeaserProps)
       <div
         className={
           children
-            ? "absolute inset-0 flex items-center justify-center bg-sand-50/70 p-4"
+            ? "absolute inset-0 flex items-center justify-center p-4"
             : "flex items-center justify-center p-8"
         }
+        style={children ? { background: "color-mix(in srgb, var(--ts-bg-outer, #f3f1e9) 70%, transparent)" } : undefined}
       >
-        <div className="card max-w-sm text-center shadow-warm-md">
-          <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-brand-100 text-brand-700">
+        <div className="ts-card max-w-sm text-center" style={{ borderColor: "var(--ts-warning-border)" }}>
+          <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full" style={{ background: "var(--ts-warning-soft)", color: "var(--ts-warning-strong)" }}>
             <Sparkle className="h-5 w-5" />
           </div>
-          <p className="font-display text-lg font-semibold text-sand-900">{headline}</p>
-          <p className="mt-1.5 text-sm text-sand-600">{blurb}</p>
-          <Link href="/billing" className="btn-primary mt-4 w-full">
+          <p className="font-display text-lg font-bold" style={{ color: "var(--ts-text-strong)" }}>{headline}</p>
+          <p className="mt-1.5 text-sm" style={{ color: "var(--ts-muted)" }}>{blurb}</p>
+          <Link href="/billing" className="ts-btn-primary mt-4 w-full">
             Subscribe to unlock
           </Link>
         </div>

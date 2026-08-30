@@ -33,11 +33,11 @@ export function LocationSelect({
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <div>
-        <label className="label">State / UT</label>
+        <label className="ts-label">State / UT</label>
         <select
           name={stateName}
           required={required}
-          className="input"
+          className="ts-input"
           value={state}
           onChange={(e) => {
             setState(e.target.value);
@@ -52,11 +52,11 @@ export function LocationSelect({
         </select>
       </div>
       <div>
-        <label className="label">District</label>
+        <label className="ts-label">District</label>
         <select
           name={districtName}
           required={required}
-          className="input"
+          className="ts-input"
           value={district}
           disabled={!state}
           onChange={(e) => {

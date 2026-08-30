@@ -5,15 +5,10 @@ import { BillingClient } from "@/components/billing-client";
 import { isActiveSubscription } from "@/lib/billing-core";
 import type { Subscription } from "@/lib/types";
 import { SUPABASE_URL } from "@/lib/env";
+import { ScreenHeader } from "../../_components/screen-header";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
-/**
- * Whether billing is configured for the mobile build. The public Razorpay key
- * isn't inlined into the static export the same way, so we treat billing as
- * "configured" when a public key env is present at build time; the actual
- * subscribe call ultimately fails gracefully via the Edge Function if not.
- */
 const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "TransferSetu Premium";
 const priceLabel = process.env.NEXT_PUBLIC_PREMIUM_PRICE_LABEL || "Monthly subscription";
@@ -45,15 +40,13 @@ export default function BillingPage() {
   const active = isActiveSubscription(sub);
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-sand-900">Premium</h1>
-        <p className="mt-1 text-sm text-sand-600">
-          Your profile and Search stay free. Premium unlocks your Matches, Chats, connection requests, alerts, and the
-          official joint-application document. The actual transfer always depends on the competent authority&apos;s
-          approval.
-        </p>
-      </div>
+    <div>
+      <ScreenHeader title="Premium" />
+      <p className="mb-4 text-sm leading-relaxed" style={{ color: "var(--ts-muted)" }}>
+        Your profile and Search stay free. Premium unlocks your Matches, Chats, connection requests, alerts, and the
+        official joint-application document. The actual transfer always depends on the competent authority&apos;s
+        approval.
+      </p>
 
       <BillingClient
         configured={configured || Boolean(SUPABASE_URL)}
@@ -67,7 +60,7 @@ export default function BillingPage() {
         onDone={load}
       />
 
-      <p className="text-xs text-sand-400">
+      <p className="mt-3 text-xs" style={{ color: "var(--ts-faint)" }}>
         Payments are processed securely by Razorpay. We never store your card or bank details.
       </p>
     </div>

@@ -147,7 +147,7 @@ interface Tip {
   y: number;
 }
 
-export function HoverTranslate() {
+export function HoverTranslate({ hideToggle = false }: { hideToggle?: boolean } = {}) {
   const [enabled, setEnabled] = useState(true);
   const [tip, setTip] = useState<Tip>({ visible: false, loading: false, text: "", error: false, x: 0, y: 0 });
 
@@ -171,6 +171,21 @@ export function HoverTranslate() {
     } catch {
       /* ignore */
     }
+  }, []);
+
+  // Mobile Settings owns the on/off control when hideToggle is set (this
+  // component still does all translation work); pick up toggles made there.
+  useEffect(() => {
+    function sync() {
+      try {
+        const saved = localStorage.getItem(ENABLED_KEY);
+        if (saved !== null) setEnabled(saved === "1");
+      } catch {
+        /* ignore */
+      }
+    }
+    window.addEventListener("ts-hover-translate-changed", sync);
+    return () => window.removeEventListener("ts-hover-translate-changed", sync);
   }, []);
 
   function hide() {
@@ -326,6 +341,7 @@ export function HoverTranslate() {
         </div>
       )}
 
+      {!hideToggle && (
       <button
         data-hovertx-ui
         type="button"
@@ -342,6 +358,7 @@ export function HoverTranslate() {
         <span aria-hidden className="text-base leading-none">अ</span>
         <span className="hidden sm:inline">{enabled ? "Hindi: On" : "Hindi: Off"}</span>
       </button>
+      )}
     </>
   );
 }

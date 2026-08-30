@@ -52,11 +52,11 @@ export function BlockButton({
   }
 
   if (!members.length) return null;
-  if (done) return <p className="text-sm text-sand-500">Blocked.</p>;
+  if (done) return <p className="text-sm" style={{ color: "var(--ts-muted)" }}>Blocked.</p>;
 
   if (!open) {
     return (
-      <button type="button" className="btn-secondary text-red-700" onClick={() => setOpen(true)}>
+      <button type="button" className="ts-btn-secondary px-4 py-2.5 text-xs" style={{ color: "var(--ts-danger)" }} onClick={() => setOpen(true)}>
         Block
       </button>
     );
@@ -65,7 +65,7 @@ export function BlockButton({
   return (
     <div className="space-y-2">
       {members.length > 1 && (
-        <select className="input" value={targetId} onChange={(e) => setTargetId(e.target.value)}>
+        <select className="ts-input" value={targetId} onChange={(e) => setTargetId(e.target.value)}>
           {members.map((m) => (
             <option key={m.id} value={m.id}>
               {m.label}
@@ -73,15 +73,15 @@ export function BlockButton({
           ))}
         </select>
       )}
-      <p className="text-sm text-sand-600">
+      <p className="text-sm" style={{ color: "var(--ts-muted)" }}>
         Blocking hides you from each other in Search and ends this match. Unblock later from Settings → Privacy.
       </p>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
       <div className="flex gap-2">
-        <button type="button" className="btn-danger" onClick={block} disabled={pending}>
+        <button type="button" className="ts-btn-danger px-4 py-2.5 text-xs" onClick={block} disabled={pending}>
           {pending ? "Blocking…" : "Confirm block"}
         </button>
-        <button type="button" className="btn-secondary" onClick={() => setOpen(false)}>
+        <button type="button" className="ts-btn-secondary px-4 py-2.5 text-xs" onClick={() => setOpen(false)}>
           Cancel
         </button>
       </div>

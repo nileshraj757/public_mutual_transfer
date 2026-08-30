@@ -1,11 +1,18 @@
 import type { MatchStatus, VerificationStatus } from "@/lib/types";
 import { Shield, CheckCircle } from "./icons";
 
+const tsToneStyle: Record<"accent" | "warning" | "danger" | "neutral", React.CSSProperties> = {
+  accent: { background: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" },
+  warning: { background: "var(--ts-warning-soft)", color: "var(--ts-warning-strong)" },
+  danger: { background: "var(--ts-danger-soft)", color: "var(--ts-danger)" },
+  neutral: { background: "var(--ts-surface)", color: "var(--ts-muted)" },
+};
+
 export function VerificationBadge({ status }: { status: VerificationStatus }) {
-  const map: Record<VerificationStatus, string> = {
-    verified: "bg-green-100 text-green-800",
-    pending: "bg-amber-100 text-amber-800",
-    rejected: "bg-red-100 text-red-800",
+  const tone: Record<VerificationStatus, keyof typeof tsToneStyle> = {
+    verified: "accent",
+    pending: "warning",
+    rejected: "danger",
   };
   const label: Record<VerificationStatus, string> = {
     verified: "Verified",
@@ -13,7 +20,7 @@ export function VerificationBadge({ status }: { status: VerificationStatus }) {
     rejected: "Rejected",
   };
   return (
-    <span className={`badge ${map[status]}`}>
+    <span className="ts-badge" style={tsToneStyle[tone[status]]}>
       <Shield className="h-3 w-3" />
       {label[status]}
     </span>
@@ -21,13 +28,13 @@ export function VerificationBadge({ status }: { status: VerificationStatus }) {
 }
 
 export function MatchStatusBadge({ status }: { status: MatchStatus }) {
-  const map: Record<MatchStatus, string> = {
-    suggested: "bg-sand-100 text-sand-700",
-    both_interested: "bg-blue-100 text-blue-800",
-    contact_shared: "bg-indigo-100 text-indigo-800",
-    agreement_generated: "bg-violet-100 text-violet-800",
-    completed: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
+  const tone: Record<MatchStatus, keyof typeof tsToneStyle> = {
+    suggested: "neutral",
+    both_interested: "accent",
+    contact_shared: "accent",
+    agreement_generated: "warning",
+    completed: "accent",
+    cancelled: "danger",
   };
   const label: Record<MatchStatus, string> = {
     suggested: "Suggested",
@@ -38,7 +45,7 @@ export function MatchStatusBadge({ status }: { status: MatchStatus }) {
     cancelled: "Cancelled",
   };
   return (
-    <span className={`badge ${map[status]}`}>
+    <span className="ts-badge" style={tsToneStyle[tone[status]]}>
       {status === "completed" && <CheckCircle className="h-3 w-3" />}
       {label[status]}
     </span>
@@ -47,7 +54,7 @@ export function MatchStatusBadge({ status }: { status: MatchStatus }) {
 
 export function MatchTypeBadge({ type, size }: { type: "direct" | "chain"; size: number }) {
   return (
-    <span className={`badge ${type === "direct" ? "bg-brand-100 text-brand-800" : "bg-fuchsia-100 text-fuchsia-800"}`}>
+    <span className="ts-badge" style={tsToneStyle[type === "direct" ? "accent" : "warning"]}>
       {type === "direct" ? "Direct swap" : `${size}-way chain`}
     </span>
   );

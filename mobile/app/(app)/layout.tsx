@@ -1,14 +1,15 @@
 "use client";
 
-import { TopNav } from "@/components/top-nav";
-import { Disclaimer } from "@/components/disclaimer";
-import { isAdminEmail } from "@/lib/env";
-import { useAuth } from "../providers";
+import { usePathname } from "next/navigation";
 import { RequireProfile } from "../_components/guards";
-import { BackBar } from "../_components/back-bar";
+import { BottomTabBar } from "../_components/bottom-tab-bar";
+import { useAuth } from "../providers";
 
-/** Authenticated app shell: guard + top navigation + page content. Mirrors the
- *  web app's src/app/(app)/layout.tsx, but client-rendered. */
+const TAB_ROUTES = ["/dashboard", "/browse", "/notifications", "/profile"];
+
+/** Authenticated app shell: guard + content + the bottom tab bar (shown only
+ *  on the four tab-root screens; every other screen renders its own
+ *  <ScreenHeader> with a back chevron instead). */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <RequireProfile>
@@ -18,17 +19,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  const { profile, session, unreadCount } = useAuth();
-  const isAdmin = Boolean(profile?.is_admin) || isAdminEmail(session?.user.email);
+  const pathname = usePathname();
+  const { unreadCount } = useAuth();
+  const isTab = TAB_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
   return (
-    <div className="min-h-screen">
-      <TopNav signedIn isAdmin={isAdmin} unread={unreadCount} />
-      <BackBar />
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        <Disclaimer className="mb-5" />
-        {children}
-      </main>
+    <div className="relative z-[1] min-h-screen">
+      <main className={`mx-auto max-w-5xl px-5 ${isTab ? "pb-28" : "pb-10"}`}>{children}</main>
+      {isTab && <BottomTabBar unread={unreadCount} />}
     </div>
   );
 }

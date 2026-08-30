@@ -77,17 +77,18 @@ export function AvatarUpload({ userId, onUploaded, variant = "icon" }: AvatarUpl
           aria-label="Change photo"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-sand-800 text-white shadow-warm transition hover:bg-sand-900 disabled:opacity-60"
+          className="grid h-7 w-7 place-items-center rounded-full border-2 shadow-md transition disabled:opacity-60"
+          style={{ borderColor: "var(--ts-bg-outer, #fff)", background: "var(--ts-accent-strong)", color: "var(--ts-on-accent)" }}
         >
           {busy ? <Loader className="h-3.5 w-3.5" /> : <CameraIcon className="h-3.5 w-3.5" />}
         </button>
       ) : (
-        <button type="button" className="btn-secondary" onClick={() => inputRef.current?.click()} disabled={busy}>
+        <button type="button" className="ts-btn-secondary" onClick={() => inputRef.current?.click()} disabled={busy}>
           {busy && <Loader className="h-4 w-4" />}
           {busy ? "Uploading…" : "Change photo"}
         </button>
       )}
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span className="text-xs" style={{ color: "var(--ts-danger)" }}>{error}</span>}
     </span>
   );
 }

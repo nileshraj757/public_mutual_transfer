@@ -41,13 +41,19 @@ export function HeroSwap({ className = "w-full h-auto" }: { className?: string }
   );
 }
 
-/** Friendly empty-state glyph — a dashed circle with a small compass/pin. */
+/** Friendly empty-state glyph — a dashed circle with a small compass/pin.
+ *  Colors resolve via currentColor/var() so it adapts to the ts-* glass theme
+ *  wherever it's used; falls back to the original warm palette otherwise. */
 export function EmptyState({ className = "h-16 w-16" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#E7E0D3" strokeWidth="2.5" strokeDasharray="1 8" strokeLinecap="round" />
-      <path d="M32 20a10 10 0 0 1 10 10c0 6.5-10 16-10 16s-10-9.5-10-16a10 10 0 0 1 10-10Z" fill="#E3F0EA" stroke="#9DC3B2" strokeWidth="1.5" />
-      <circle cx="32" cy="30" r="3.5" fill="#146152" />
+    <svg viewBox="0 0 64 64" className={className} aria-hidden style={{ color: "var(--ts-muted-2, #9DC3B2)" }}>
+      <circle cx="32" cy="32" r="26" fill="none" style={{ stroke: "var(--ts-border, #E7E0D3)" }} strokeWidth="2.5" strokeDasharray="1 8" strokeLinecap="round" />
+      <path
+        d="M32 20a10 10 0 0 1 10 10c0 6.5-10 16-10 16s-10-9.5-10-16a10 10 0 0 1 10-10Z"
+        style={{ fill: "var(--ts-accent-soft, #E3F0EA)", stroke: "currentColor" }}
+        strokeWidth="1.5"
+      />
+      <circle cx="32" cy="30" r="3.5" style={{ fill: "var(--ts-accent-strong, #146152)" }} />
     </svg>
   );
 }

@@ -1,36 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { callFn } from "@/lib/functions";
+import { Shield, Settings, Flag, BarChart, Refresh } from "@/components/icons";
+import { ScreenHeader } from "../../_components/screen-header";
 import { useAuth } from "../../providers";
+import { useToast } from "../../_components/toast";
 import { Splash } from "../../_components/splash";
 
 interface Stats {
-  profiles: number;
   pending: number;
-  matches: number;
   reports: number;
 }
 
-export default function AdminOverviewPage() {
+export default function AdminHubPage() {
   const { supabase } = useAuth();
+  const router = useRouter();
+  const toast = useToast();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [pending, setPending] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [recomputing, setRecomputing] = useState(false);
 
   async function load() {
-    const [profiles, pendingCount, matches, reports] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
+    const [pendingCount, reports] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-      supabase.from("matches").select("id", { count: "exact", head: true }),
       supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     ]);
-    setStats({
-      profiles: profiles.count ?? 0,
-      pending: pendingCount.count ?? 0,
-      matches: matches.count ?? 0,
-      reports: reports.count ?? 0,
-    });
+    setStats({ pending: pendingCount.count ?? 0, reports: reports.count ?? 0 });
   }
 
   useEffect(() => {
@@ -39,49 +35,54 @@ export default function AdminOverviewPage() {
   }, [supabase]);
 
   async function recompute() {
-    setPending(true);
-    setMsg("");
+    setRecomputing(true);
     try {
       const data = await callFn<{ created?: number }>(supabase, "match-recompute-all");
-      setMsg(data.created ? `${data.created} new match(es) created.` : "Up to date — no new matches.");
-      await load();
+      toast.show(data.created ? `${data.created} new match(es) created.` : "Up to date — no new matches.");
+      load();
     } catch (e) {
-      setMsg((e as Error).message || "Recompute failed.");
+      toast.show((e as Error).message || "Recompute failed.");
     } finally {
-      setPending(false);
+      setRecomputing(false);
     }
   }
 
   if (!stats) return <Splash />;
 
   const cards = [
-    { label: "Total profiles", value: stats.profiles },
-    { label: "Pending verification", value: stats.pending },
-    { label: "Cached matches", value: stats.matches },
-    { label: "Open reports", value: stats.reports },
+    { href: "/admin/verification", label: "Verification", icon: Shield, meta: `${stats.pending} pending`, color: "var(--ts-accent)" },
+    { href: "/admin/rules", label: "Rules engine", icon: Settings, meta: "Eligibility config", color: "var(--ts-accent)" },
+    { href: "/admin/reports", label: "Reports", icon: Flag, meta: `${stats.reports} open`, color: "var(--ts-warning)" },
+    { href: "/admin/analytics", label: "Analytics", icon: BarChart, meta: "Demand & matches", color: "var(--ts-accent)" },
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-4">
-        {cards.map((s) => (
-          <div key={s.label} className="card">
-            <p className="font-display text-2xl font-semibold text-sand-900">{s.value}</p>
-            <p className="text-sm text-sand-500">{s.label}</p>
-          </div>
+    <div>
+      <ScreenHeader title="Admin" />
+      <div className="grid grid-cols-2 gap-3">
+        {cards.map((c) => (
+          <button
+            key={c.href}
+            type="button"
+            onClick={() => router.push(c.href)}
+            className="ts-card text-left transition active:scale-[0.98]"
+          >
+            <c.icon className="h-5 w-5" style={{ color: c.color }} />
+            <p className="mt-2.5 text-sm font-semibold" style={{ color: "var(--ts-text-strong)" }}>{c.label}</p>
+            <p className="mt-0.5 text-[11px]" style={{ color: "var(--ts-muted)" }}>{c.meta}</p>
+          </button>
         ))}
       </div>
 
-      <div className="card flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-semibold text-sand-900">Recompute all matches</h2>
-          <p className="text-sm text-sand-600">Rebuilds the full match graph (direct + chains) for every active profile.</p>
-          {msg && <p className="mt-1 text-xs text-sand-500">{msg}</p>}
-        </div>
-        <button className="btn-primary" type="button" onClick={recompute} disabled={pending}>
-          {pending ? "Recomputing…" : "Recompute now"}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={recompute}
+        disabled={recomputing}
+        className="ts-btn-secondary mt-4 w-full gap-2 text-xs"
+      >
+        <Refresh className={`h-3.5 w-3.5 ${recomputing ? "animate-spin" : ""}`} />
+        {recomputing ? "Recomputing…" : "Recompute all matches"}
+      </button>
     </div>
   );
 }

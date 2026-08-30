@@ -29,16 +29,16 @@ export function PreferencesEditor({ initial, onSubmit, afterSave, lockedUntil = 
   if (isPreferencesLocked(lockedUntil)) {
     const until = new Date(lockedUntil!).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
     return (
-      <div className="card border-amber-300 bg-amber-50 text-sm text-amber-900">
-        <p className="font-medium">Preferred districts are locked until {until}.</p>
-        <p className="mt-1">
+      <div className="ts-card text-sm" style={{ borderColor: "var(--ts-warning-border)", color: "var(--ts-text-strong)" }}>
+        <p className="font-semibold">Preferred districts are locked until {until}.</p>
+        <p className="mt-1" style={{ color: "var(--ts-muted)" }}>
           To prevent fake or frequently-changing preferences, your list locks for 30 days after every save. You&apos;ll
           be able to edit it again after that date.
         </p>
         {rows.length > 0 && (
-          <ol className="mt-3 space-y-1 border-t border-amber-200 pt-3">
+          <ol className="mt-3 space-y-1 border-t pt-3" style={{ borderColor: "var(--ts-border)" }}>
             {rows.map((r, i) => (
-              <li key={`${r.preferred_state}-${r.preferred_district}`} className="text-amber-800">
+              <li key={`${r.preferred_state}-${r.preferred_district}`} style={{ color: "var(--ts-muted)" }}>
                 {i + 1}. {r.preferred_district}, {r.preferred_state}
               </li>
             ))}
@@ -67,16 +67,15 @@ export function PreferencesEditor({ initial, onSubmit, afterSave, lockedUntil = 
   }
 
   return (
-    <div className="space-y-5">
-      <div className="card space-y-3">
-        <h2 className="font-semibold text-sand-900">Your preferred districts (highest priority first)</h2>
-        <p className="text-xs text-sand-500">This list locks for 30 days after you save, so choose carefully.</p>
-        <PreferenceRowsEditor rows={rows} onChange={setRows} />
-      </div>
+    <div className="space-y-4">
+      <p className="text-sm leading-relaxed" style={{ color: "var(--ts-muted)" }}>
+        Rank the districts you&apos;d swap into. This list locks for 30 days after you save, so choose carefully.
+      </p>
+      <PreferenceRowsEditor rows={rows} onChange={setRows} />
 
-      {msg && <p className={`text-sm ${msg.ok ? "text-green-600" : "text-red-600"}`}>{msg.text}</p>}
+      {msg && <p className="text-sm" style={{ color: msg.ok ? "var(--ts-accent-strong)" : "var(--ts-danger)" }}>{msg.text}</p>}
 
-      <button type="button" className="btn-primary" onClick={save} disabled={pending || rows.length === 0}>
+      <button type="button" className="ts-btn-primary w-full" onClick={save} disabled={pending || rows.length === 0}>
         {pending && <Loader className="h-4 w-4" />}
         {pending ? "Saving…" : onboarding ? "Save & see my matches" : "Save preferences"}
       </button>

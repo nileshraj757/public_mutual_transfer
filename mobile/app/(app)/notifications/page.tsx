@@ -24,12 +24,7 @@ export default function NotificationsPage() {
   const load = useCallback(async () => {
     if (!profile) return;
     const [{ data }, isLocked] = await Promise.all([
-      supabase
-        .from("notifications")
-        .select("*")
-        .eq("profile_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(100),
+      supabase.from("notifications").select("*").eq("profile_id", profile.id).order("created_at", { ascending: false }).limit(100),
       isPremiumLockedClient(supabase, profile.id),
     ]);
     setNotifications((data ?? []) as NotificationRow[]);
@@ -51,32 +46,31 @@ export default function NotificationsPage() {
 
   const hasUnread = notifications.some((n) => !n.read);
 
-  if (locked) {
-    return (
-      <PremiumTeaser
-        headline={`${notifications.length} alert${notifications.length === 1 ? "" : "s"}`}
-        blurb="Subscribe to see match alerts, connection requests, and messages as they happen."
-      >
-        <div className="card h-64" />
-      </PremiumTeaser>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-sand-900">Notifications</h1>
-        {hasUnread && (
-          <button className="btn-secondary" type="button" onClick={markAllRead}>
+    <div>
+      <div
+        className="sticky top-0 z-10 -mx-5 mb-4 flex items-center justify-between border-b px-5 py-4 backdrop-blur-xl [padding-top:calc(env(safe-area-inset-top)+1rem)]"
+        style={{ background: "var(--ts-sticky-bg)", borderColor: "var(--ts-border)" }}
+      >
+        <p className="font-display text-xl font-bold tracking-[-0.3px]" style={{ color: "var(--ts-text-strong)" }}>Notifications</p>
+        {hasUnread && !locked && (
+          <button type="button" className="ts-btn-secondary px-3 py-2 text-xs" onClick={markAllRead}>
             Mark all read
           </button>
         )}
       </div>
 
-      {notifications.length === 0 ? (
-        <p className="card text-sm text-sand-500">No notifications yet. We&apos;ll alert you when a new match appears.</p>
+      {locked ? (
+        <PremiumTeaser
+          headline={`${notifications.length} alert${notifications.length === 1 ? "" : "s"}`}
+          blurb="Subscribe to see match alerts, connection requests, and messages as they happen."
+        >
+          <div className="ts-card h-64" />
+        </PremiumTeaser>
+      ) : notifications.length === 0 ? (
+        <p className="ts-card text-sm" style={{ color: "var(--ts-muted)" }}>No notifications yet. We&apos;ll alert you when a new match appears.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {notifications.map((n) => (
             <li key={n.id}>
               <NotificationItem n={n} href={mobileLink(n.link)} onRead={refreshUnread} />

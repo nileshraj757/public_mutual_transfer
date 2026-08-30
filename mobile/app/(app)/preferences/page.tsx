@@ -5,6 +5,7 @@ import { PreferencesEditor } from "@/app/(app)/preferences/preferences-editor";
 import { RelaxedRulesPanel } from "@/components/relaxed-rules-panel";
 import { savePreferencesForm, type PrefInput } from "@/lib/preferences-core";
 import { callFn } from "@/lib/functions";
+import { ScreenHeader } from "../../_components/screen-header";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
@@ -22,12 +23,7 @@ export default function PreferencesPage() {
         .eq("profile_id", profile.id)
         .order("rank");
       if (active) {
-        setInitial(
-          (data ?? []).map((p) => ({
-            preferred_state: p.preferred_state,
-            preferred_district: p.preferred_district,
-          }))
-        );
+        setInitial((data ?? []).map((p) => ({ preferred_state: p.preferred_state, preferred_district: p.preferred_district })));
       }
     })();
     return () => {
@@ -51,14 +47,11 @@ export default function PreferencesPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-semibold text-sand-900">Where do you want to go?</h1>
-        <p className="mt-1 text-sm text-sand-600">
-          List the districts you&apos;d accept a transfer to, most-wanted first. We match these against other
-          employees&apos; current postings.
-        </p>
-      </div>
-      <div className="mb-6">
+      <ScreenHeader title="Preferences" />
+      <p className="mb-4 text-sm leading-relaxed" style={{ color: "var(--ts-muted)" }}>
+        Ranked districts you&apos;d swap into, in priority order.
+      </p>
+      <div className="mb-5">
         <RelaxedRulesPanel profileId={profile.id} initial={profile.relaxed_rules} />
       </div>
       <Suspense>

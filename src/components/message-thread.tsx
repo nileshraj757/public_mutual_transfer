@@ -80,20 +80,27 @@ export function MessageThread({ matchId, selfId, labels }: MessageThreadProps) {
   }
 
   return (
-    <div className="card">
-      <h3 className="mb-3 font-semibold text-sand-900">Messages</h3>
-      <div className="mb-3 max-h-80 space-y-2 overflow-y-auto rounded-lg bg-sand-50 p-3">
+    <div className="ts-card">
+      <p className="mb-3 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>CHAT</p>
+      <div className="mb-3 max-h-80 space-y-2 overflow-y-auto">
         {messages.length === 0 ? (
-          <p className="text-center text-sm text-sand-400">No messages yet. Say hello and coordinate your swap.</p>
+          <p className="py-4 text-center text-sm" style={{ color: "var(--ts-faint)" }}>No messages yet. Say hello and coordinate your swap.</p>
         ) : (
           messages.map((m) => {
             const mine = m.sender_profile_id === selfId;
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${mine ? "bg-brand-600 text-white" : "bg-white text-sand-800 shadow-sm"}`}>
-                  {!mine && <p className="mb-0.5 text-[11px] font-medium opacity-70">{labels[m.sender_profile_id] ?? "Member"}</p>}
+                <div
+                  className="max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm"
+                  style={
+                    mine
+                      ? { background: "linear-gradient(135deg, var(--ts-accent), var(--ts-accent-strong))", color: "var(--ts-on-accent)" }
+                      : { background: "var(--ts-surface)", color: "var(--ts-text-strong)" }
+                  }
+                >
+                  {!mine && <p className="mb-0.5 text-[11px] font-semibold opacity-70">{labels[m.sender_profile_id] ?? "Member"}</p>}
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                  <p className={`mt-0.5 text-[10px] ${mine ? "text-brand-100" : "text-sand-400"}`}>
+                  <p className="mt-0.5 text-[10px] opacity-60">
                     {new Date(m.created_at).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
                   </p>
                 </div>
@@ -103,16 +110,16 @@ export function MessageThread({ matchId, selfId, labels }: MessageThreadProps) {
         )}
         <div ref={bottomRef} />
       </div>
-      {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-2 text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
       <form onSubmit={send} className="flex gap-2">
         <input
-          className="input"
-          placeholder="Type a message…"
+          className="ts-input"
+          placeholder="Message…"
           value={body}
           maxLength={4000}
           onChange={(e) => setBody(e.target.value)}
         />
-        <button className="btn-primary" disabled={sending || !body.trim()}>Send</button>
+        <button className="ts-btn-primary px-4" disabled={sending || !body.trim()}>Send</button>
       </form>
     </div>
   );

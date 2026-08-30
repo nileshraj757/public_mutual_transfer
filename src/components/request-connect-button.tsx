@@ -60,12 +60,16 @@ export function RequestConnectButton({ profileId }: { profileId: string }) {
   }
 
   if (status === "sent") {
-    return <span className="badge bg-green-100 text-green-800">Requested</span>;
+    return (
+      <span className="ts-badge" style={{ background: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" }}>
+        Requested
+      </span>
+    );
   }
 
   if (locked) {
     return (
-      <Link href="/billing" className="btn-secondary block w-full text-center">
+      <Link href="/billing" className="ts-btn-secondary block w-full text-center text-xs">
         Subscribe to send requests
       </Link>
     );
@@ -73,10 +77,10 @@ export function RequestConnectButton({ profileId }: { profileId: string }) {
 
   return (
     <div className="space-y-1">
-      <button type="button" className="btn-secondary w-full" onClick={send} disabled={status === "sending"}>
+      <button type="button" className="ts-btn-secondary w-full py-2.5 text-xs" onClick={send} disabled={status === "sending"}>
         {status === "sending" ? "Sending…" : "Request to connect"}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs" style={{ color: "var(--ts-danger)" }}>{error}</p>}
     </div>
   );
 }

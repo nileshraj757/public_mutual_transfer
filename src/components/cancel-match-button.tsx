@@ -52,10 +52,10 @@ export function CancelMatchButton({
 
   return (
     <div className="space-y-1">
-      <button type="button" className="btn-secondary" onClick={cancel} disabled={pending}>
+      <button type="button" className="ts-btn-secondary px-4 py-2.5 text-xs" onClick={cancel} disabled={pending}>
         {pending ? "Saving…" : label}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs" style={{ color: "var(--ts-danger)" }}>{error}</p>}
     </div>
   );
 }

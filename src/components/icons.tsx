@@ -286,6 +286,23 @@ export function Download(props: IconProps) {
   );
 }
 
+export function Chat(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+export function Refresh(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M21 12a9 9 0 1 1-3-6.7" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  );
+}
+
 export function Star(props: IconProps) {
   return (
     <svg {...base(props)} fill="currentColor" stroke="none">

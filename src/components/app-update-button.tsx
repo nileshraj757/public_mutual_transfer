@@ -99,40 +99,40 @@ export function AppUpdateButton() {
   return (
     <div className="space-y-3">
       {currentVersion && (
-        <p className="text-sm text-sand-600">
+        <p className="text-sm" style={{ color: "var(--ts-muted)" }}>
           Current version: {currentVersion === "builtin" ? "Built-in" : currentVersion}
         </p>
       )}
 
-      {status === "up-to-date" && <p className="text-sm text-sand-600">You&apos;re on the latest version.</p>}
+      {status === "up-to-date" && <p className="text-sm" style={{ color: "var(--ts-muted)" }}>You&apos;re on the latest version.</p>}
       {status === "update-available" && (
-        <p className="text-sm text-sand-600">Update {pending?.version} is available.</p>
+        <p className="text-sm" style={{ color: "var(--ts-muted)" }}>Update {pending?.version} is available.</p>
       )}
-      {status === "downloaded" && <p className="text-sm text-green-700">Update downloaded and ready to install.</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {status === "downloaded" && <p className="text-sm" style={{ color: "var(--ts-accent-strong)" }}>Update downloaded and ready to install.</p>}
+      {error && <p className="text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
 
       {status === "update-available" ? (
         <div className="flex gap-2">
-          <button type="button" className="btn-primary" onClick={download}>
+          <button type="button" className="ts-btn-primary" onClick={download}>
             Download update
           </button>
-          <button type="button" className="btn-secondary" onClick={later}>
+          <button type="button" className="ts-btn-secondary" onClick={later}>
             Later
           </button>
         </div>
       ) : status === "downloaded" ? (
         <div className="flex gap-2">
-          <button type="button" className="btn-primary" onClick={installNow}>
+          <button type="button" className="ts-btn-primary" onClick={installNow}>
             Install now (restarts app)
           </button>
-          <button type="button" className="btn-secondary" onClick={later}>
+          <button type="button" className="ts-btn-secondary" onClick={later}>
             Later
           </button>
         </div>
       ) : (
         <button
           type="button"
-          className="btn-secondary"
+          className="ts-btn-secondary"
           onClick={check}
           disabled={status === "checking" || status === "downloading"}
         >

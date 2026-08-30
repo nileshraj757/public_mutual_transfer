@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
+import { ToastProvider } from "./_components/toast";
 
 interface AuthValue {
   /** True until the first session + profile resolution completes. */
@@ -119,7 +120,11 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     },
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      <ToastProvider>{children}</ToastProvider>
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthValue {

@@ -33,12 +33,14 @@ export function SwapRoute({
     return (
       <div className="space-y-1 text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-brand-600 px-2 py-0.5 text-xs font-medium text-white">You</span>
-          <span className="text-sand-500">{loc(members[selfIdx])}</span>
-          <span aria-hidden className="text-brand-600">→</span>
-          <span className="font-semibold text-sand-900">{loc(destOf(selfIdx))}</span>
+          <span className="rounded-md px-2 py-0.5 text-xs font-semibold" style={{ background: "var(--ts-accent)", color: "var(--ts-on-accent)" }}>
+            You
+          </span>
+          <span style={{ color: "var(--ts-muted)" }}>{loc(members[selfIdx])}</span>
+          <span aria-hidden style={{ color: "var(--ts-accent-strong)" }}>→</span>
+          <span className="font-semibold" style={{ color: "var(--ts-text-strong)" }}>{loc(destOf(selfIdx))}</span>
         </div>
-        <p className="text-xs text-sand-400">{type === "direct" ? "Two-way mutual swap" : `${n}-way chain swap`}</p>
+        <p className="text-xs" style={{ color: "var(--ts-faint)" }}>{type === "direct" ? "Two-way mutual swap" : `${n}-way chain swap`}</p>
       </div>
     );
   }

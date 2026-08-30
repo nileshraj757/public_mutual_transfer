@@ -36,23 +36,23 @@ export function RelaxedRulesPanel({ profileId, initial }: { profileId: string; i
   }
 
   return (
-    <div className="card space-y-3">
+    <div className="ts-card space-y-3">
       <div>
-        <h2 className="font-semibold text-sand-900">Matching strictness</h2>
-        <p className="text-sm text-sand-600">
+        <h2 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>MATCHING STRICTNESS</h2>
+        <p className="mt-1.5 text-sm" style={{ color: "var(--ts-muted)" }}>
           By default a swap must match on cadre, designation and pay level for both sides. Uncheck any of these to
           also see otherwise-similar matches for yourself.
         </p>
       </div>
       <div className="space-y-2">
         {KEYS.map(({ key, label }) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-sand-700">
+          <label key={key} className="flex items-center gap-2.5 text-sm" style={{ color: "var(--ts-text-strong)" }}>
             <input type="checkbox" checked={!relaxed.has(key)} onChange={() => toggle(key)} disabled={pending} />
             {label}
           </label>
         ))}
       </div>
-      {saved && <p className="text-xs text-green-600">Saved.</p>}
+      {saved && <p className="text-xs" style={{ color: "var(--ts-accent-strong)" }}>Saved.</p>}
     </div>
   );
 }

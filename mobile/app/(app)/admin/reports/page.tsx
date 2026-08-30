@@ -2,10 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { ReportStatus } from "@/lib/types";
+import { ScreenHeader } from "../../../_components/screen-header";
 import { useAuth } from "../../../providers";
 import { Splash } from "../../../_components/splash";
 
 const STATUSES: ReportStatus[] = ["open", "reviewing", "resolved", "dismissed"];
+const STATUS_STYLE: Record<ReportStatus, { bg: string; color: string }> = {
+  open: { bg: "var(--ts-warning-soft)", color: "var(--ts-warning-strong)" },
+  reviewing: { bg: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" },
+  resolved: { bg: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" },
+  dismissed: { bg: "var(--ts-surface)", color: "var(--ts-muted)" },
+};
 
 interface Report {
   id: string;
@@ -37,11 +44,16 @@ export default function ReportsPage() {
   if (reports === null) return <Splash />;
 
   return (
-    <div className="space-y-3">
+    <div>
+      <ScreenHeader title="Reports" />
       {reports.length === 0 ? (
-        <p className="card text-sm text-sand-500">No reports. 🎉</p>
+        <p className="ts-card text-sm" style={{ color: "var(--ts-muted)" }}>No reports.</p>
       ) : (
-        reports.map((r) => <ReportCard key={r.id} report={r} onChange={load} />)
+        <div className="space-y-2.5">
+          {reports.map((r) => (
+            <ReportCard key={r.id} report={r} onChange={load} />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -52,41 +64,47 @@ function ReportCard({ report, onChange }: { report: Report; onChange: () => void
   const [status, setStatus] = useState<ReportStatus>(report.status);
   const [busy, setBusy] = useState(false);
 
-  async function update() {
+  async function update(next: ReportStatus) {
     setBusy(true);
-    await supabase.from("reports").update({ status }).eq("id", report.id);
+    setStatus(next);
+    await supabase.from("reports").update({ status: next }).eq("id", report.id);
     setBusy(false);
     onChange();
   }
 
   return (
-    <div className="card">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-sand-800">{report.reason}</p>
-          <p className="mt-1 text-xs text-sand-400">
-            {new Date(report.created_at).toLocaleString("en-IN")} · reporter {short(report.reporter_profile_id)} · against{" "}
-            {short(report.reported_profile_id)} {report.match_id ? `· match ${short(report.match_id)}` : ""}
-          </p>
-        </div>
-        <span className="badge bg-sand-100 text-sand-700 capitalize">{report.status}</span>
+    <div className="ts-card animate-ts-card-in">
+      <div className="flex items-start justify-between gap-2">
+        <p className="flex-1 text-sm" style={{ color: "var(--ts-text-strong)" }}>{report.reason}</p>
+        <span className="ts-badge flex-none" style={STATUS_STYLE[status]}>{status.toUpperCase()}</span>
       </div>
-      <div className="mt-3 flex items-center gap-2">
+      <p className="mt-1 text-[11px]" style={{ color: "var(--ts-faint)" }}>
+        {new Date(report.created_at).toLocaleString("en-IN")} · reporter {short(report.reporter_profile_id)} · against{" "}
+        {short(report.reported_profile_id)} {report.match_id ? `· match ${short(report.match_id)}` : ""}
+      </p>
+      {status === "open" && (
+        <button
+          type="button"
+          onClick={() => update("resolved")}
+          disabled={busy}
+          className="ts-btn mt-3 px-3.5 py-2 text-xs"
+          style={{ background: "var(--ts-accent-soft)", border: "1px solid var(--ts-accent-border)", color: "var(--ts-accent-strong)" }}
+        >
+          Resolve
+        </button>
+      )}
+      {status !== "open" && (
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as ReportStatus)}
-          className="input max-w-[180px] py-1.5 text-sm"
+          onChange={(e) => update(e.target.value as ReportStatus)}
+          disabled={busy}
+          className="ts-input mt-3 w-auto py-1.5 text-xs"
         >
           {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
+            <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button className="btn-secondary px-3 py-1.5 text-sm" type="button" onClick={update} disabled={busy}>
-          Update
-        </button>
-      </div>
+      )}
     </div>
   );
 }

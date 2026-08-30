@@ -38,10 +38,10 @@ export function ChangePasswordForm() {
   return (
     <form onSubmit={submit} className="space-y-3">
       <div>
-        <label className="label">New password</label>
+        <label className="ts-label">New password</label>
         <input
           type="password"
-          className="input"
+          className="ts-input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={8}
@@ -49,18 +49,18 @@ export function ChangePasswordForm() {
         />
       </div>
       <div>
-        <label className="label">Confirm new password</label>
+        <label className="ts-label">Confirm new password</label>
         <input
           type="password"
-          className="input"
+          className="ts-input"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           minLength={8}
           required
         />
       </div>
-      {msg && <p className={`text-sm ${msg.ok ? "text-green-600" : "text-red-600"}`}>{msg.text}</p>}
-      <button type="submit" className="btn-secondary" disabled={pending}>
+      {msg && <p className="text-sm" style={{ color: msg.ok ? "var(--ts-accent-strong)" : "var(--ts-danger)" }}>{msg.text}</p>}
+      <button type="submit" className="ts-btn-secondary" disabled={pending}>
         {pending ? "Saving…" : "Change password"}
       </button>
     </form>

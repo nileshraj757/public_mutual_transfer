@@ -67,31 +67,33 @@ export function ConsentPanel({ matchId, selfConsented, allConsented, consentedCo
 
   if (allConsented) {
     return (
-      <div className="card border-green-300 bg-green-50">
-        <p className="text-sm font-medium text-green-800">✓ Everyone has consented.</p>
-        <p className="text-sm text-green-700">Contact details are now shared below and messaging is unlocked.</p>
+      <div className="ts-card" style={{ borderColor: "var(--ts-accent-border)", background: "var(--ts-accent-soft)" }}>
+        <p className="text-sm font-semibold" style={{ color: "var(--ts-accent-strong)" }}>✓ Everyone has consented.</p>
+        <p className="text-sm" style={{ color: "var(--ts-text-strong)" }}>Contact details are now shared below and messaging is unlocked.</p>
       </div>
     );
   }
 
   return (
-    <div className="card">
-      <h3 className="font-semibold text-sand-900">Mutual consent</h3>
-      <p className="mt-1 text-sm text-sand-600">
-        Contact details are revealed only when <strong>all {total} parties</strong> opt in. So far {consentedCount} of{" "}
-        {total} are interested.
+    <div className="ts-card">
+      <h3 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>CONSENT</h3>
+      <p className="mt-1.5 text-sm" style={{ color: "var(--ts-muted)" }}>
+        Contact details are revealed only when <strong style={{ color: "var(--ts-text-strong)" }}>all {total} parties</strong> opt in. So far{" "}
+        {consentedCount} of {total} are interested.
       </p>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      <div className="mt-3 flex gap-2">
+      {error && <p className="mt-2 text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {selfConsented ? (
           <>
-            <span className="badge bg-blue-100 text-blue-800">You&apos;re interested — waiting for others</span>
-            <button className="btn-secondary" onClick={() => setConsent(false)} disabled={pending}>
+            <span className="ts-badge" style={{ background: "var(--ts-accent-soft)", color: "var(--ts-accent-strong)" }}>
+              You&apos;re interested — waiting for others
+            </span>
+            <button className="ts-btn-secondary px-4 py-2 text-xs" onClick={() => setConsent(false)} disabled={pending}>
               Withdraw interest
             </button>
           </>
         ) : (
-          <button className="btn-primary" onClick={() => setConsent(true)} disabled={pending}>
+          <button className="ts-btn-primary w-full" onClick={() => setConsent(true)} disabled={pending}>
             {pending ? "Saving…" : "I'm interested"}
           </button>
         )}

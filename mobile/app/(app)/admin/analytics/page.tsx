@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ScreenHeader } from "../../../_components/screen-header";
 import { useAuth } from "../../../providers";
 import { Splash } from "../../../_components/splash";
 
@@ -47,12 +48,12 @@ export default function AnalyticsPage() {
       for (const p of profiles ?? []) upsert(p.current_state, p.current_district, "supply");
 
       const rows = [...demandMap.values()];
-      const topDemand = [...rows].sort((a, b) => b.demand - a.demand).slice(0, 15);
+      const topDemand = [...rows].sort((a, b) => b.demand - a.demand).slice(0, 8);
       const unmet = [...rows]
         .map((r) => ({ ...r, gap: r.demand - r.supply }))
         .filter((r) => r.gap > 0)
         .sort((a, b) => b.gap - a.gap)
-        .slice(0, 15);
+        .slice(0, 8);
       const types = matchesByType.data ?? [];
 
       if (active)
@@ -73,80 +74,60 @@ export default function AnalyticsPage() {
   if (!data) return <Splash />;
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Stat label="Completed swaps" value={data.completed} />
-        <Stat label="Direct matches" value={data.direct} />
-        <Stat label="Chain matches" value={data.chain} />
+    <div>
+      <ScreenHeader title="Analytics" />
+
+      <div className="mb-5 grid grid-cols-3 gap-2.5">
+        <Stat value={data.completed} label="COMPLETED" tone="accent" />
+        <Stat value={data.direct} label="DIRECT" />
+        <Stat value={data.chain} label="CHAIN" tone="warning" />
       </div>
 
-      <section className="card">
-        <h2 className="mb-3 font-semibold text-sand-900">Most-wanted districts (demand)</h2>
-        {data.topDemand.length === 0 ? (
-          <p className="text-sm text-sand-500">No preference data yet.</p>
-        ) : (
-          <ul className="space-y-2">
-            {data.topDemand.map((r) => (
-              <li key={r.key} className="text-sm">
-                <div className="flex justify-between">
-                  <span className="text-sand-700">
-                    {r.district}, {r.state}
-                  </span>
-                  <span className="text-sand-500">
-                    {r.demand} want · {r.supply} here
-                  </span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded bg-sand-100">
-                  <div className="h-full rounded bg-brand-500" style={{ width: `${(r.demand / data.maxDemand) * 100}%` }} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <p className="mb-2.5 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>DEMAND PER DISTRICT</p>
+      {data.topDemand.length === 0 ? (
+        <p className="ts-card text-sm" style={{ color: "var(--ts-muted)" }}>No preference data yet.</p>
+      ) : (
+        <div className="ts-card mb-5 space-y-3.5">
+          {data.topDemand.map((r) => (
+            <div key={r.key}>
+              <div className="mb-1.5 flex justify-between text-xs" style={{ color: "var(--ts-muted)" }}>
+                <span>{r.district}, {r.state}</span>
+                <span>{r.demand} want · {r.supply} here</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--ts-border)" }}>
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${(r.demand / data.maxDemand) * 100}%`, background: "linear-gradient(90deg, var(--ts-accent), var(--ts-warning))" }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <section className="card">
-        <h2 className="mb-3 font-semibold text-sand-900">Unmet-demand heatmap (demand &gt; supply)</h2>
-        {data.unmet.length === 0 ? (
-          <p className="text-sm text-sand-500">No unmet demand detected.</p>
-        ) : (
-          <div className="-mx-5 overflow-x-auto px-5">
-            <table className="w-full min-w-[480px] text-sm">
-              <thead>
-                <tr className="text-left text-sand-500">
-                  <th className="py-1">District</th>
-                  <th className="py-1 text-right">Want to move in</th>
-                  <th className="py-1 text-right">Currently posted</th>
-                  <th className="py-1 text-right">Gap</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.unmet.map((r) => (
-                  <tr key={r.key} className="border-t border-sand-100">
-                    <td className="py-1.5">
-                      {r.district}, {r.state}
-                    </td>
-                    <td className="py-1.5 text-right">{r.demand}</td>
-                    <td className="py-1.5 text-right">{r.supply}</td>
-                    <td className="py-1.5 text-right">
-                      <span className="badge bg-amber-100 text-amber-800">+{r.gap}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {data.unmet.length > 0 && (
+        <>
+          <p className="mb-2.5 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>UNMET DEMAND</p>
+          <div className="ts-card space-y-2">
+            {data.unmet.map((r) => (
+              <div key={r.key} className="flex items-center justify-between gap-2 border-t pt-2 text-sm first:border-0 first:pt-0" style={{ borderColor: "var(--ts-border)" }}>
+                <span style={{ color: "var(--ts-text-strong)" }}>{r.district}, {r.state}</span>
+                <span className="ts-badge" style={{ background: "var(--ts-warning-soft)", color: "var(--ts-warning-strong)" }}>+{r.gap}</span>
+              </div>
+            ))}
           </div>
-        )}
-      </section>
+        </>
+      )}
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ value, label, tone }: { value: number; label: string; tone?: "accent" | "warning" }) {
+  const color = tone === "accent" ? "var(--ts-accent-strong)" : tone === "warning" ? "var(--ts-warning)" : "var(--ts-text-strong)";
   return (
-    <div className="card">
-      <p className="font-display text-2xl font-semibold text-sand-900">{value}</p>
-      <p className="text-sm text-sand-500">{label}</p>
+    <div className="ts-card text-center">
+      <p className="font-display text-xl font-bold" style={{ color }}>{value}</p>
+      <p className="mt-1 text-[9px] font-semibold tracking-[0.4px]" style={{ color: "var(--ts-faint)" }}>{label}</p>
     </div>
   );
 }

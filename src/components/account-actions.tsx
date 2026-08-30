@@ -30,17 +30,31 @@ export function ActiveToggle({ initial, onDone }: { initial: boolean; onDone?: (
   }
 
   return (
-    <label className="flex items-center gap-3">
-      <input type="checkbox" checked={active} onChange={toggle} disabled={pending} className="h-4 w-4" />
-      <span className="text-sm text-sand-700">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm" style={{ color: "var(--ts-text-strong)" }}>
         {active ? "Active — I appear in matches" : "Paused — hidden from matching"}
       </span>
-    </label>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={active}
+        disabled={pending}
+        onClick={toggle}
+        className="relative h-[26px] w-11 flex-none rounded-full transition disabled:opacity-50"
+        style={{ background: active ? "var(--ts-accent)" : "var(--ts-border-strong)" }}
+      >
+        <span
+          className="absolute top-[3px] h-5 w-5 rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(.34,1.56,.64,1)]"
+          style={{ left: 3, transform: `translateX(${active ? 18 : 0}px)` }}
+        />
+      </button>
+    </div>
   );
 }
 
 export function DeleteAccountButton() {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -69,17 +83,35 @@ export function DeleteAccountButton() {
     });
   }
 
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-sand-600">
-        This permanently deletes your profile, preferences, matches, messages, notifications and your login — everything.
-        This cannot be undone. Type <strong>DELETE</strong> to confirm.
-      </p>
-      <input className="input max-w-xs" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="DELETE" />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button className="btn-danger" onClick={remove} disabled={pending || confirm !== "DELETE"}>
-        {pending ? "Deleting…" : "Delete my account and all my data"}
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full rounded-2xl border py-3.5 text-sm font-semibold transition"
+        style={{ background: "var(--ts-danger-soft)", borderColor: "var(--ts-danger-border)", color: "var(--ts-danger)" }}
+      >
+        Delete my account
       </button>
+    );
+  }
+
+  return (
+    <div className="animate-ts-card-in space-y-3 rounded-2xl border p-3.5" style={{ background: "var(--ts-danger-soft)", borderColor: "var(--ts-danger-border)" }}>
+      <p className="text-sm" style={{ color: "var(--ts-text-strong)" }}>
+        This permanently deletes your profile, preferences, matches, messages, notifications and your login —
+        everything. This cannot be undone. Type <strong>DELETE</strong> to confirm.
+      </p>
+      <input className="ts-input" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="DELETE" />
+      {error && <p className="text-sm" style={{ color: "var(--ts-danger)" }}>{error}</p>}
+      <div className="flex gap-2">
+        <button type="button" className="ts-btn-secondary flex-1 text-xs" onClick={() => setOpen(false)} disabled={pending}>
+          Cancel
+        </button>
+        <button type="button" className="ts-btn-danger flex-1 text-xs" onClick={remove} disabled={pending || confirm !== "DELETE"}>
+          {pending ? "Deleting…" : "Delete my account"}
+        </button>
+      </div>
     </div>
   );
 }

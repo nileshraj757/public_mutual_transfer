@@ -27,19 +27,19 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string | null 
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      {currentEmail && <p className="text-sm text-sand-600">Current: {currentEmail}</p>}
+      {currentEmail && <p className="text-sm" style={{ color: "var(--ts-muted)" }}>Current: {currentEmail}</p>}
       <div>
-        <label className="label">New email</label>
+        <label className="ts-label">New email</label>
         <input
           type="email"
-          className="input"
+          className="ts-input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
       </div>
-      {msg && <p className={`text-sm ${msg.ok ? "text-green-600" : "text-red-600"}`}>{msg.text}</p>}
-      <button type="submit" className="btn-secondary" disabled={pending || !email}>
+      {msg && <p className="text-sm" style={{ color: msg.ok ? "var(--ts-accent-strong)" : "var(--ts-danger)" }}>{msg.text}</p>}
+      <button type="submit" className="ts-btn-secondary" disabled={pending || !email}>
         {pending ? "Saving…" : "Change email"}
       </button>
     </form>

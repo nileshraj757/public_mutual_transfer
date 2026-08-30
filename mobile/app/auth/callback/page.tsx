@@ -69,11 +69,11 @@ export default function AuthCallbackPage() {
     return (
       <main className="grid min-h-screen place-items-center p-8 text-center">
         <div className="max-w-sm">
-          <h1 className="font-display text-xl font-semibold text-sand-900">Sign-in link invalid</h1>
-          <p className="mt-2 text-sm text-sand-600">
+          <h1 className="font-display text-xl font-bold" style={{ color: "var(--ts-text-strong)" }}>Sign-in link invalid</h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--ts-muted)" }}>
             That link has expired or was already used. Please request a new one.
           </p>
-          <button className="btn-primary mt-4" onClick={() => router.replace("/sign-in")}>
+          <button className="ts-btn-primary mt-4" onClick={() => router.replace("/sign-in")}>
             Back to sign in
           </button>
         </div>

@@ -39,7 +39,7 @@ export function BrowseFilters() {
   }
 
   return (
-    <div className="card space-y-3">
+    <div className="ts-card space-y-3">
       <LocationSelect
         defaultState={state}
         defaultDistrict={district}
@@ -50,16 +50,16 @@ export function BrowseFilters() {
       />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
-          <label className="label">Cadre</label>
-          <select className="input" value={cadre} disabled={related} onChange={(e) => setCadre(e.target.value)}>
+          <label className="ts-label">Cadre</label>
+          <select className="ts-input" value={cadre} disabled={related} onChange={(e) => setCadre(e.target.value)}>
             <option value="">Any</option>
             {CADRE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
-          <label className="label">Designation / post</label>
+          <label className="ts-label">Designation / post</label>
           <input
-            className="input"
+            className="ts-input"
             value={designation}
             placeholder="Any"
             disabled={related}
@@ -68,22 +68,22 @@ export function BrowseFilters() {
           />
         </div>
         <div>
-          <label className="label">Grade pay</label>
-          <select className="input" value={pay} disabled={related} onChange={(e) => setPay(e.target.value)}>
+          <label className="ts-label">Grade pay</label>
+          <select className="ts-input" value={pay} disabled={related} onChange={(e) => setPay(e.target.value)}>
             <option value="">Any</option>
             {GRADE_PAY_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm text-sand-700">
+      <label className="flex items-center gap-2 text-sm" style={{ color: "var(--ts-muted)" }}>
         <input type="checkbox" checked={related} onChange={(e) => setRelated(e.target.checked)} />
         Show other related posts (ignore cadre/designation/pay level filters)
       </label>
       <div className="flex gap-2">
-        <button type="button" className="btn-primary" onClick={search}>
+        <button type="button" className="ts-btn-primary px-4 py-2.5 text-xs" onClick={search}>
           Search
         </button>
-        <button type="button" className="btn-secondary" onClick={clear}>
+        <button type="button" className="ts-btn-secondary px-4 py-2.5 text-xs" onClick={clear}>
           Clear
         </button>
       </div>
