@@ -1,31 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { ProfileForm } from "@/components/profile-form";
+import { PreferencesEditor } from "@/app/(app)/preferences/preferences-editor";
+import { AvatarUpload } from "@/components/avatar-upload";
 import { VerificationBadge } from "@/components/badges";
-import { MapPin, Users, Mail, Phone } from "@/components/icons";
+import { MapPin, Users, Mail, Phone, Flag } from "@/components/icons";
 import type { ActionResult } from "@/lib/profile-core";
+import { isPreferencesLocked, type PrefInput } from "@/lib/preferences-core";
 import type { Profile } from "@/lib/types";
 
 interface ProfilePanelProps {
   profile: Profile;
   /** Login email — displayed read-only; it can never be changed. */
   email: string | null;
-  /** Persist edits (web server action or mobile Supabase upsert). */
+  /** Persist profile edits (web server action or mobile Supabase upsert). */
   onSubmit: (formData: FormData) => Promise<ActionResult>;
-  /** Re-fetch after a successful save (mobile). */
+  /** Re-fetch after a successful profile save (mobile). */
   afterSave?: () => void;
+  /** Current ranked preference list, highest priority first. */
+  preferences: PrefInput[];
+  /** Persist the preference list (web server action or mobile upsert). */
+  onSubmitPreferences: (prefs: PrefInput[]) => Promise<ActionResult>;
+  /** Re-fetch after a successful preferences save (mobile). */
+  afterSavePreferences?: () => void;
 }
 
 /**
  * The Profile tab: a clean, informative read-only summary with a photo/initials
- * badge at the top and an "Edit profile" button that swaps in the full form.
+ * badge at the top, an "Edit profile" button that swaps in the full form, and a
+ * "Posting preferences" section (folded in here rather than a separate tab) with
+ * its own "Edit preferences" button that swaps in the ranked-district editor.
  * Email is shown but never editable.
  */
-export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePanelProps) {
-  const [editing, setEditing] = useState(false);
+export function ProfilePanel({
+  profile,
+  email,
+  onSubmit,
+  afterSave,
+  preferences,
+  onSubmitPreferences,
+  afterSavePreferences,
+}: ProfilePanelProps) {
+  const [mode, setMode] = useState<"view" | "profile" | "preferences">("view");
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
+  const locked = isPreferencesLocked(profile.preferences_locked_until);
 
-  if (editing) {
+  if (mode === "profile") {
     return (
       <div>
         <div className="mb-6 flex items-center justify-between gap-3">
@@ -33,7 +54,7 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
             <h1 className="font-display text-2xl font-semibold text-sand-900">Edit profile</h1>
             <p className="mt-1 text-sm text-sand-600">Keep this accurate — it drives your matches.</p>
           </div>
-          <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>
+          <button type="button" className="btn-secondary" onClick={() => setMode("view")}>
             Cancel
           </button>
         </div>
@@ -51,9 +72,37 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
           onSubmit={onSubmit}
           afterSave={() => {
             afterSave?.();
-            setEditing(false);
+            setMode("view");
           }}
         />
+      </div>
+    );
+  }
+
+  if (mode === "preferences") {
+    return (
+      <div>
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold text-sand-900">Posting preferences</h1>
+            <p className="mt-1 text-sm text-sand-600">
+              List the districts you&apos;d accept a transfer to, most-wanted first. We match these against other
+              employees&apos; current postings.
+            </p>
+          </div>
+          <button type="button" className="btn-secondary" onClick={() => setMode("view")}>
+            Done
+          </button>
+        </div>
+
+        <Suspense>
+          <PreferencesEditor
+            initial={preferences}
+            onSubmit={onSubmitPreferences}
+            afterSave={afterSavePreferences}
+            lockedUntil={profile.preferences_locked_until}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -66,7 +115,12 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
       {/* Header — photo badge + identity */}
       <div className="card">
         <div className="flex items-start gap-4">
-          <Avatar name={profile.full_name} />
+          <div className="relative shrink-0">
+            <Avatar name={profile.full_name} url={avatarUrl} />
+            <span className="absolute -bottom-1 -right-1">
+              <AvatarUpload userId={profile.id} onUploaded={setAvatarUrl} />
+            </span>
+          </div>
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-2xl font-semibold leading-tight text-sand-900">
               {profile.full_name || "Your profile"}
@@ -83,7 +137,7 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
             </p>
           </div>
         </div>
-        <button type="button" className="btn-primary mt-4 w-full sm:w-auto" onClick={() => setEditing(true)}>
+        <button type="button" className="btn-primary mt-4 w-full sm:w-auto" onClick={() => setMode("profile")}>
           Edit profile
         </button>
       </div>
@@ -131,11 +185,48 @@ export function ProfilePanel({ profile, email, onSubmit, afterSave }: ProfilePan
           <Val v={profile.disciplinary_pending ? "Yes (self-declared)" : "No"} />
         </Row>
       </Section>
+
+      {/* Posting preferences */}
+      <div className="card">
+        <h2 className="mb-3 flex items-center gap-2 font-semibold text-sand-900">
+          <Flag className="h-4 w-4 text-brand-600" />
+          Posting preferences
+        </h2>
+        {preferences.length === 0 ? (
+          <p className="text-sm text-sand-500">No preferences yet. Add the districts you&apos;d accept a transfer to.</p>
+        ) : (
+          <ol className="space-y-1.5">
+            {preferences.map((p, i) => (
+              <li key={`${p.preferred_state}-${p.preferred_district}`} className="flex items-center gap-2 text-sm">
+                <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-800">
+                  {i + 1}
+                </span>
+                <span className="text-sand-700">{p.preferred_district}, {p.preferred_state}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+        {locked ? (
+          <p className="mt-4 text-xs text-amber-700">
+            Locked until{" "}
+            {new Date(profile.preferences_locked_until!).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            {" "}— prevents frequent changes.
+          </p>
+        ) : (
+          <button type="button" className="btn-secondary mt-4" onClick={() => setMode("preferences")}>
+            Edit preferences
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
-function Avatar({ name }: { name: string | null }) {
+function Avatar({ name, url }: { name: string | null; url: string | null }) {
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element -- remote Storage URL, not a static asset
+    return <img src={url} alt="" className="h-16 w-16 shrink-0 rounded-full object-cover shadow-warm ring-2 ring-white" />;
+  }
   const initials =
     (name ?? "")
       .split(/\s+/)

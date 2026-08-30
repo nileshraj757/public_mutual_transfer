@@ -2,9 +2,10 @@ import { Suspense } from "react";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PreferencesEditor } from "./preferences-editor";
+import { RelaxedRulesPanel } from "@/components/relaxed-rules-panel";
 import { savePreferences } from "./actions";
 
-export const metadata = { title: "Your preferences — Transfer Setu" };
+export const metadata = { title: "Your preferences — TransferSetu" };
 
 export default async function PreferencesPage() {
   const profile = await requireProfile("/preferences");
@@ -29,8 +30,11 @@ export default async function PreferencesPage() {
           current postings.
         </p>
       </div>
+      <div className="mb-6">
+        <RelaxedRulesPanel profileId={profile.id} initial={profile.relaxed_rules} />
+      </div>
       <Suspense>
-        <PreferencesEditor initial={initial} onSubmit={savePreferences} />
+        <PreferencesEditor initial={initial} onSubmit={savePreferences} lockedUntil={profile.preferences_locked_until} />
       </Suspense>
     </div>
   );

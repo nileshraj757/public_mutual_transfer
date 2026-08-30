@@ -3,9 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LocationSelect } from "@/components/location-select";
+import { PreferenceRowsEditor } from "@/components/preference-rows-editor";
 import type { ActionResult } from "@/lib/profile-core";
+import type { PrefInput } from "@/lib/preferences-core";
 import { COURT_LEVELS, CADRE_CATEGORIES, GRADE_PAY_OPTIONS, designationOptions, OTHER } from "@/lib/judiciary";
-import { MapPin, Users, Loader } from "@/components/icons";
+import { MapPin, Users, Flag, Loader } from "@/components/icons";
 import type { Profile } from "@/lib/types";
 
 interface ProfileFormProps {
@@ -14,15 +16,20 @@ interface ProfileFormProps {
   /** Persist the form. Web passes the server action; mobile passes a direct
    *  Supabase upsert. */
   onSubmit: (formData: FormData) => Promise<ActionResult>;
+  /** Onboarding only: persist the preferred-districts list collected in the
+   *  same step, right after the profile itself saves successfully. */
+  onSubmitPreferences?: (prefs: PrefInput[]) => Promise<ActionResult>;
   /** Called after a successful save (mobile re-fetch; router.refresh() is a
    *  no-op under static export). */
   afterSave?: () => void;
 }
 
-export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormProps) {
+export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afterSave }: ProfileFormProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ActionResult | null>(null);
+  const [prefRows, setPrefRows] = useState<PrefInput[]>([]);
+  const [prefError, setPrefError] = useState("");
 
   const [courtLevel, setCourtLevel] = useState(profile?.court_level ?? "");
   const [cadre, setCadre] = useState(profile?.cadre ?? "");
@@ -51,13 +58,35 @@ export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormP
   }
 
   async function handleSubmit(formData: FormData) {
+    if (mode === "onboarding") {
+      setPrefError("");
+      if (prefRows.length === 0) {
+        setPrefError("Add at least one preferred district — this is how we find your matches.");
+        return;
+      }
+    }
+
     setPending(true);
     const res = await onSubmit(formData);
     setResult(res);
+
+    if (res.ok && mode === "onboarding" && onSubmitPreferences) {
+      const prefRes = await onSubmitPreferences(prefRows);
+      if (!prefRes.ok) {
+        setPending(false);
+        setPrefError(prefRes.error ?? "Couldn't save your preferences — please try again.");
+        return;
+      }
+    }
+
     setPending(false);
     if (res.ok) {
-      if (mode === "onboarding") router.push("/preferences?onboarding=1");
-      else router.refresh();
+      if (mode === "onboarding") {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        router.refresh();
+      }
       afterSave?.();
     }
   }
@@ -180,6 +209,21 @@ export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormP
       </div>
 
       {mode === "onboarding" && (
+        <div className="card space-y-3">
+          <h2 className="flex items-center gap-2 font-semibold text-sand-900">
+            <Flag className="h-4 w-4 text-brand-600" />
+            Where do you want to go? <span className="text-xs font-normal text-sand-500">(matched on these)</span>
+          </h2>
+          <p className="text-xs text-sand-500">
+            List the districts you&apos;d accept a transfer to, most-wanted first. This locks for 30 days once saved, so
+            choose carefully.
+          </p>
+          <PreferenceRowsEditor rows={prefRows} onChange={setPrefRows} />
+          {prefError && <p className="text-sm text-red-600">{prefError}</p>}
+        </div>
+      )}
+
+      {mode === "onboarding" && (
         <label className="flex items-start gap-2 rounded-xl border border-sand-200 bg-white p-4 text-sm text-sand-700">
           <input type="checkbox" name="consent_dpdp" required className="mt-0.5 accent-brand-600" />
           <span>
@@ -194,7 +238,7 @@ export function ProfileForm({ profile, mode, onSubmit, afterSave }: ProfileFormP
 
       <button type="submit" className="btn-primary" disabled={pending}>
         {pending && <Loader className="h-4 w-4" />}
-        {pending ? "Saving…" : mode === "onboarding" ? "Save & add preferences" : "Save profile"}
+        {pending ? "Saving…" : mode === "onboarding" ? "Create profile" : "Save profile"}
       </button>
     </form>
   );

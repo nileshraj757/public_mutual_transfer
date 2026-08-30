@@ -54,7 +54,7 @@ async function loadPoolAndRules(admin: SupabaseClient) {
     admin
       .from("profiles")
       .select(
-        "id, court_level, cadre, designation, pay_level, current_state, current_district, is_active"
+        "id, court_level, cadre, designation, pay_level, current_state, current_district, is_active, relaxed_rules"
       )
       .eq("is_active", true),
     admin.from("preferences").select("profile_id, preferred_state, preferred_district, rank"),
@@ -77,6 +77,7 @@ async function loadPoolAndRules(admin: SupabaseClient) {
     current_state: (p.current_state as string) ?? null,
     current_district: (p.current_district as string) ?? null,
     is_active: p.is_active as boolean,
+    relaxed_rules: (p.relaxed_rules as string[]) ?? [],
     preferences: (prefsByProfile.get(p.id as string) ?? [])
       .sort((a, b) => a.rank - b.rank)
       .map(({ state, district }) => ({ state, district })),

@@ -63,3 +63,49 @@ export async function triggerRecomputeAll() {
   revalidatePath("/admin");
   revalidatePath("/dashboard");
 }
+
+export async function addDistrict(formData: FormData) {
+  const supabase = await assertAdmin();
+  const state = (formData.get("state") as string).trim();
+  const district = (formData.get("district") as string).trim();
+  if (!state || !district) return;
+  await supabase.from("locations").upsert({ state, district }, { onConflict: "state,district" });
+  revalidatePath("/admin/districts");
+}
+
+export async function deleteDistrict(formData: FormData) {
+  const supabase = await assertAdmin();
+  const id = formData.get("id") as string;
+  await supabase.from("locations").delete().eq("id", id);
+  revalidatePath("/admin/districts");
+}
+
+export async function addCadre(formData: FormData) {
+  const supabase = await assertAdmin();
+  const label = (formData.get("label") as string).trim();
+  if (!label) return;
+  await supabase.from("cadres").upsert({ label }, { onConflict: "label" });
+  revalidatePath("/admin/cadres");
+}
+
+export async function deleteCadre(formData: FormData) {
+  const supabase = await assertAdmin();
+  const id = formData.get("id") as string;
+  await supabase.from("cadres").delete().eq("id", id);
+  revalidatePath("/admin/cadres");
+}
+
+export async function addDesignation(formData: FormData) {
+  const supabase = await assertAdmin();
+  const label = (formData.get("label") as string).trim();
+  if (!label) return;
+  await supabase.from("designations").upsert({ label }, { onConflict: "label" });
+  revalidatePath("/admin/designations");
+}
+
+export async function deleteDesignation(formData: FormData) {
+  const supabase = await assertAdmin();
+  const id = formData.get("id") as string;
+  await supabase.from("designations").delete().eq("id", id);
+  revalidatePath("/admin/designations");
+}

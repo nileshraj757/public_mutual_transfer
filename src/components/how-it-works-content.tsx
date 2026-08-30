@@ -9,7 +9,7 @@ import { Disclaimer } from "@/components/disclaimer";
 export function HowItWorksContent({ showCta = false }: { showCta?: boolean }) {
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-3xl font-bold text-sand-900">How to use Transfer Setu</h1>
+      <h1 className="text-3xl font-bold text-sand-900">How to use TransferSetu</h1>
       <Disclaimer className="my-6" />
 
       <div className="prose prose-slate max-w-none space-y-6 text-sand-700">

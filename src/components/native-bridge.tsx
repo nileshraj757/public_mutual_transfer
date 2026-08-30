@@ -37,6 +37,16 @@ export function NativeBridge() {
         /* ignore */
       }
 
+      // Tell the OTA updater (app-update-button.tsx) this bundle loaded fine.
+      // Required within its appReadyTimeout after an update is applied, or the
+      // plugin assumes the update crashed and auto-rolls back to the last-good
+      // bundle — this is the safety net for a bad OTA push.
+      import("@capgo/capacitor-updater")
+        .then(({ CapacitorUpdater }) => CapacitorUpdater.notifyAppReady())
+        .catch(() => {
+          /* plugin unavailable (older APK build without it) — nothing to do */
+        });
+
       // Magic-link / Google OAuth deep link: mutualtransfer://auth/callback?code=...&next=...
       //
       // We exchange the code and soft-navigate HERE rather than hard-loading a

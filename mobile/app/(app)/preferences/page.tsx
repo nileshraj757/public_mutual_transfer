@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { PreferencesEditor } from "@/app/(app)/preferences/preferences-editor";
+import { RelaxedRulesPanel } from "@/components/relaxed-rules-panel";
 import { savePreferencesForm, type PrefInput } from "@/lib/preferences-core";
 import { callFn } from "@/lib/functions";
 import { useAuth } from "../../providers";
@@ -57,8 +58,11 @@ export default function PreferencesPage() {
           employees&apos; current postings.
         </p>
       </div>
+      <div className="mb-6">
+        <RelaxedRulesPanel profileId={profile.id} initial={profile.relaxed_rules} />
+      </div>
       <Suspense>
-        <PreferencesEditor initial={initial} onSubmit={onSubmit} />
+        <PreferencesEditor initial={initial} onSubmit={onSubmit} lockedUntil={profile.preferences_locked_until} />
       </Suspense>
     </div>
   );

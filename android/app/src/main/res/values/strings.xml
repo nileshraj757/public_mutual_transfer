@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Transfer Setu</string>
-    <string name="title_activity_main">Transfer Setu</string>
+    <string name="app_name">TransferSetu</string>
+    <string name="title_activity_main">TransferSetu</string>
     <string name="package_name">in.mutualtransfer.app</string>
     <string name="custom_url_scheme">in.mutualtransfer.app</string>
 </resources>

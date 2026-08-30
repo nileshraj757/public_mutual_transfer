@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import type { NotificationRow } from "@/lib/types";
 import { matchHref } from "@/lib/native";
+import { isPremiumLockedClient } from "@/lib/billing-client";
 import { NotificationItem } from "@/components/notification-item";
+import { PremiumTeaser } from "@/components/premium-teaser";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
@@ -17,16 +19,21 @@ function mobileLink(link: string | null): string | null {
 export default function NotificationsPage() {
   const { supabase, profile, refreshUnread } = useAuth();
   const [notifications, setNotifications] = useState<NotificationRow[] | null>(null);
+  const [locked, setLocked] = useState(false);
 
   const load = useCallback(async () => {
     if (!profile) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("profile_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(100);
+    const [{ data }, isLocked] = await Promise.all([
+      supabase
+        .from("notifications")
+        .select("*")
+        .eq("profile_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      isPremiumLockedClient(supabase, profile.id),
+    ]);
     setNotifications((data ?? []) as NotificationRow[]);
+    setLocked(isLocked);
   }, [supabase, profile]);
 
   useEffect(() => {
@@ -43,6 +50,17 @@ export default function NotificationsPage() {
   if (!profile || notifications === null) return <Splash />;
 
   const hasUnread = notifications.some((n) => !n.read);
+
+  if (locked) {
+    return (
+      <PremiumTeaser
+        headline={`${notifications.length} alert${notifications.length === 1 ? "" : "s"}`}
+        blurb="Subscribe to see match alerts, connection requests, and messages as they happen."
+      >
+        <div className="card h-64" />
+      </PremiumTeaser>
+    );
+  }
 
   return (
     <div className="space-y-4">

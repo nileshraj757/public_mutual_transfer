@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BrowseFilters } from "@/components/browse-filters";
+import { RequestConnectButton } from "@/components/request-connect-button";
+import { ReportProfileButton } from "@/components/agreement-and-report";
 import { VerificationBadge } from "@/components/badges";
 import type { BrowseProfile } from "@/lib/types";
 import { useAuth } from "../../providers";
@@ -36,7 +38,7 @@ function BrowseInner() {
         f_district: params.get("district") || null,
         f_designation: params.get("designation") || null,
         f_pay_level: params.get("pay_level") || null,
-        f_cadre: null,
+        f_cadre: params.get("cadre") || null,
         page_limit: PAGE_SIZE,
         page_offset: (page - 1) * PAGE_SIZE,
       });
@@ -96,6 +98,10 @@ function BrowseInner() {
                     <span className="text-xs text-sand-400">Not specified</span>
                   )}
                 </div>
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <RequestConnectButton profileId={r.profile_id} />
+                <ReportProfileButton profileId={r.profile_id} />
               </div>
             </div>
           ))}

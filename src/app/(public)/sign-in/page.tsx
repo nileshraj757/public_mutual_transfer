@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { SignInForm } from "./sign-in-form";
 import { MailSpot } from "@/components/illustrations";
 
-export const metadata = { title: "Sign in — Transfer Setu" };
+export const metadata = { title: "Sign in — TransferSetu" };
 
 export default function SignInPage() {
   return (

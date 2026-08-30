@@ -1,56 +1,91 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LOCATION_DATA } from "@/lib/locations";
-import { GRADE_PAY_OPTIONS } from "@/lib/judiciary";
+import { CADRE_CATEGORIES, GRADE_PAY_OPTIONS } from "@/lib/judiciary";
+import { LocationSelect } from "@/components/location-select";
 
 export function BrowseFilters() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const state = params.get("state") ?? "";
-  const district = params.get("district") ?? "";
-  const designation = params.get("designation") ?? "";
-  const pay = params.get("pay_level") ?? "";
+  const [cadre, setCadre] = useState(params.get("cadre") ?? "");
+  const [designation, setDesignation] = useState(params.get("designation") ?? "");
+  const [pay, setPay] = useState(params.get("pay_level") ?? "");
+  const [state, setState] = useState(params.get("state") ?? "");
+  const [district, setDistrict] = useState(params.get("district") ?? "");
+  const [related, setRelated] = useState(params.get("related") === "1");
 
-  const districts = LOCATION_DATA.find((s) => s.state === state)?.districts ?? [];
-
-  function update(next: Record<string, string>) {
-    const sp = new URLSearchParams(params.toString());
-    for (const [k, v] of Object.entries(next)) {
-      if (v) sp.set(k, v);
-      else sp.delete(k);
-    }
-    sp.delete("page");
+  function search() {
+    const sp = new URLSearchParams();
+    // "Show other related posts" drops the cadre/designation/pay-level filters
+    // (location filters still apply) so nearby-but-not-exact postings show up.
+    const fields: Record<string, string> = related
+      ? { state, district }
+      : { cadre, designation, pay_level: pay, state, district };
+    for (const [k, v] of Object.entries(fields)) if (v) sp.set(k, v);
+    if (related) sp.set("related", "1");
     router.push(`/browse?${sp.toString()}`);
   }
 
+  function clear() {
+    setCadre("");
+    setDesignation("");
+    setPay("");
+    setState("");
+    setDistrict("");
+    setRelated(false);
+    router.push("/browse");
+  }
+
   return (
-    <div className="card grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <div>
-        <label className="label">State / UT</label>
-        <select className="input" value={state} onChange={(e) => update({ state: e.target.value, district: "" })}>
-          <option value="">Any</option>
-          {LOCATION_DATA.map((s) => <option key={s.state} value={s.state}>{s.state}</option>)}
-        </select>
+    <div className="card space-y-3">
+      <LocationSelect
+        defaultState={state}
+        defaultDistrict={district}
+        onChange={(s, d) => {
+          setState(s);
+          setDistrict(d);
+        }}
+      />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div>
+          <label className="label">Cadre</label>
+          <select className="input" value={cadre} disabled={related} onChange={(e) => setCadre(e.target.value)}>
+            <option value="">Any</option>
+            {CADRE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="label">Designation / post</label>
+          <input
+            className="input"
+            value={designation}
+            placeholder="Any"
+            disabled={related}
+            onChange={(e) => setDesignation(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && search()}
+          />
+        </div>
+        <div>
+          <label className="label">Grade pay</label>
+          <select className="input" value={pay} disabled={related} onChange={(e) => setPay(e.target.value)}>
+            <option value="">Any</option>
+            {GRADE_PAY_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
       </div>
-      <div>
-        <label className="label">District</label>
-        <select className="input" value={district} disabled={!state} onChange={(e) => update({ district: e.target.value })}>
-          <option value="">Any</option>
-          {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-      </div>
-      <div>
-        <label className="label">Designation</label>
-        <input className="input" defaultValue={designation} placeholder="Any" onBlur={(e) => update({ designation: e.target.value })} onKeyDown={(e) => e.key === "Enter" && update({ designation: (e.target as HTMLInputElement).value })} />
-      </div>
-      <div>
-        <label className="label">Grade pay</label>
-        <select className="input" value={pay} onChange={(e) => update({ pay_level: e.target.value })}>
-          <option value="">Any</option>
-          {GRADE_PAY_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
+      <label className="flex items-center gap-2 text-sm text-sand-700">
+        <input type="checkbox" checked={related} onChange={(e) => setRelated(e.target.checked)} />
+        Show other related posts (ignore cadre/designation/pay level filters)
+      </label>
+      <div className="flex gap-2">
+        <button type="button" className="btn-primary" onClick={search}>
+          Search
+        </button>
+        <button type="button" className="btn-secondary" onClick={clear}>
+          Clear
+        </button>
       </div>
     </div>
   );

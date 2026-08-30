@@ -2,17 +2,19 @@ import { Suspense } from "react";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BrowseFilters } from "@/components/browse-filters";
+import { RequestConnectButton } from "@/components/request-connect-button";
+import { ReportProfileButton } from "@/components/agreement-and-report";
 import { VerificationBadge } from "@/components/badges";
 import type { BrowseProfile } from "@/lib/types";
 
-export const metadata = { title: "Browse options — Transfer Setu" };
+export const metadata = { title: "Browse options — TransferSetu" };
 
 const PAGE_SIZE = 24;
 
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: { state?: string; district?: string; designation?: string; pay_level?: string; page?: string };
+  searchParams: { cadre?: string; designation?: string; pay_level?: string; state?: string; district?: string; page?: string };
 }) {
   await requireProfile("/browse");
   const supabase = createClient();
@@ -24,7 +26,7 @@ export default async function BrowsePage({
     f_district: searchParams.district || null,
     f_designation: searchParams.designation || null,
     f_pay_level: searchParams.pay_level || null,
-    f_cadre: null,
+    f_cadre: searchParams.cadre || null,
     page_limit: PAGE_SIZE,
     page_offset: (page - 1) * PAGE_SIZE,
   });
@@ -77,6 +79,10 @@ export default async function BrowsePage({
                     <span className="text-xs text-sand-400">Not specified</span>
                   )}
                 </div>
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <RequestConnectButton profileId={r.profile_id} />
+                <ReportProfileButton profileId={r.profile_id} />
               </div>
             </div>
           ))}

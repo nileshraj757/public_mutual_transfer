@@ -2,8 +2,13 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { hasActiveSubscription } from "@/lib/billing";
 import { ActiveToggle, DeleteAccountButton } from "@/components/account-actions";
+import { NotificationPrefsPanel } from "@/components/notification-prefs-panel";
+import { ChangePasswordForm } from "@/components/change-password-form";
+import { ChangeEmailForm } from "@/components/change-email-form";
+import { BlockedUsersList } from "@/components/blocked-users-list";
+import { SignOutButton } from "@/components/sign-out-button";
 
-export const metadata = { title: "Account settings — Transfer Setu" };
+export const metadata = { title: "Account settings — TransferSetu" };
 
 export default async function SettingsPage() {
   const profile = await requireProfile("/settings");
@@ -30,7 +35,7 @@ export default async function SettingsPage() {
           <p className="text-sm text-sand-600">
             {premium
               ? "You have an active subscription."
-              : "Unlock the official joint-application PDF and priority match alerts."}
+              : "Unlock your Matches, Chats, connection requests, alerts, and the joint-application PDF."}
           </p>
         </div>
         <Link href="/billing" className={premium ? "btn-secondary" : "btn-primary"}>
@@ -44,11 +49,37 @@ export default async function SettingsPage() {
       </div>
 
       <div className="card space-y-3">
-        <h2 className="font-semibold text-sand-900">Your data (DPDP)</h2>
+        <h2 className="font-semibold text-sand-900">Notifications</h2>
+        <NotificationPrefsPanel profileId={profile.id} initial={profile.notification_prefs} />
+      </div>
+
+      <div className="card space-y-3">
+        <h2 className="font-semibold text-sand-900">Change password</h2>
+        <ChangePasswordForm />
+      </div>
+
+      <div className="card space-y-3">
+        <h2 className="font-semibold text-sand-900">Change email</h2>
+        <ChangeEmailForm currentEmail={profile.contact_email} />
+        <p className="text-xs text-sand-500">
+          Need to change your phone number? That&apos;s on your <Link href="/profile" className="underline">Profile</Link> page.
+        </p>
+      </div>
+
+      <div className="card space-y-3">
+        <h2 className="font-semibold text-sand-900">Privacy</h2>
         <p className="text-sm text-sand-600">
           You can review and correct your data anytime on the Profile and Preferences pages. To exercise your right to
-          erasure, delete your account below.
+          erasure, delete your account below. Read our <Link href="/privacy" className="underline">privacy policy</Link>.
         </p>
+        <div>
+          <h3 className="mb-2 text-sm font-medium text-sand-800">Blocked users</h3>
+          <BlockedUsersList profileId={profile.id} />
+        </div>
+      </div>
+
+      <div className="card">
+        <SignOutButton />
       </div>
 
       <div className="card space-y-3 border-red-200">

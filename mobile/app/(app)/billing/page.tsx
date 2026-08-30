@@ -15,7 +15,7 @@ import { Splash } from "../../_components/splash";
  * subscribe call ultimately fails gracefully via the Edge Function if not.
  */
 const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "Transfer Setu Premium";
+const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "TransferSetu Premium";
 const priceLabel = process.env.NEXT_PUBLIC_PREMIUM_PRICE_LABEL || "Monthly subscription";
 
 export default function BillingPage() {
@@ -49,7 +49,8 @@ export default function BillingPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold text-sand-900">Premium</h1>
         <p className="mt-1 text-sm text-sand-600">
-          Premium unlocks priority match alerts. The actual transfer always depends on the competent authority&apos;s
+          Your profile and Search stay free. Premium unlocks your Matches, Chats, connection requests, alerts, and the
+          official joint-application document. The actual transfer always depends on the competent authority&apos;s
           approval.
         </p>
       </div>

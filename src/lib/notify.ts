@@ -2,10 +2,12 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 interface NotifyInput {
   profileId: string;
-  kind: "new_match" | "consent" | "message" | "system";
+  kind: "new_match" | "consent" | "message" | "system" | "match_request";
   title: string;
   body?: string;
   link?: string;
+  /** For actionable notifications (e.g. match_request) — the row they refer to. */
+  relatedId?: string;
   /** If provided, also attempt a best-effort email (degrades gracefully). */
   email?: string | null;
 }
@@ -22,6 +24,7 @@ export async function notify(input: NotifyInput): Promise<void> {
     title: input.title,
     body: input.body ?? null,
     link: input.link ?? null,
+    related_id: input.relatedId ?? null,
   });
 
   if (input.email) {

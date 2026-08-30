@@ -11,6 +11,8 @@ import { SwapRoute } from "@/components/swap-route";
 import { ConsentPanel } from "@/components/consent-panel";
 import { MessageThread } from "@/components/message-thread";
 import { GenerateAgreementButton, ReportButton } from "@/components/agreement-and-report";
+import { CancelMatchButton } from "@/components/cancel-match-button";
+import { BlockButton } from "@/components/block-button";
 import { Mail, Phone } from "@/components/icons";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
@@ -153,10 +155,20 @@ function MatchInner() {
         </>
       )}
 
-      <ReportButton
-        matchId={match.id}
-        members={match.members.map((m, i) => ({ id: m.id, label: m.isSelf ? "Myself (mistake)" : `Member ${i + 1}` }))}
-      />
+      <div className="card space-y-3">
+        <h3 className="font-semibold text-sand-900">Safety</h3>
+        <div className="flex flex-wrap gap-2">
+          <CancelMatchButton matchId={match.id} status={match.status} onDone={load} />
+          <BlockButton
+            members={match.members.filter((m) => !m.isSelf).map((m, i) => ({ id: m.id, label: `Member ${i + 1}` }))}
+            onDone={load}
+          />
+        </div>
+        <ReportButton
+          matchId={match.id}
+          members={match.members.map((m, i) => ({ id: m.id, label: m.isSelf ? "Myself (mistake)" : `Member ${i + 1}` }))}
+        />
+      </div>
     </div>
   );
 }

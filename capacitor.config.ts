@@ -16,19 +16,30 @@ const config: CapacitorConfig = {
   // Package ID intentionally unchanged — Android treats a different appId as a
   // different app entirely (breaks in-place upgrade of already-installed builds).
   appId: "in.mutualtransfer.app",
-  appName: "Transfer Setu",
+  appName: "TransferSetu",
   webDir: "mobile/out",
   server: {
     androidScheme: "https",
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1200,
+      launchShowDuration: 500,
       backgroundColor: "#146152",
       showSpinner: false,
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
+    },
+    // Manual OTA web-bundle updates (Settings → "Check for updates" —
+    // src/components/app-update-button.tsx). autoUpdate: false disables the
+    // plugin's own background polling/apply — we drive download()/set()/reload()
+    // ourselves so the user controls exactly when an update is fetched and
+    // applied. Pinned to @capgo/capacitor-updater@6.14.9 (see package.json) —
+    // versions from 6.14.10 on bundle androidx.work >= 2.10.0, which requires
+    // compileSdk 35; this project is on compileSdk 34 / AGP 8.2.1.
+    CapacitorUpdater: {
+      autoUpdate: false,
+      autoDeletePrevious: true,
     },
   },
 };

@@ -5,6 +5,7 @@ import { PwaRegister } from "@/components/pwa-register";
 import { HoverTranslate } from "@/components/hover-translate";
 import { NativeBridge } from "@/components/native-bridge";
 import { UpdateChecker } from "@/components/update-checker";
+import { LaunchSplash } from "@/components/launch-splash";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -20,12 +21,12 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Transfer Setu — find a posting swap",
+  title: "TransferSetu — find a posting swap",
   description:
     "A free facilitation platform that helps eligible court/judicial-department employees discover and arrange mutual transfers (posting swaps).",
   manifest: "/manifest.json",
-  applicationName: "Transfer Setu",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Transfer Setu" },
+  applicationName: "TransferSetu",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "TransferSetu" },
 };
 
 export const viewport: Viewport = {
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sora.variable} ${instrumentSans.variable}`}>
       <body>
+        <LaunchSplash />
         <UpdateChecker />
         {children}
         <PwaRegister />

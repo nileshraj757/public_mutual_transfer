@@ -58,6 +58,10 @@ export interface Profile {
   is_admin: boolean;
   is_active: boolean;
   consent_dpdp: boolean;
+  relaxed_rules: string[];
+  notification_prefs: Record<string, boolean>;
+  preferences_locked_until: string | null;
+  avatar_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -112,6 +116,7 @@ export interface NotificationRow {
   title: string;
   body: string | null;
   link: string | null;
+  related_id: string | null;
   read: boolean;
   created_at: string;
 }
@@ -141,6 +146,8 @@ export interface MatchCandidate {
   /** Ordered preferred (state, district) locations. */
   preferences: { state: string; district: string }[];
   is_active: boolean;
+  /** Hard-rule keys this user has opted to relax for their own matches. */
+  relaxed_rules: string[];
 }
 
 /** A discovered match (direct = 2 ids, chain = N ids in cycle order). */

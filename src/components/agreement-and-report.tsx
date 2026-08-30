@@ -18,7 +18,7 @@ export function GenerateAgreementButton({ matchId, locked = false }: { matchId: 
     return (
       <div className="rounded-lg border border-sand-200 bg-sand-50 p-3 text-sm text-sand-600">
         The official joint-application PDF can be generated on the{" "}
-        <span className="font-medium text-sand-800">Transfer Setu website</span> (sign in with the same account).
+        <span className="font-medium text-sand-800">TransferSetu website</span> (sign in with the same account).
       </div>
     );
   }
@@ -97,35 +97,82 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
+const REPORT_REASONS = [
+  "Fake employee",
+  "Wrong information",
+  "Misuse",
+  "Harassment",
+  "Fraud",
+  "Other",
+] as const;
+
+async function submitReport(input: { matchId: string | null; reportedProfileId: string; reason: string }) {
+  if (isNativeApp()) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("reports").insert({
+        reporter_profile_id: user.id,
+        reported_profile_id: input.reportedProfileId,
+        match_id: input.matchId,
+        reason: input.reason,
+      });
+    }
+  } else {
+    await fetch("/api/reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        match_id: input.matchId,
+        reported_profile_id: input.reportedProfileId,
+        reason: input.reason,
+      }),
+    });
+  }
+}
+
+function ReasonPicker({ category, setCategory, detail, setDetail }: {
+  category: string;
+  setCategory: (v: string) => void;
+  detail: string;
+  setDetail: (v: string) => void;
+}) {
+  return (
+    <>
+      <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
+        <option value="">Reason…</option>
+        {REPORT_REASONS.map((r) => (
+          <option key={r} value={r}>{r}</option>
+        ))}
+      </select>
+      {category === "Other" && (
+        <textarea
+          className="input"
+          rows={3}
+          placeholder="Describe the issue…"
+          value={detail}
+          onChange={(e) => setDetail(e.target.value)}
+        />
+      )}
+    </>
+  );
+}
+
 export function ReportButton({ matchId, members }: { matchId: string; members: { id: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
   const [reportedId, setReportedId] = useState(members[0]?.id ?? "");
-  const [reason, setReason] = useState("");
+  const [category, setCategory] = useState("");
+  const [detail, setDetail] = useState("");
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
 
+  const reason = category === "Other" ? detail.trim() : category;
+
   function submit() {
     startTransition(async () => {
-      if (isNativeApp()) {
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from("reports").insert({
-            reporter_profile_id: user.id,
-            reported_profile_id: reportedId,
-            match_id: matchId,
-            reason: reason.trim(),
-          });
-        }
-      } else {
-        await fetch("/api/reports", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ match_id: matchId, reported_profile_id: reportedId, reason }),
-        });
-      }
+      await submitReport({ matchId, reportedProfileId: reportedId, reason });
       setDone(true);
       setOpen(false);
     });
@@ -145,9 +192,50 @@ export function ReportButton({ matchId, members }: { matchId: string; members: {
           <select className="input" value={reportedId} onChange={(e) => setReportedId(e.target.value)}>
             {members.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
-          <textarea className="input" rows={3} placeholder="Describe the issue…" value={reason} onChange={(e) => setReason(e.target.value)} />
+          <ReasonPicker category={category} setCategory={setCategory} detail={detail} setDetail={setDetail} />
           <div className="flex gap-2">
-            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason.trim()}>Submit report</button>
+            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason}>Submit report</button>
+            <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => setOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Report a profile encountered via Search, outside of any match (match_id: null
+ *  — the existing reports table/RLS and /api/reports route already accept that). */
+export function ReportProfileButton({ profileId }: { profileId: string }) {
+  const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState("");
+  const [detail, setDetail] = useState("");
+  const [pending, startTransition] = useTransition();
+  const [done, setDone] = useState(false);
+
+  const reason = category === "Other" ? detail.trim() : category;
+
+  function submit() {
+    startTransition(async () => {
+      await submitReport({ matchId: null, reportedProfileId: profileId, reason });
+      setDone(true);
+      setOpen(false);
+    });
+  }
+
+  if (done) return <p className="text-xs text-green-600">Report submitted. Thank you.</p>;
+
+  return (
+    <div className="text-sm">
+      {!open ? (
+        <button className="flex items-center gap-1 text-xs text-sand-500 underline hover:text-red-600" onClick={() => setOpen(true)}>
+          <Flag className="h-3.5 w-3.5" />
+          Report
+        </button>
+      ) : (
+        <div className="card mt-2 space-y-2">
+          <ReasonPicker category={category} setCategory={setCategory} detail={detail} setDetail={setDetail} />
+          <div className="flex gap-2">
+            <button className="btn-danger px-3 py-1.5 text-sm" onClick={submit} disabled={pending || !reason}>Submit report</button>
             <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => setOpen(false)}>Cancel</button>
           </div>
         </div>

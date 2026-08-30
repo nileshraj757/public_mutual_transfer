@@ -10,7 +10,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <main className="flex-1">{children}</main>
       <footer className="border-t border-sand-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-sm text-sand-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Transfer Setu (facilitation only — not the appointing authority).</p>
+          <p>© {new Date().getFullYear()} TransferSetu (facilitation only — not the appointing authority).</p>
           <div className="flex gap-4">
             <Link href="/how-it-works" className="hover:text-sand-800">How it works</Link>
             <Link href="/privacy" className="hover:text-sand-800">Privacy</Link>

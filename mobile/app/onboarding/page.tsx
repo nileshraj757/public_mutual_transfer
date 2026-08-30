@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProfileForm } from "@/components/profile-form";
 import { saveProfileForm } from "@/lib/profile-core";
+import { savePreferencesForm, type PrefInput } from "@/lib/preferences-core";
 import { callFn } from "@/lib/functions";
 import { useAuth } from "../providers";
 import { RequireSession } from "../_components/guards";
@@ -43,16 +44,27 @@ function OnboardingInner() {
     return res;
   }
 
+  async function onSubmitPreferences(prefs: PrefInput[]) {
+    const res = await savePreferencesForm(supabase, session!.user.id, prefs);
+    if (res.ok) {
+      try {
+        await callFn(supabase, "match-recompute");
+      } catch {
+        /* best-effort */
+      }
+    }
+    return res;
+  }
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-8 [padding-top:calc(env(safe-area-inset-top)+1.5rem)]">
       <div className="mb-6">
-        <p className="text-sm font-medium text-brand-700">Step 1 of 2</p>
         <h1 className="font-display text-2xl font-semibold text-sand-900">Create your profile</h1>
         <p className="mt-1 text-sm text-sand-600">
-          These details determine who you can swap with. Next, you&apos;ll add the locations you want.
+          These details determine who you can swap with, including the districts you&apos;d accept a transfer to.
         </p>
       </div>
-      <ProfileForm profile={null} mode="onboarding" onSubmit={onSubmit} />
+      <ProfileForm profile={null} mode="onboarding" onSubmit={onSubmit} onSubmitPreferences={onSubmitPreferences} />
     </main>
   );
 }

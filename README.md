@@ -1,4 +1,4 @@
-# Transfer Setu — facilitation platform for court/judicial employees
+# TransferSetu — facilitation platform for court/judicial employees
 
 A **$0 / free-tier-only** web app that helps court & judicial-department employees
 discover and arrange **mutual transfers (posting swaps)**. It finds direct swaps
@@ -80,7 +80,7 @@ SUPABASE_SERVICE_ROLE_KEY=...        # server-only, never exposed to the browser
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 OFFICIAL_EMAIL_DOMAINS=              # optional, e.g. hcourt.gov.in
 # RESEND_API_KEY=...                 # optional notification email
-# NOTIFY_EMAIL_FROM="Transfer Setu <notify@yourdomain>"
+# NOTIFY_EMAIL_FROM="TransferSetu <notify@yourdomain>"
 ```
 
 ### 4. Create the database

@@ -192,9 +192,10 @@ export function BillingClient({
       ) : (
         <div className="mt-4">
           <ul className="mb-4 space-y-1 text-sm text-sand-600">
+            <li>✓ See your Direct & Chain matches in full</li>
+            <li>✓ Send connection requests and chat once there&apos;s mutual interest</li>
+            <li>✓ Get match, message and request alerts</li>
             <li>✓ Generate & download the official joint-application PDF</li>
-            <li>✓ Priority email alerts for new matches</li>
-            <li>✓ Support the platform&apos;s free upkeep</li>
           </ul>
           <button className="btn-primary" onClick={subscribe} disabled={busy}>
             {busy ? "Starting…" : `Subscribe — ${priceLabel}`}

@@ -33,7 +33,10 @@ export type FunctionName =
   | "match-recompute-all"
   | "billing-subscribe"
   | "billing-verify"
-  | "billing-cancel";
+  | "billing-cancel"
+  | "match-request-send"
+  | "match-request-respond"
+  | "profile-block";
 // match-recompute-all is admin-only (used by the mobile admin overview). Not
 // exposed to the mobile app: agreement-PDF generation (heavier pdf-lib port,
 // deferred). See supabase/functions/README.md.

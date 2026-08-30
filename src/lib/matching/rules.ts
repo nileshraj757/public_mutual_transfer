@@ -52,13 +52,18 @@ const norm = (v: string | null | undefined) => (v ?? "").trim().toLowerCase();
 /**
  * Whether two employees satisfy all HARD equality constraints. A null/blank
  * value on either side fails the check (we can't confirm equality).
+ *
+ * A key is skipped only when BOTH sides have opted to relax it
+ * (profiles.relaxed_rules) — a mismatch only surfaces when neither party
+ * actually cares about that attribute.
  */
 export function rulesCompatible(
-  a: Pick<MatchCandidate, HardKey>,
-  b: Pick<MatchCandidate, HardKey>,
+  a: Pick<MatchCandidate, HardKey | "relaxed_rules">,
+  b: Pick<MatchCandidate, HardKey | "relaxed_rules">,
   rules: MatchRules
 ): boolean {
   return rules.hardKeys.every((k) => {
+    if (a.relaxed_rules.includes(k) && b.relaxed_rules.includes(k)) return true;
     const av = norm(a[k]);
     const bv = norm(b[k]);
     return av !== "" && av === bv;

@@ -2,7 +2,7 @@
   "name": "mutual-transfer-mobile",
   "version": "1.0.0",
   "private": true,
-  "description": "Standalone client-only (statically exported) build of the Transfer Setu app, bundled into the Capacitor APK/IPA. Reuses the root src/ components and pure libs via the @/* alias.",
+  "description": "Standalone client-only (statically exported) build of the TransferSetu app, bundled into the Capacitor APK/IPA. Reuses the root src/ components and pure libs via the @/* alias.",
   "scripts": {
     "dev": "next dev -p 3100",
     "build": "next build",

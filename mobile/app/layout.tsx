@@ -4,6 +4,7 @@ import { Sora, Instrument_Sans } from "next/font/google";
 // classes). externalDir in next.config.mjs allows importing from ../src.
 import "../../src/app/globals.css";
 import { NativeBridge } from "@/components/native-bridge";
+import { LaunchSplash } from "@/components/launch-splash";
 import { AppProviders } from "./providers";
 
 const sora = Sora({
@@ -20,8 +21,8 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Transfer Setu",
-  applicationName: "Transfer Setu",
+  title: "TransferSetu",
+  applicationName: "TransferSetu",
 };
 
 export const viewport: Viewport = {
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sora.variable} ${instrumentSans.variable}`}>
       <body>
+        <LaunchSplash />
         <AppProviders>{children}</AppProviders>
         <NativeBridge />
       </body>

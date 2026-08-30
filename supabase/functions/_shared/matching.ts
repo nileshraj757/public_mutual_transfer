@@ -14,6 +14,7 @@ export interface MatchCandidate {
   current_district: string | null;
   is_active: boolean;
   preferences: { state: string; district: string }[];
+  relaxed_rules: string[];
 }
 export interface DiscoveredMatch {
   type: "direct" | "chain";
@@ -70,11 +71,12 @@ function clamp(n: number, lo: number, hi: number) {
 const norm = (v: string | null | undefined) => (v ?? "").trim().toLowerCase();
 
 export function rulesCompatible(
-  a: Pick<MatchCandidate, HardKey>,
-  b: Pick<MatchCandidate, HardKey>,
+  a: Pick<MatchCandidate, HardKey | "relaxed_rules">,
+  b: Pick<MatchCandidate, HardKey | "relaxed_rules">,
   rules: MatchRules
 ): boolean {
   return rules.hardKeys.every((k) => {
+    if (a.relaxed_rules.includes(k) && b.relaxed_rules.includes(k)) return true;
     const av = norm(a[k]);
     const bv = norm(b[k]);
     return av !== "" && av === bv;

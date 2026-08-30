@@ -1,21 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { getUserMatches, type MatchView } from "@/lib/matches";
+import { isPremiumLockedClient } from "@/lib/billing-client";
 import { MatchCard } from "@/components/match-card";
 import { RecomputeButton } from "@/components/recompute-button";
 import { VerificationBadge } from "@/components/badges";
+import { PremiumTeaser } from "@/components/premium-teaser";
 import { EmptyState } from "@/components/illustrations";
+import type { VerificationStatus } from "@/lib/types";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
 export default function DashboardPage() {
   const { supabase, profile } = useAuth();
   const [matches, setMatches] = useState<MatchView[] | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [prefCount, setPrefCount] = useState(0);
 
   const load = useCallback(async () => {
     if (!profile) return;
-    setMatches(await getUserMatches(supabase, profile.id));
+    const [m, isLocked, prefs] = await Promise.all([
+      getUserMatches(supabase, profile.id),
+      isPremiumLockedClient(supabase, profile.id),
+      supabase.from("preferences").select("id", { count: "exact", head: true }).eq("profile_id", profile.id),
+    ]);
+    setMatches(m);
+    setLocked(isLocked);
+    setPrefCount(prefs.count ?? 0);
   }, [supabase, profile]);
 
   useEffect(() => {
@@ -29,19 +42,101 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <HomeHero
+        name={profile.full_name}
+        posting={`${profile.current_district ?? ""}, ${profile.current_state ?? ""}`}
+        designation={profile.designation}
+        verification={profile.verification_status}
+        directCount={direct.length}
+        chainCount={chains.length}
+        prefCount={prefCount}
+        locked={locked}
+        onRecompute={load}
+      />
+
+      {locked ? (
+        <PremiumTeaser
+          headline={`${direct.length + chains.length} matches waiting`}
+          blurb="Subscribe to see full match details, chat, and send connection requests."
+        >
+          <MatchesPreview direct={direct} chains={chains} />
+        </PremiumTeaser>
+      ) : (
+        <MatchesPreview direct={direct} chains={chains} />
+      )}
+    </div>
+  );
+}
+
+function HomeHero({
+  name,
+  posting,
+  designation,
+  verification,
+  directCount,
+  chainCount,
+  prefCount,
+  locked,
+  onRecompute,
+}: {
+  name: string | null;
+  posting: string;
+  designation: string | null;
+  verification: VerificationStatus;
+  directCount: number;
+  chainCount: number;
+  prefCount: number;
+  locked: boolean;
+  onRecompute: () => void;
+}) {
+  return (
+    <div className="card overflow-hidden bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 text-white">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-sand-900">
-            Namaste{profile.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
-          </h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-sand-600">
-            {profile.current_district}, {profile.current_state} · {profile.designation}
-            <VerificationBadge status={profile.verification_status} />
+          <h1 className="font-display text-2xl font-semibold">Namaste{name ? `, ${name.split(" ")[0]}` : ""}</h1>
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-brand-50/90">
+            {posting} · {designation ?? "—"}
+            <VerificationBadge status={verification} />
           </p>
         </div>
-        <RecomputeButton onDone={load} />
+        <RecomputeButton onDone={onRecompute} />
       </div>
 
+      <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+        <StatTile value={directCount} label="Direct matches" />
+        <StatTile value={chainCount} label="Chain matches" />
+        <StatTile value={prefCount} label="Preferred districts" />
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Link href="/browse" className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium transition hover:bg-white/25">
+          Search postings
+        </Link>
+        <Link href="/profile" className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium transition hover:bg-white/25">
+          Edit profile
+        </Link>
+        {locked && (
+          <Link href="/billing" className="rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-sand-900 transition hover:bg-amber-300">
+            Subscribe
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatTile({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-xl bg-white/10 px-3 py-2.5 text-center">
+      <p className="font-display text-xl font-bold">{value}</p>
+      <p className="text-[11px] leading-tight text-brand-50/80">{label}</p>
+    </div>
+  );
+}
+
+function MatchesPreview({ direct, chains }: { direct: MatchView[]; chains: MatchView[] }) {
+  return (
+    <div className="space-y-8">
       <Section title="Direct matches" count={direct.length} hint="A two-person swap where each of you wants the other's location.">
         {direct.length ? (
           <div className="grid gap-3 sm:grid-cols-2">

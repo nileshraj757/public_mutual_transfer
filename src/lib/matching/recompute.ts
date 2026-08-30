@@ -15,7 +15,9 @@ async function loadPoolAndRules(admin = createAdminClient()) {
     await Promise.all([
       admin
         .from("profiles")
-        .select("id, court_level, cadre, designation, pay_level, current_state, current_district, is_active")
+        .select(
+          "id, court_level, cadre, designation, pay_level, current_state, current_district, is_active, relaxed_rules"
+        )
         .eq("is_active", true),
       admin.from("preferences").select("profile_id, preferred_state, preferred_district, rank"),
       admin.from("rules_config").select("*"),
@@ -41,6 +43,7 @@ async function loadPoolAndRules(admin = createAdminClient()) {
     current_state: p.current_state,
     current_district: p.current_district,
     is_active: p.is_active,
+    relaxed_rules: p.relaxed_rules ?? [],
     preferences: (prefsByProfile.get(p.id) ?? [])
       .sort((a, b) => a.rank - b.rank)
       .map(({ state, district }) => ({ state, district })),

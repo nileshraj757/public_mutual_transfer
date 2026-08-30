@@ -29,6 +29,7 @@ function person(
     current_district: current[1],
     preferences: prefs.map(([state, district]) => ({ state, district })),
     is_active: true,
+    relaxed_rules: [],
     ...over,
   };
 }

@@ -1,6 +1,6 @@
 import { HowItWorksContent } from "@/components/how-it-works-content";
 
-export const metadata = { title: "How it works — Transfer Setu" };
+export const metadata = { title: "How it works — TransferSetu" };
 
 export default function HowItWorksPage() {
   return (

@@ -3,8 +3,12 @@ import { requireAdmin } from "@/lib/auth";
 
 const tabs = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/users", label: "Users" },
   { href: "/admin/verification", label: "Verification" },
   { href: "/admin/rules", label: "Rules engine" },
+  { href: "/admin/districts", label: "Districts" },
+  { href: "/admin/cadres", label: "Cadres" },
+  { href: "/admin/designations", label: "Designations" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/analytics", label: "Analytics" },
 ];

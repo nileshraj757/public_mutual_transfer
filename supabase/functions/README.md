@@ -22,6 +22,9 @@ the public webhook) verifies that token before doing any privileged work
 | `billing-subscribe` | Bearer | `src/app/api/billing/subscribe/route.ts` |
 | `billing-verify` | Bearer | `src/app/api/billing/verify/route.ts` |
 | `billing-cancel` | Bearer | `src/app/api/billing/cancel/route.ts` |
+| `match-request-send` | Bearer | `src/app/api/matches/request/route.ts` |
+| `match-request-respond` | Bearer | `src/app/api/matches/request/[id]/respond/route.ts` |
+| `profile-block` | Bearer | `src/app/api/profiles/block/route.ts` |
 | `razorpay-webhook` | **public** (HMAC-signed) | `src/app/api/webhooks/razorpay/route.ts` |
 
 **Deliberately NOT ported** (documented, out of scope for the mobile app):
@@ -55,6 +58,9 @@ supabase functions deploy match-recompute
 supabase functions deploy billing-subscribe
 supabase functions deploy billing-verify
 supabase functions deploy billing-cancel
+supabase functions deploy match-request-send
+supabase functions deploy match-request-respond
+supabase functions deploy profile-block
 # webhook must skip JWT verification (Razorpay sends no Authorization header):
 supabase functions deploy razorpay-webhook --no-verify-jwt
 ```
@@ -63,4 +69,11 @@ Then point the Razorpay Dashboard webhook at
 `https://<project-ref>.supabase.co/functions/v1/razorpay-webhook`.
 
 Also apply the new migration `supabase/migrations/0005_match_member_views_rpc.sql`
-(the `get_match_member_views()` RPC the mobile match views depend on).
+(the `get_match_member_views()` RPC the mobile match views depend on),
+`supabase/migrations/0007_match_requests.sql` (the `match_requests` table
+`match-request-send`/`match-request-respond` depend on), and
+`supabase/migrations/0008_relaxed_rules_and_prefs.sql` (adds `relaxed_rules`,
+`notification_prefs`, `blocked_profiles`, `cadres`, `designations`, and
+redefines `browse_profiles()` + the `messages` RLS policies — re-deploy
+`match-recompute` and `match-recompute-all` too, since their shared
+`_shared/matching.ts` copy changed alongside it).
