@@ -4,7 +4,7 @@
 // state instead of erroring.
 import { authenticate } from "../_shared/auth.ts";
 import { corsHeaders, json } from "../_shared/cors.ts";
-import { billingEnabled } from "../_shared/razorpay.ts";
+// import { billingEnabled } from "../_shared/razorpay.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -13,22 +13,25 @@ Deno.serve(async (req) => {
   if (!ctx) return json({ error: "Not signed in." }, 401);
   const { admin, userId } = ctx;
 
-  if (billingEnabled()) {
-    const { data: sub } = await admin
-      .from("subscriptions")
-      .select("status, current_end")
-      .eq("profile_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const active =
-      sub &&
-      (sub.status === "active" || sub.status === "authenticated") &&
-      (!sub.current_end || new Date(sub.current_end).getTime() > Date.now());
-    if (!active) {
-      return json({ error: "Sending connection requests requires an active subscription." }, 402);
-    }
-  }
+  // Subscription flow is temporarily disabled on mobile — premium is unlocked
+  // for everyone until it's reimplemented (mirrors isPremiumLockedClient in
+  // src/lib/billing-client.ts). Restore this block to bring the gate back.
+  // if (billingEnabled()) {
+  //   const { data: sub } = await admin
+  //     .from("subscriptions")
+  //     .select("status, current_end")
+  //     .eq("profile_id", userId)
+  //     .order("created_at", { ascending: false })
+  //     .limit(1)
+  //     .maybeSingle();
+  //   const active =
+  //     sub &&
+  //     (sub.status === "active" || sub.status === "authenticated") &&
+  //     (!sub.current_end || new Date(sub.current_end).getTime() > Date.now());
+  //   if (!active) {
+  //     return json({ error: "Sending connection requests requires an active subscription." }, 402);
+  //   }
+  // }
 
   const { recipient_id } = await req.json().catch(() => ({}));
   if (!recipient_id) return json({ error: "Missing recipient_id." }, 400);

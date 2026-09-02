@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LocationSelect } from "@/components/location-select";
 import { PreferenceRowsEditor } from "@/components/preference-rows-editor";
 import type { ActionResult } from "@/lib/profile-core";
 import type { PrefInput } from "@/lib/preferences-core";
 import { COURT_LEVELS, CADRE_CATEGORIES, GRADE_PAY_OPTIONS, designationOptions, OTHER } from "@/lib/judiciary";
-import { MapPin, Users, Flag, Loader } from "@/components/icons";
+import { MapPin, Users, Flag, Loader, ChevronRight } from "@/components/icons";
 import type { Profile } from "@/lib/types";
 
 interface ProfileFormProps {
@@ -22,14 +22,39 @@ interface ProfileFormProps {
   /** Called after a successful save (mobile re-fetch; router.refresh() is a
    *  no-op under static export). */
   afterSave?: () => void;
+  /**
+   * Onboarding only, mobile-only: render profile details and preferences as
+   * two actual separate screens (a "Continue" gate in between) instead of one
+   * continuous scroll. Off by default so web's onboarding page — which never
+   * passes this — is unaffected. All fields still live in a single <form>
+   * with one final submit; only the "step" not currently shown is hidden via
+   * CSS (not unmounted), so field values survive going back and forth and
+   * native required-field validation only applies to the visible step.
+   */
+  twoStep?: boolean;
 }
 
-export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afterSave }: ProfileFormProps) {
+export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afterSave, twoStep = false }: ProfileFormProps) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ActionResult | null>(null);
   const [prefRows, setPrefRows] = useState<PrefInput[]>([]);
   const [prefError, setPrefError] = useState("");
+  const [step, setStep] = useState<1 | 2>(1);
+  const showStep1 = !twoStep || step === 1;
+  const showStep2 = !twoStep || step === 2;
+
+  function goNext() {
+    if (formRef.current?.reportValidity()) {
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+  function goBack() {
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   const [courtLevel, setCourtLevel] = useState(profile?.court_level ?? "");
   const [cadre, setCadre] = useState(profile?.cadre ?? "");
@@ -92,9 +117,38 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
+    <form ref={formRef} action={handleSubmit} className="space-y-4">
+      {twoStep && (
+        <div className="mb-1 flex items-center gap-2.5">
+          {step === 2 && (
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Back"
+              className="grid h-9 w-9 flex-none place-items-center rounded-xl border transition active:scale-95"
+              style={{ background: "var(--ts-surface)", borderColor: "var(--ts-border)", color: "var(--ts-text-strong)" }}
+            >
+              <ChevronRight className="h-[18px] w-[18px] rotate-180" />
+            </button>
+          )}
+          <div className="flex-1">
+            <p className="text-[11px] font-bold tracking-[0.8px]" style={{ color: "var(--ts-accent)" }}>STEP {step} OF 2</p>
+            <p className="mt-0.5 font-display text-lg font-bold" style={{ color: "var(--ts-text-strong)" }}>
+              {step === 1 ? "Create your profile" : "Set your preferences"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {twoStep && (
+        <div className="mb-2 flex gap-1.5">
+          <div className="h-1 flex-1 rounded-full" style={{ background: "var(--ts-accent)" }} />
+          <div className="h-1 flex-1 rounded-full" style={{ background: step === 2 ? "var(--ts-accent)" : "var(--ts-border-strong)" }} />
+        </div>
+      )}
+
       {/* Identity */}
-      <div id="profile-form-step-1" className="ts-card space-y-4">
+      <div id="profile-form-step-1" className={showStep1 ? "ts-card space-y-4" : "hidden"}>
         <h2 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>IDENTITY</h2>
         <div>
           <label className="ts-label" htmlFor="full_name">Full name *</label>
@@ -115,7 +169,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* Where you are */}
-      <div className="ts-card space-y-4">
+      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
         <h2 className="flex items-center gap-2 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>
           <MapPin className="h-3.5 w-3.5" style={{ color: "var(--ts-accent-strong)" }} />
           WHERE YOU ARE
@@ -136,7 +190,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* What you are */}
-      <div className="ts-card space-y-4">
+      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
         <h2 className="flex items-center gap-2 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>
           <Users className="h-3.5 w-3.5" style={{ color: "var(--ts-accent-strong)" }} />
           WHAT YOU ARE <span className="font-normal normal-case" style={{ color: "var(--ts-faint)" }}>(matched on these)</span>
@@ -199,7 +253,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* Contact & declarations */}
-      <div className="ts-card space-y-4">
+      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
         <h2 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>CONTACT &amp; DECLARATIONS</h2>
         <div>
           <label className="ts-label" htmlFor="phone">Phone * (private — revealed only after mutual consent)</label>
@@ -211,8 +265,14 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
         </label>
       </div>
 
+      {twoStep && showStep1 && (
+        <button type="button" onClick={goNext} className="ts-btn-primary w-full">
+          Continue to preferences
+        </button>
+      )}
+
       {mode === "onboarding" && (
-        <div id="profile-form-step-2" className="ts-card space-y-3">
+        <div id="profile-form-step-2" className={showStep2 ? "ts-card space-y-3" : "hidden"}>
           <h2 className="flex items-center gap-2 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>
             <Flag className="h-3.5 w-3.5" style={{ color: "var(--ts-accent-strong)" }} />
             WHERE DO YOU WANT TO GO? <span className="font-normal normal-case" style={{ color: "var(--ts-faint)" }}>(matched on these)</span>
@@ -227,7 +287,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       )}
 
       {mode === "onboarding" && (
-        <label className="ts-card flex items-start gap-2 text-sm" style={{ color: "var(--ts-muted)" }}>
+        <label className={showStep2 ? "ts-card flex items-start gap-2 text-sm" : "hidden"} style={{ color: "var(--ts-muted)" }}>
           <input type="checkbox" name="consent_dpdp" required className="mt-0.5" />
           <span>
             I consent to the processing of my data for the sole purpose of mutual-transfer facilitation, as described in
@@ -239,10 +299,12 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       {result && !result.ok && <p className="text-sm" style={{ color: "var(--ts-danger)" }}>{result.error}</p>}
       {result?.ok && mode === "edit" && <p className="text-sm" style={{ color: "var(--ts-accent-strong)" }}>Profile saved.</p>}
 
-      <button type="submit" className="ts-btn-primary w-full" disabled={pending}>
-        {pending && <Loader className="h-4 w-4" />}
-        {pending ? "Saving…" : mode === "onboarding" ? "Create profile" : "Save profile"}
-      </button>
+      {showStep2 && (
+        <button type="submit" className="ts-btn-primary w-full" disabled={pending}>
+          {pending && <Loader className="h-4 w-4" />}
+          {pending ? "Saving…" : mode === "onboarding" ? "Create profile" : "Save profile"}
+        </button>
+      )}
     </form>
   );
 }

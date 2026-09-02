@@ -4,12 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { BillingClient } from "@/components/billing-client";
 import { isActiveSubscription } from "@/lib/billing-core";
 import type { Subscription } from "@/lib/types";
-import { SUPABASE_URL } from "@/lib/env";
 import { ScreenHeader } from "../../_components/screen-header";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
-const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+// Subscription flow is temporarily disabled on mobile — forcing this false
+// makes BillingClient render its "Premium is coming soon" fallback instead of
+// a live Subscribe/Razorpay checkout. Restore the real check to bring it back:
+// const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+const configured = false;
 const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "TransferSetu Premium";
 const priceLabel = process.env.NEXT_PUBLIC_PREMIUM_PRICE_LABEL || "Monthly subscription";
 
@@ -49,7 +52,7 @@ export default function BillingPage() {
       </p>
 
       <BillingClient
-        configured={configured || Boolean(SUPABASE_URL)}
+        configured={configured}
         isActive={active}
         status={sub?.status ?? null}
         currentEnd={sub?.current_end ?? null}
