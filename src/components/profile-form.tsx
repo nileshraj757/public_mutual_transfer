@@ -46,10 +46,19 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
   const showStep2 = !twoStep || step === 2;
 
   function goNext() {
-    if (formRef.current?.reportValidity()) {
-      setStep(2);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // Only validate step 1's own fields here — the whole <form> also contains
+    // step 2's required consent checkbox, which is merely CSS-hidden
+    // (display: none) while on step 1, not disabled. A form-wide
+    // reportValidity() would try (and silently fail) to focus that hidden,
+    // still-required control, so setStep(2) would never run.
+    const step1 = document.getElementById("profile-form-step-1-fields");
+    const invalid = step1?.querySelector<HTMLInputElement | HTMLSelectElement>(":invalid");
+    if (invalid) {
+      invalid.reportValidity();
+      return;
     }
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function goBack() {
     setStep(1);
@@ -147,8 +156,9 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
         </div>
       )}
 
+      <div id="profile-form-step-1-fields" className={showStep1 ? "space-y-4" : "hidden"}>
       {/* Identity */}
-      <div id="profile-form-step-1" className={showStep1 ? "ts-card space-y-4" : "hidden"}>
+      <div className="ts-card space-y-4">
         <h2 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>IDENTITY</h2>
         <div>
           <label className="ts-label" htmlFor="full_name">Full name *</label>
@@ -169,7 +179,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* Where you are */}
-      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
+      <div className="ts-card space-y-4">
         <h2 className="flex items-center gap-2 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>
           <MapPin className="h-3.5 w-3.5" style={{ color: "var(--ts-accent-strong)" }} />
           WHERE YOU ARE
@@ -190,7 +200,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* What you are */}
-      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
+      <div className="ts-card space-y-4">
         <h2 className="flex items-center gap-2 text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>
           <Users className="h-3.5 w-3.5" style={{ color: "var(--ts-accent-strong)" }} />
           WHAT YOU ARE <span className="font-normal normal-case" style={{ color: "var(--ts-faint)" }}>(matched on these)</span>
@@ -253,7 +263,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
       </div>
 
       {/* Contact & declarations */}
-      <div className={showStep1 ? "ts-card space-y-4" : "hidden"}>
+      <div className="ts-card space-y-4">
         <h2 className="text-xs font-bold tracking-[0.5px]" style={{ color: "var(--ts-muted)" }}>CONTACT &amp; DECLARATIONS</h2>
         <div>
           <label className="ts-label" htmlFor="phone">Phone * (private — revealed only after mutual consent)</label>
@@ -263,6 +273,7 @@ export function ProfileForm({ profile, mode, onSubmit, onSubmitPreferences, afte
           <input type="checkbox" name="disciplinary_pending" defaultChecked={profile?.disciplinary_pending ?? false} className="mt-0.5" />
           <span>I have a pending disciplinary matter (self-declared; shown as a soft factor to potential matches).</span>
         </label>
+      </div>
       </div>
 
       {twoStep && showStep1 && (
