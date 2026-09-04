@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { getMatchById, type MatchMemberView, type MatchView } from "@/lib/matches";
 import { parseRules, type MatchRules } from "@/lib/matching/rules";
 import { isPremiumLockedClient } from "@/lib/billing-client";
+import { watchTables } from "@/lib/realtime";
 import type { RuleConfig } from "@/lib/types";
 import { MatchStatusBadge, MatchTypeBadge, VerificationBadge } from "@/components/badges";
 import { ConsentPanel } from "@/components/consent-panel";
@@ -59,7 +60,7 @@ function MatchInner() {
     setRules(parseRules((rulesRows ?? []) as RuleConfig[]));
     setLocked(isLocked);
 
-    if (m?.allConsented) {
+    if (m?.allConsented && m.status !== "cancelled") {
       const { data } = await supabase.rpc("reveal_contact", { p_match_id: m.id });
       setContacts(Object.fromEntries(((data ?? []) as RevealedContact[]).map((c) => [c.profile_id, c])));
     } else {
@@ -72,6 +73,13 @@ function MatchInner() {
     load();
   }, [load]);
 
+  // Live-refresh: this page fetches its own data, so it needs its own
+  // realtime subscription rather than relying on router.refresh() (web-only).
+  useEffect(
+    () => watchTables(supabase, [{ table: "matches" }, { table: "match_requests" }, { table: "messages" }], load),
+    [supabase, load]
+  );
+
   if (!profile || !loaded || !rules) return <Splash />;
   if (!match) {
     return (
@@ -82,6 +90,7 @@ function MatchInner() {
     );
   }
 
+  const isEnded = match.status === "cancelled";
   const consentedCount = Object.values(match.consents).filter(Boolean).length;
   const labels: Record<string, string> = {};
   match.members.forEach((m, i) => (labels[m.id] = m.isSelf ? "You" : `Member ${i + 1}`));
@@ -138,22 +147,31 @@ function MatchInner() {
             consented={match.consents[m.id]}
             coolingOffMonths={rules.coolingOffMonths}
             showSeniority={rules.showSeniority}
+            hideDetails={isEnded && !m.isSelf}
           />
         ))}
       </div>
 
-      <div className="mb-4">
-        <ConsentPanel
-          matchId={match.id}
-          selfConsented={match.selfConsented}
-          allConsented={match.allConsented}
-          consentedCount={consentedCount}
-          total={match.members.length}
-          onDone={load}
-        />
-      </div>
+      {!isEnded && (
+        <div className="mb-4">
+          <ConsentPanel
+            matchId={match.id}
+            selfConsented={match.selfConsented}
+            allConsented={match.allConsented}
+            consentedCount={consentedCount}
+            total={match.members.length}
+            onDone={load}
+          />
+        </div>
+      )}
 
-      {match.allConsented ? (
+      {isEnded ? (
+        <div className="ts-card mb-4 text-center" style={{ background: "var(--ts-surface-soft)" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--ts-muted)" }}>
+            This match has ended. Messaging is closed and profile details are no longer shared.
+          </p>
+        </div>
+      ) : match.allConsented ? (
         <>
           <div className="ts-card relative mb-4 text-center">
             {justRevealed && (
@@ -273,6 +291,7 @@ function MemberCard({
   consented,
   coolingOffMonths,
   showSeniority,
+  hideDetails,
 }: {
   member: MatchMemberView;
   index: number;
@@ -280,7 +299,22 @@ function MemberCard({
   consented: boolean;
   coolingOffMonths: number | null;
   showSeniority: boolean;
+  /** True once this match has ended (declined post-acceptance) — hides the
+   *  other member's profile details without removing them from the list. */
+  hideDetails?: boolean;
 }) {
+  if (hideDetails) {
+    return (
+      <div className="ts-card">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold" style={{ color: "var(--ts-text-strong)" }}>Member {index + 1}</h3>
+          <span className="ts-badge" style={{ background: "var(--ts-surface)", color: "var(--ts-muted)" }}>Match ended</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--ts-faint)" }}>This match has ended. Profile details are no longer shared.</p>
+      </div>
+    );
+  }
+
   const years = member.joining_date ? yearsSince(member.joining_date) : null;
   const inCoolOff =
     coolingOffMonths != null && member.last_transfer_date ? monthsSince(member.last_transfer_date) < coolingOffMonths : false;

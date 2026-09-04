@@ -1,5 +1,6 @@
 import { TopNav } from "@/components/top-nav";
 import { Disclaimer } from "@/components/disclaimer";
+import { RealtimeAppRefresh } from "@/components/realtime-app-refresh";
 import { getProfile, requireUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
@@ -21,6 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
+      <RealtimeAppRefresh />
       <TopNav signedIn isAdmin={isAdmin} unread={unread} />
       <main className="mx-auto max-w-5xl px-4 py-6">
         <Disclaimer className="mb-5" />

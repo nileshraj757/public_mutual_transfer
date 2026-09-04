@@ -10,7 +10,7 @@ import { Splash } from "../../_components/splash";
 /** Dedicated "Chats" tab: all matches + their conversations in a master–detail
  *  layout. Profile is guaranteed by the (app) RequireProfile layout guard. */
 export default function InboxPage() {
-  const { supabase, profile } = useAuth();
+  const { supabase, profile, realtimeVersion } = useAuth();
   const [locked, setLocked] = useState<boolean | null>(null);
   const [count, setCount] = useState(0);
 
@@ -30,7 +30,7 @@ export default function InboxPage() {
     return () => {
       active = false;
     };
-  }, [supabase, profile]);
+  }, [supabase, profile, realtimeVersion]);
 
   if (!profile || locked === null) return <Splash />;
 

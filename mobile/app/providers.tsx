@@ -11,6 +11,7 @@ import {
 import { usePathname } from "next/navigation";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { watchTables } from "@/lib/realtime";
 import type { Profile } from "@/lib/types";
 import { ToastProvider } from "./_components/toast";
 
@@ -26,6 +27,11 @@ interface AuthValue {
   unreadCount: number;
   /** Re-count unread notifications (after opening/marking the alerts read). */
   refreshUnread: () => Promise<void>;
+  /** Bumped on every realtime change to notifications/matches/match_requests/
+   *  messages — pages that fetch their own data add it to their effect deps
+   *  to auto-refresh (there's no server-side router.refresh() equivalent
+   *  under this app's static export). */
+  realtimeVersion: number;
   signOut: () => Promise<void>;
 }
 
@@ -49,6 +55,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [realtimeVersion, setRealtimeVersion] = useState(0);
 
   const loadProfile = useCallback(
     async (userId: string | undefined) => {
@@ -76,6 +83,22 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     if (session) refreshUnread();
     else setUnreadCount(0);
   }, [session, refreshUnread]);
+
+  // Live-refresh: this static export has no server to router.refresh(), so a
+  // single app-wide realtime subscription bumps realtimeVersion for any
+  // self-fetching page to react to, and keeps the unread badge current.
+  useEffect(() => {
+    if (!session) return;
+    const unsubscribe = watchTables(
+      supabase,
+      [{ table: "notifications" }, { table: "matches" }, { table: "match_requests" }, { table: "messages" }],
+      () => {
+        setRealtimeVersion((v) => v + 1);
+        refreshUnread();
+      }
+    );
+    return unsubscribe;
+  }, [supabase, session, refreshUnread]);
 
   // Resolve the session on mount, on every navigation, and on auth events.
   useEffect(() => {
@@ -112,6 +135,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     supabase,
     refreshProfile: () => loadProfile(session?.user.id),
     unreadCount,
+    realtimeVersion,
     refreshUnread,
     signOut: async () => {
       await supabase.auth.signOut();

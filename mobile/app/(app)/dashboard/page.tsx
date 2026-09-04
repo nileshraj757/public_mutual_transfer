@@ -22,7 +22,7 @@ import { Splash } from "../../_components/splash";
  * everything above "YOUR MATCHES" is new.
  */
 export default function DashboardPage() {
-  const { supabase, profile, unreadCount } = useAuth();
+  const { supabase, profile, unreadCount, realtimeVersion } = useAuth();
   const toast = useToast();
   const [matches, setMatches] = useState<MatchView[] | null>(null);
   const [locked, setLocked] = useState(false);
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, realtimeVersion]);
 
   if (!profile || matches === null) return <Splash />;
 

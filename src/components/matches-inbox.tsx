@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getUserMatches, type MatchMemberView, type MatchView } from "@/lib/matches";
+import { watchTables } from "@/lib/realtime";
 import { MatchStatusBadge, MatchTypeBadge, VerificationBadge } from "@/components/badges";
 import { SwapRoute } from "@/components/swap-route";
 import { ConsentPanel } from "@/components/consent-panel";
@@ -84,6 +85,13 @@ export function MatchesInbox({ userId }: { userId: string }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Live-refresh: a client component fetches its own data, so it needs its own
+  // realtime subscription rather than relying on router.refresh() (web-only).
+  useEffect(
+    () => watchTables(supabase, [{ table: "matches" }, { table: "match_requests" }, { table: "messages" }], load),
+    [supabase, load]
+  );
 
   const selected = matches?.find((m) => m.id === selectedId) ?? null;
 
@@ -205,23 +213,26 @@ function MatchDetailPane({
   onChanged: () => void;
 }) {
   const [contacts, setContacts] = useState<Record<string, RevealedContact>>({});
+  // A cancelled match ("not interested"/"declined") is not a full block, but it
+  // does end the connection: no more contact reveal, chat, or profile details.
+  const isEnded = match.status === "cancelled";
 
   useEffect(() => {
-    let active = true;
+    let mounted = true;
     (async () => {
-      if (!match.allConsented) {
-        if (active) setContacts({});
+      if (!match.allConsented || isEnded) {
+        if (mounted) setContacts({});
         return;
       }
       const { data } = await supabase.rpc("reveal_contact", { p_match_id: match.id });
-      if (active) {
+      if (mounted) {
         setContacts(Object.fromEntries(((data ?? []) as RevealedContact[]).map((c) => [c.profile_id, c])));
       }
     })();
     return () => {
-      active = false;
+      mounted = false;
     };
-  }, [supabase, match.id, match.allConsented]);
+  }, [supabase, match.id, match.allConsented, isEnded]);
 
   const consentedCount = Object.values(match.consents).filter(Boolean).length;
   const labels: Record<string, string> = {};
@@ -259,21 +270,24 @@ function MatchDetailPane({
                 movingTo={[dest.current_district, dest.current_state].filter(Boolean).join(", ") || "Unknown"}
                 consented={match.consents[m.id]}
                 contact={contacts[m.id]}
+                hideDetails={isEnded && !m.isSelf}
               />
             );
           })}
         </div>
 
-        <ConsentPanel
-          matchId={match.id}
-          selfConsented={match.selfConsented}
-          allConsented={match.allConsented}
-          consentedCount={consentedCount}
-          total={match.members.length}
-          onDone={onChanged}
-        />
+        {!isEnded && (
+          <ConsentPanel
+            matchId={match.id}
+            selfConsented={match.selfConsented}
+            allConsented={match.allConsented}
+            consentedCount={consentedCount}
+            total={match.members.length}
+            onDone={onChanged}
+          />
+        )}
 
-        {match.allConsented && (
+        {match.allConsented && !isEnded && (
           <div className="card">
             <h3 className="font-semibold text-sand-900">Joint application</h3>
             <p className="mb-3 mt-1 text-sm text-sand-600">
@@ -285,7 +299,12 @@ function MatchDetailPane({
       </div>
 
       {/* Chat — the rest of the space */}
-      {match.allConsented ? (
+      {isEnded ? (
+        <div className="card border-dashed text-center text-sm text-sand-500">
+          <p className="font-medium text-sand-700">This match has ended</p>
+          <p className="mt-1">Messaging is closed and profile details are no longer shared for this match.</p>
+        </div>
+      ) : match.allConsented ? (
         <MessageThread matchId={match.id} selfId={userId} labels={labels} />
       ) : (
         <div className="card border-dashed text-center text-sm text-sand-500">
@@ -306,13 +325,29 @@ function MemberCard({
   movingTo,
   consented,
   contact,
+  hideDetails,
 }: {
   member: MatchMemberView;
   index: number;
   movingTo: string;
   consented: boolean;
   contact?: RevealedContact;
+  /** True once this match has ended (declined post-acceptance) — hides the
+   *  other member's profile details without removing them from the list. */
+  hideDetails?: boolean;
 }) {
+  if (hideDetails) {
+    return (
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="font-semibold text-sand-900">Member {index + 1}</h3>
+          <span className="badge bg-sand-100 text-sand-600">Match ended</span>
+        </div>
+        <p className="text-sm text-sand-500">This match has ended. Profile details are no longer shared.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="card">
       <div className="mb-2 flex items-center justify-between">

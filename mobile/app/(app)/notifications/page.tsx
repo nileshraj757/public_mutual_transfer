@@ -17,7 +17,7 @@ function mobileLink(link: string | null): string | null {
 }
 
 export default function NotificationsPage() {
-  const { supabase, profile, refreshUnread } = useAuth();
+  const { supabase, profile, refreshUnread, realtimeVersion } = useAuth();
   const [notifications, setNotifications] = useState<NotificationRow[] | null>(null);
   const [locked, setLocked] = useState(false);
 
@@ -33,7 +33,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, realtimeVersion]);
 
   async function markAllRead() {
     if (!profile) return;

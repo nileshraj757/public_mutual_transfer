@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isNativeApp } from "@/lib/native";
+import { watchTables } from "@/lib/realtime";
 import type { Message } from "@/lib/types";
 
 interface MessageThreadProps {
@@ -35,8 +36,14 @@ export function MessageThread({ matchId, selfId, labels }: MessageThreadProps) {
 
   useEffect(() => {
     load();
+    // Realtime push for immediacy; the interval is just a fallback in case an
+    // event is missed while the socket reconnects.
     const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
+    const unsubscribe = watchTables(supabase, [{ table: "messages", filter: `match_id=eq.${matchId}` }], load);
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId]);
 

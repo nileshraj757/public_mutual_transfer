@@ -30,13 +30,16 @@ export default async function MatchDetailPage({ params }: { params: { id: string
   const supabase = createClient();
   const match = await getMatchById(supabase, profile.id, params.id);
   if (!match) notFound();
+  // A cancelled match ("not interested"/"declined") is not a full block, but it
+  // does end the connection: no more contact reveal, chat, or profile details.
+  const isEnded = match.status === "cancelled";
 
   const { data: rulesRows } = await supabase.from("rules_config").select("*");
   const rules = parseRules((rulesRows ?? []) as RuleConfig[]);
 
   // Contact reveal is gated server-side by the reveal_contact() RPC.
   let contacts: Record<string, RevealedContact> = {};
-  if (match.allConsented) {
+  if (match.allConsented && !isEnded) {
     const { data } = await supabase.rpc("reveal_contact", { p_match_id: match.id });
     contacts = Object.fromEntries(((data ?? []) as RevealedContact[]).map((c) => [c.profile_id, c]));
   }
@@ -96,33 +99,42 @@ export default async function MatchDetailPage({ params }: { params: { id: string
               contact={contacts[m.id]}
               coolingOffMonths={rules.coolingOffMonths}
               showSeniority={rules.showSeniority}
+              hideDetails={isEnded && !m.isSelf}
             />
           );
         })}
       </div>
 
       {/* Consent gate */}
-      <ConsentPanel
-        matchId={match.id}
-        selfConsented={match.selfConsented}
-        allConsented={match.allConsented}
-        consentedCount={consentedCount}
-        total={match.members.length}
-      />
+      {!isEnded && (
+        <ConsentPanel
+          matchId={match.id}
+          selfConsented={match.selfConsented}
+          allConsented={match.allConsented}
+          consentedCount={consentedCount}
+          total={match.members.length}
+        />
+      )}
 
-      {/* Post-consent: messaging + agreement */}
-      {match.allConsented && (
-        <>
-          <MessageThread matchId={match.id} selfId={profile.id} labels={labels} />
-          <div className="card">
-            <h3 className="font-semibold text-sand-900">Joint application</h3>
-            <p className="mb-3 mt-1 text-sm text-sand-600">
-              Generate a pre-filled joint mutual-transfer application with everyone&apos;s details. Submit it to your
-              competent authority — approval rests entirely with them.
-            </p>
-            <GenerateAgreementButton matchId={match.id} locked={premiumLocked} />
-          </div>
-        </>
+      {isEnded ? (
+        <div className="card border-dashed text-center text-sm text-sand-500">
+          <p className="font-medium text-sand-700">This match has ended</p>
+          <p className="mt-1">Messaging is closed and profile details are no longer shared for this match.</p>
+        </div>
+      ) : (
+        match.allConsented && (
+          <>
+            <MessageThread matchId={match.id} selfId={profile.id} labels={labels} />
+            <div className="card">
+              <h3 className="font-semibold text-sand-900">Joint application</h3>
+              <p className="mb-3 mt-1 text-sm text-sand-600">
+                Generate a pre-filled joint mutual-transfer application with everyone&apos;s details. Submit it to
+                your competent authority — approval rests entirely with them.
+              </p>
+              <GenerateAgreementButton matchId={match.id} locked={premiumLocked} />
+            </div>
+          </>
+        )
       )}
 
       <div className="card space-y-3">
@@ -145,6 +157,7 @@ function MemberCard({
   contact,
   coolingOffMonths,
   showSeniority,
+  hideDetails,
 }: {
   member: MatchMemberView;
   index: number;
@@ -153,7 +166,22 @@ function MemberCard({
   contact?: RevealedContact;
   coolingOffMonths: number | null;
   showSeniority: boolean;
+  /** True once this match has ended (declined post-acceptance) — hides the
+   *  other member's profile details without removing them from the list. */
+  hideDetails?: boolean;
 }) {
+  if (hideDetails) {
+    return (
+      <div className="card">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="font-semibold text-sand-900">Member {index + 1}</h3>
+          <span className="badge bg-sand-100 text-sand-600">Match ended</span>
+        </div>
+        <p className="text-sm text-sand-500">This match has ended. Profile details are no longer shared.</p>
+      </div>
+    );
+  }
+
   const years = member.joining_date ? yearsSince(member.joining_date) : null;
   const inCoolOff =
     coolingOffMonths != null && member.last_transfer_date

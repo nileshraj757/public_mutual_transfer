@@ -37,15 +37,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "That profile isn't available right now." }, { status: 404 });
   }
 
+  // Only short-circuit if a prior accepted request's match is still active —
+  // if it was later declined ("not interested") or blocked, that match is
+  // cancelled and this pair should be able to start over with a fresh request.
   const { data: existingAccepted } = await admin
     .from("match_requests")
-    .select("match_id")
+    .select("match_id, matches(status)")
     .eq("status", "accepted")
     .or(
       `and(requester_id.eq.${user.id},recipient_id.eq.${recipient_id}),and(requester_id.eq.${recipient_id},recipient_id.eq.${user.id})`
     )
     .maybeSingle();
-  if (existingAccepted?.match_id) {
+  const existingMatchStatus = (existingAccepted?.matches as { status?: string } | null)?.status;
+  if (existingAccepted?.match_id && existingMatchStatus !== "cancelled") {
     return NextResponse.json({ ok: true, status: "accepted", match_id: existingAccepted.match_id });
   }
 
