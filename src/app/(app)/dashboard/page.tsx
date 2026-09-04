@@ -21,8 +21,13 @@ export default async function DashboardPage() {
     supabase.from("preferences").select("id", { count: "exact", head: true }).eq("profile_id", profile.id),
   ]);
 
-  const direct = matches.filter((m) => m.type === "direct" && m.status !== "cancelled");
-  const chains = matches.filter((m) => m.type === "chain" && m.status !== "cancelled");
+  // A cancelled match ("not interested"/declined post-acceptance) is not a
+  // block — it stays visible here so the pair can find each other again and
+  // send a fresh request, it just doesn't count toward the "active" stats.
+  const direct = matches.filter((m) => m.type === "direct");
+  const chains = matches.filter((m) => m.type === "chain");
+  const activeDirectCount = direct.filter((m) => m.status !== "cancelled").length;
+  const activeChainCount = chains.filter((m) => m.status !== "cancelled").length;
 
   return (
     <div className="space-y-8">
@@ -31,15 +36,15 @@ export default async function DashboardPage() {
         posting={`${profile.current_district ?? ""}, ${profile.current_state ?? ""}`}
         designation={profile.designation}
         verification={profile.verification_status}
-        directCount={direct.length}
-        chainCount={chains.length}
+        directCount={activeDirectCount}
+        chainCount={activeChainCount}
         prefCount={prefCount ?? 0}
         locked={locked}
       />
 
       {locked ? (
         <PremiumTeaser
-          headline={`${direct.length + chains.length} matches waiting`}
+          headline={`${activeDirectCount + activeChainCount} matches waiting`}
           blurb="Subscribe to see full match details, chat, and send connection requests."
         >
           <MatchesPreview direct={direct} chains={chains} />

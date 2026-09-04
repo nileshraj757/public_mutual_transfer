@@ -46,8 +46,13 @@ export default function DashboardPage() {
 
   if (!profile || matches === null) return <Splash />;
 
-  const direct = matches.filter((m) => m.type === "direct" && m.status !== "cancelled");
-  const chains = matches.filter((m) => m.type === "chain" && m.status !== "cancelled");
+  // A cancelled match ("not interested"/declined post-acceptance) is not a
+  // block — it stays visible here so the pair can find each other again and
+  // send a fresh request, it just doesn't count toward the "active" stats.
+  const direct = matches.filter((m) => m.type === "direct");
+  const chains = matches.filter((m) => m.type === "chain");
+  const activeDirectCount = direct.filter((m) => m.status !== "cancelled").length;
+  const activeChainCount = chains.filter((m) => m.status !== "cancelled").length;
   const firstName = profile.full_name?.split(" ")[0] ?? "there";
   const initials =
     (profile.full_name ?? "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
@@ -91,7 +96,7 @@ export default function DashboardPage() {
       </Link>
 
       <div className="mb-4 grid grid-cols-3 gap-2.5">
-        <StatTile value={direct.length + chains.length} label="ACTIVE MATCHES" tone="accent" />
+        <StatTile value={activeDirectCount + activeChainCount} label="ACTIVE MATCHES" tone="accent" />
         <StatTile value={unreadCount} label="UNREAD ALERTS" tone={unreadCount > 0 ? "warning" : "default"} />
         <StatTile value={prefCount} label="DISTRICTS WANTED" />
       </div>
@@ -111,7 +116,7 @@ export default function DashboardPage() {
 
       {locked ? (
         <PremiumTeaser
-          headline={`${direct.length + chains.length} matches waiting`}
+          headline={`${activeDirectCount + activeChainCount} matches waiting`}
           blurb="Subscribe to see full match details, chat, and send connection requests."
         >
           <MatchesPreview direct={direct} chains={chains} />
