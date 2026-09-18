@@ -8,11 +8,7 @@ import { ScreenHeader } from "../../_components/screen-header";
 import { useAuth } from "../../providers";
 import { Splash } from "../../_components/splash";
 
-// Subscription flow is temporarily disabled on mobile — forcing this false
-// makes BillingClient render its "Premium is coming soon" fallback instead of
-// a live Subscribe/Razorpay checkout. Restore the real check to bring it back:
-// const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
-const configured = false;
+const configured = Boolean(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 const planName = process.env.NEXT_PUBLIC_PREMIUM_NAME || "TransferSetu Premium";
 const priceLabel = process.env.NEXT_PUBLIC_PREMIUM_PRICE_LABEL || "Monthly subscription";
 
